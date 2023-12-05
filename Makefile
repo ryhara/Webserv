@@ -1,6 +1,8 @@
 NAME = webserv
 SRC = main.cpp
+
 CONFIG = ConfigParse.cpp
+
 SERVER = Server.cpp
 
 SRCDIR = ./srcs
@@ -11,8 +13,8 @@ OBJS = $(addprefix $(OBJDIR)/, $(SRC:.cpp=.o) $(CONFIG:.cpp=.o) $(SERVER:.cpp=.o
 DEPENDS = $(OBJS:.o=.d)
 CXX = c++
 RM = rm -rf
-CXXFLAGS = -MMD -MP -Wall -Wextra -Werror -std=c++98
-DEBUGFLAGS = -g -fsanitize=address
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98  -MMD -MP -g
+DEBUGFLAGS =-fsanitize=address
 INC = -I$(CONFIGDIR) -I$(SERVERDIR) -I$(SRCDIR)
 
 all : $(OBJDIR) $(NAME)
