@@ -4,5 +4,6 @@
 #include <iostream>
 #include <string>
 
+void server(void);
 
 #endif
