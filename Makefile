@@ -43,7 +43,7 @@ fclean : clean
 re : fclean all
 
 test : all
-	./$(NAME) ./test.conf
+	./$(NAME) ./config/test.conf
 
 debug : fclean
 	make DEBUG=1

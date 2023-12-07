@@ -5,6 +5,15 @@ HTTPサーバーをC++で実装する課題です。
 
 ## Usage
 
+compile
+```
+make
+```
+
+execute
+```
+./webserv ./config/XXX
+```
 
 ## Test
 

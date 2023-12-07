@@ -1,9 +1,6 @@
-#ifndef WEBSERV_HPP
-#define WEBSERV_HPP
+#pragma once
 
 #include <iostream>
 #include <string>
 
 void server(void);
-
-#endif
