@@ -14,9 +14,12 @@ add_executable(webserv ${SOURCE_FILES})
 include(FetchContent)
 FetchContent_Declare(
   googletest
-  URL https://github.com/google/googletest/archive/release-1.10.0.tar.gz
+  URL https://github.com/google/googletest/releases/tag/v1.14.0.tar.gz
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(googletest)
+# Google Testのモジュールをインクルード
+include(GoogleTest)
 
 enable_testing()
 
