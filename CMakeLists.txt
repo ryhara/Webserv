@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 98)
 
 # ソースファイルを指定
 file(GLOB_RECURSE SOURCE_FILES "src/**/*.cpp")
-include_directories(src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Google Testをダウンロードして統合
 include(FetchContent)
