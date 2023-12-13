@@ -6,12 +6,13 @@ set(CMAKE_CXX_STANDARD 98)
 
 # ソースファイルを指定
 file(GLOB_RECURSE SOURCE_FILES "src/**/*.cpp")
+include_directories(src)
 
 # Google Testをダウンロードして統合
 include(FetchContent)
 FetchContent_Declare(
   googletest
-  URL https://github.com/google/googletest/archive/release-1.12.0.tar.gz
+  URL https://github.com/google/googletest/archive/release-1.12.1.tar.gz
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(googletest)
