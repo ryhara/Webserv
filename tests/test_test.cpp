@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include "test.hpp"
+#include "../srcs/test.hpp"
 
 // TEST(テストケース名, テスト名)
 TEST(FunctionTest, HelloTestFunction) {
