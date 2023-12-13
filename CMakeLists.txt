@@ -7,9 +7,6 @@ set(CMAKE_CXX_STANDARD 98)
 # ソースファイルを指定
 file(GLOB_RECURSE SOURCE_FILES "src/**/*.cpp")
 
-# 実行ファイルを追加
-add_executable(webserv ${SOURCE_FILES})
-
 # Google Testをダウンロードして統合
 include(FetchContent)
 FetchContent_Declare(
