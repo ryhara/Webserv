@@ -32,8 +32,9 @@ target_link_libraries(${PROGRAM}
 	gtest_main
 )
 
-# インクルードディレクトリの指定
 target_include_directories(${PROGRAM}
 	PRIVATE
-	${PROJECT_SOURCE_DIR}/include
+		${PROJECT_SOURCE_DIR}/srcs
 )
+# テストの自動検出
+gtest_discover_tests(${PROGRAM})
