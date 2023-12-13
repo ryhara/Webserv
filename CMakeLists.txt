@@ -18,11 +18,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-# テスト実行ファイルを追加
-file(GLOB_RECURSE TEST_FILES "tests/*.cpp")
-add_executable(example_test ${TEST_FILES})
-target_link_libraries(example_test gtest_main)
-
 enable_testing()
-include(GoogleTest)
-gtest_discover_tests(example_test)
+
+# 各テストファイルに対して個別のテスト実行ファイルを生成
+file(GLOB_RECURSE TEST_FILES "tests/*.cpp")
+foreach(TEST_FILE ${TEST_FILES})
+  get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
+  add_executable(${TEST_NAME} ${TEST_FILE})
+  target_link_libraries(${TEST_NAME} gtest_main)
+  gtest_discover_tests(${TEST_NAME})
+endforeach()

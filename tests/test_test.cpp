@@ -2,9 +2,10 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include "Hello.h"
+#include "test.hpp"
 
-TEST(HelloTest, OutputsHello) {
+// TEST(テストケース名, テスト名)
+TEST(FunctionTest, HelloTestFunction) {
 	std::string name = "World";
 	std::string expected = "Hello World\n";
 	// 標準出力をキャプチャする
@@ -18,4 +19,10 @@ TEST(HelloTest, OutputsHello) {
 
 	// テストアサーション
 	EXPECT_EQ(expected, buffer.str());
+}
+
+TEST(FunctionTest, AddTestFunction) {
+    EXPECT_EQ(3, add_test(1, 2));
+    EXPECT_EQ(5, add_test(2, 3));
+    EXPECT_EQ(0, add_test(-1, 1));
 }
