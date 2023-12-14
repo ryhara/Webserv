@@ -12,7 +12,7 @@ TEST(FunctionTest, HelloTestFunction) {
 	std::stringstream buffer;
 	std::streambuf* prevcoutbuf = std::cout.rdbuf(buffer.rdbuf());
 	// 関数を呼び出す
-	test(name);
+	hello(name);
 
 	// 標準出力を元に戻す
 	std::cout.rdbuf(prevcoutbuf);

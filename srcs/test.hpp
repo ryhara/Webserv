@@ -2,5 +2,5 @@
 
 #include <iostream>
 
-void test(std::string name);
+void hello(std::string name);
 int add_test(int a, int b);

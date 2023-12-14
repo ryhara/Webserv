@@ -12,7 +12,7 @@ make
 
 execute
 ```
-./webserv ./config/XXX
+./webserv [./config/XXX]
 ```
 
 ## Test
