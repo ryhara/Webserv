@@ -8,6 +8,9 @@ SERVER = Server.cpp
 SRCDIR = ./srcs
 CONFIGDIR = ./srcs/config
 SERVERDIR = ./srcs/server
+
+SRCS = $(addprefix $(CONFIGDIR)/, $(CONFIG)) $(addprefix $(SERVERDIR)/, $(SERVER))
+
 OBJDIR = obj
 OBJS = $(addprefix $(OBJDIR)/, $(SRC:.cpp=.o) $(CONFIG:.cpp=.o) $(SERVER:.cpp=.o))
 DEPENDS = $(OBJS:.o=.d)
@@ -45,10 +48,12 @@ re : fclean all
 test : all
 	./$(NAME) ./config/test.conf
 
+func_test :
+	g++ -o a.out ./tests/*_test.cpp $(SRCS) $(SRCDIR)/test.cpp $(INC) -pthread -lgtest_main -lgtest -std=c++14
+
 debug : fclean
 	make DEBUG=1
 
-
-.PHONY : all clean fclean re test debug
+.PHONY : all clean fclean re test debug func_test
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)
