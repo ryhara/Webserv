@@ -50,3 +50,5 @@ debug : fclean
 
 
 .PHONY : all clean fclean re test debug
+
+# g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)
