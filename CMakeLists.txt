@@ -34,7 +34,12 @@ target_link_libraries(${PROGRAM}
 
 target_include_directories(${PROGRAM}
 	PRIVATE
-		${PROJECT_SOURCE_DIR}/srcs
+		${PROJECT_SOURCE_DIR}/srcs/cgi/
+		${PROJECT_SOURCE_DIR}/srcs/config/
+		${PROJECT_SOURCE_DIR}/srcs/exeption/
+		${PROJECT_SOURCE_DIR}/srcs/server/
+		${PROJECT_SOURCE_DIR}/srcs/utils/
+		${PROJECT_SOURCE_DIR}/srcs/
 )
 # テストの自動検出
 gtest_discover_tests(${PROGRAM})
