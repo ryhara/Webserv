@@ -15,8 +15,7 @@ int main(int argc, char **argv, char **envp)
 		return 1;
 	}
 	// TODO : config_fileを読み込む処理
-	parse();
-	server();
-	std::cout << "webserv" << std::endl;
+	Server server;
+	server.start();
 	return 0;
 }

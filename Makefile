@@ -5,20 +5,23 @@ CONFIG = ConfigParse.cpp
 
 SERVER = Server.cpp
 
+UTILS = ft_memset.cpp error.cpp
+
 SRCDIR = ./srcs
 CONFIGDIR = ./srcs/config
 SERVERDIR = ./srcs/server
+UTILSDIR = ./srcs/utils
 
-SRCS = $(addprefix $(CONFIGDIR)/, $(CONFIG)) $(addprefix $(SERVERDIR)/, $(SERVER))
+SRCS = $(addprefix $(CONFIGDIR)/, $(CONFIG)) $(addprefix $(SERVERDIR)/, $(SERVER)) $(addprefix $(UTILSDIR)/, $(UTILS))
 
 OBJDIR = obj
-OBJS = $(addprefix $(OBJDIR)/, $(SRC:.cpp=.o) $(CONFIG:.cpp=.o) $(SERVER:.cpp=.o))
+OBJS = $(addprefix $(OBJDIR)/, $(SRC:.cpp=.o) $(CONFIG:.cpp=.o) $(SERVER:.cpp=.o) $(UTILS:.cpp=.o))
 DEPENDS = $(OBJS:.o=.d)
 CXX = c++
 RM = rm -rf
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98  -MMD -MP -g
 DEBUGFLAGS =-fsanitize=address
-INC = -I$(CONFIGDIR) -I$(SERVERDIR) -I$(SRCDIR)
+INC = -I$(CONFIGDIR) -I$(SERVERDIR) -I$(SRCDIR) -I$(UTILSDIR)
 
 all : $(OBJDIR) $(NAME)
 
@@ -35,6 +38,9 @@ $(OBJDIR)/%.o: $(SERVERDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(if $(DEBUG), $(DEBUGFLAGS)) -o $@ -c $< $(INC)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	$(CXX) $(CXXFLAGS) $(if $(DEBUG), $(DEBUGFLAGS)) -o $@ -c $< $(INC)
+
+$(OBJDIR)/%.o: $(UTILSDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(if $(DEBUG), $(DEBUGFLAGS)) -o $@ -c $< $(INC)
 
 clean :
