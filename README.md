@@ -16,6 +16,8 @@ execute
 ```
 
 ## Test
+- Github Actions
+- Google Test
 
 
 ## Wiki
