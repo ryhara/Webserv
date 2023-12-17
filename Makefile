@@ -20,28 +20,27 @@ DEPENDS = $(OBJS:.o=.d)
 CXX = c++
 RM = rm -rf
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98  -MMD -MP -g
-DEBUGFLAGS =-fsanitize=address
 INC = -I$(CONFIGDIR) -I$(SERVERDIR) -I$(SRCDIR) -I$(UTILSDIR)
 
 all : $(OBJDIR) $(NAME)
 
 $(NAME): $(OBJS)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(if $(DEBUG), $(DEBUGFLAGS))
+	$(CXX) -o $@ $^ $(CXXFLAGS)
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(OBJDIR)/%.o: $(CONFIGDIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(if $(DEBUG), $(DEBUGFLAGS)) -o $@ -c $< $(INC)
+	$(CXX) $(CXXFLAGS) -o $@ -c $< $(INC)
 
 $(OBJDIR)/%.o: $(SERVERDIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(if $(DEBUG), $(DEBUGFLAGS)) -o $@ -c $< $(INC)
+	$(CXX) $(CXXFLAGS) -o $@ -c $< $(INC)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(if $(DEBUG), $(DEBUGFLAGS)) -o $@ -c $< $(INC)
+	$(CXX) $(CXXFLAGS) -o $@ -c $< $(INC)
 
 $(OBJDIR)/%.o: $(UTILSDIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(if $(DEBUG), $(DEBUGFLAGS)) -o $@ -c $< $(INC)
+	$(CXX) $(CXXFLAGS) -o $@ -c $< $(INC)
 
 clean :
 	$(RM) $(OBJDIR)
@@ -61,8 +60,8 @@ use_cfunc :
 	nm -u $(NAME) | grep "^_[a-z]"
 	@echo "使用していない関数も含まれるので注意"
 
-debug : fclean
-	make DEBUG=1
+debug : CXXFLAGS += -D DEBUG -fsanitize=address
+debug : re
 
 .PHONY : all clean fclean re test debug func_test use_cfunc
 
