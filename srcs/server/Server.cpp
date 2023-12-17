@@ -8,6 +8,7 @@ Server::~Server(void)
 {
 }
 
+// TODO : split into smaller functions
 void Server::start(void)
 {
 	std::cout << "Server::start" << std::endl;
@@ -52,6 +53,7 @@ void Server::start(void)
 			log_exit("accept");
 		}
 		// Fork
+		// TODO : signal handle, wait
 		pid = fork();
 		if (pid < 0)
 		{
