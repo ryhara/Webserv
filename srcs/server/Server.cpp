@@ -122,7 +122,6 @@ void Server::start(void)
 	initServerAddr();
 	// Create socket
 	createSocket();
-	// set signal_handler
 	// TODO : search SIGCHLD
 	// signal(SIGCHLD, SIG_IGN);
 	// Bind
