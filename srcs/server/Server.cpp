@@ -24,7 +24,7 @@ void Server::start(void)
 		std::exit(EXIT_FAILURE);
 	}
 	// TODO : setsockopt ?
-	// setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, NULL, 0);
+	setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, NULL, 0);
 
 	// Init server_addr
 	ft_memset(&server_addr, 0, sizeof(server_addr));
@@ -53,7 +53,8 @@ void Server::start(void)
 			log_exit("accept");
 		}
 		// Fork
-		// TODO : signal handle, wait
+		// TODO : signal handle
+		// TODO : forkはCGIの時だけにする　pollを使う
 		pid = fork();
 		if (pid < 0)
 		{
@@ -65,15 +66,31 @@ void Server::start(void)
 		{
 			// Child process
 			close(server_fd);
-			// TODO : handle client
+			// TODO : buffer size調整、第3引数の調べる(MSG_DONTWAIT : ノンブロッキングモードなので使えそう)
+			char buffer[BUFFER_SIZE];
+			ssize_t n = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+			if (n < 0)
+			{
+				close(client_fd);
+				log_exit("recv");
+			}
+			buffer[n] = '\0';
+			std::cout << "Received: " << buffer << std::endl;
+
 			close(client_fd);
 			std::cout << "Client connected" << std::endl;
 			exit(EXIT_SUCCESS);
 		}
 		else
 		{
+			int status;
 			// Parent process
 			close(client_fd);
+			if (waitpid(pid, &status, 0) < 0)
+			{
+				close(server_fd);
+				log_exit("waitpid");
+			}
 		}
 
 	}

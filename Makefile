@@ -3,7 +3,7 @@ SRC = main.cpp
 
 CONFIG = ConfigParse.cpp
 
-SERVER = Server.cpp
+SERVER = Server.cpp RequestParse.cpp
 
 UTILS = ft_memset.cpp error.cpp
 

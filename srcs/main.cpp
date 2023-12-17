@@ -19,3 +19,8 @@ int main(int argc, char **argv, char **envp)
 	server.start();
 	return 0;
 }
+
+__attribute__((destructor))
+static void destructor() {
+    system("leaks -q webserv");
+}

@@ -18,6 +18,7 @@
 
 # define DEFAULT_SERVER_PORT	4242
 # define MAX_CLIENTS			10
+# define BUFFER_SIZE			8192
 
 class Server
 {
