@@ -32,17 +32,16 @@ class Server
 		struct addrinfo *_res;
 		char			_buffer[BUFFER_SIZE];
 
-		void initServerAddr(void);
-		void createSocket(void);
-		void bindSocket(void);
-		void listenSocket(void);
-		void mainLoop(void);
-		int acceptSocket(void);
-		void childProcess(int client_fd);
-		void parentProcess(pid_t pid);
+		void	initServerAddr(void);
+		void	createSocket(void);
+		void	bindSocket(void);
+		void	listenSocket(void);
+		void	mainLoop(void);
+		int		acceptSocket(void);
+		void	childProcess(int client_fd);
+		void	parentProcess(pid_t pid);
 	public:
 		Server(void);
 		~Server(void);
-
-		void start(void);
+		void	start(void);
 };
