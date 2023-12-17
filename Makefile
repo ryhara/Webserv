@@ -57,13 +57,13 @@ test : all
 func_test :
 	g++ -o a.out ./tests/*_test.cpp $(SRCS) $(SRCDIR)/test.cpp $(INC) -pthread -lgtest_main -lgtest -std=c++14
 
-use_func :
+use_cfunc :
 	nm -u $(NAME) | grep "^_[a-z]"
 	@echo "使用していない関数も含まれるので注意"
 
 debug : fclean
 	make DEBUG=1
 
-.PHONY : all clean fclean re test debug func_test use_func
+.PHONY : all clean fclean re test debug func_test use_cfunc
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)
