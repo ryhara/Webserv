@@ -14,6 +14,8 @@ class HTTPRequestParse
 		HTTPRequestParse(HTTPRequest &request);
 		~HTTPRequestParse(void);
 
+		HTTPRequest &getRequest(void) const;
+
 };
 
 /* example */
