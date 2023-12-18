@@ -3,4 +3,6 @@
 #include <string>
 #include <iostream>
 
-void parse(void);
+class ConfigParse {
+
+};
