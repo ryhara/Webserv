@@ -18,7 +18,7 @@ class HTTPRequestParse
 
 };
 
-/* example */
+/* request example */
 
 // Received: GET / HTTP/1.1
 // Host: localhost:4242
