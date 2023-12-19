@@ -21,6 +21,7 @@ class HTTPRequestParse
 		HTTPRequest &getRequest(void) const;
 		void parse(char *buffer);
 		std::vector<std::string> split(std::string str, char del);
+		std::vector<std::string> split(std::string str, std::string del);
 		void readRequestLine(std::string &line);
 		void readHeaders(std::stringstream &ss);
 		void searchLocation(void);

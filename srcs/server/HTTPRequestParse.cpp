@@ -35,12 +35,25 @@ std::vector<std::string> HTTPRequestParse::split(std::string str, char del)
 	return (result);
 }
 
+std::vector<std::string> HTTPRequestParse::split(std::string str, std::string del)
+{
+	std::vector<std::string> result;
+	std::string::size_type pos = str.find(del);
+	std::string::size_type del_size = del.size();
+
+	if (pos == std::string::npos)
+		return (result);
+	result.push_back(str.substr(0, pos));
+	result.push_back(str.substr(pos + del_size));
+	return (result);
+}
+
+
 void HTTPRequestParse::parse(char *buffer)
 {
 	std::string line;
 	std::stringstream bufferStream(buffer);
 
-	// TODO : 1行ずつ読み込む
 	if (!getlineWithCRLF(bufferStream, line))
 		log_exit("getline", __LINE__, __FILE__);
 	readRequestLine(line);
@@ -67,10 +80,9 @@ void HTTPRequestParse::readHeaders(std::stringstream &ss)
 	{
 		if (line.empty())
 			break;
-		std::vector<std::string> header = split(line, ':');
+		std::vector<std::string> header = split(line, std::string(": "));
 		pair.first = header[0];
 		pair.second = header[1];
-		pair.second.erase(0, 1);
 		this->_request.setHeaders(pair);
 	}
 }

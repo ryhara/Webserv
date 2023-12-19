@@ -3,7 +3,7 @@ SRC = main.cpp
 
 CONFIG = ConfigParse.cpp
 
-SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp
+SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp Kqueue.cpp
 
 UTILS = ft_memset.cpp error.cpp
 
