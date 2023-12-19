@@ -4,6 +4,8 @@
 #include <sstream>
 #include "../srcs/server/HTTPRequestParse.hpp"
 
+char example[] = "GET /cgi/index.html HTTP/1.1\r\nHost: localhost:4242\r\nConnection: keep-alive\r\nsec-ch-ua: \"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"\r\n";
+
 TEST(HTTPRequestParseTest, readRequestLineTest) {
 	HTTPRequest request;
 	HTTPRequestParse parse(request);
@@ -15,22 +17,20 @@ TEST(HTTPRequestParseTest, readRequestLineTest) {
 }
 
 TEST(HTTPRequestParseTest, readHeadersTest) {
-	char example[] = "Host: localhost:4242\r\nConnection: keep-alive\r\n";
+	char example1[] = "Host: localhost:4242\r\nConnection: keep-alive\r\n";
 	HTTPRequest request;
 	HTTPRequestParse parse(request);
-	std::stringstream ss(example);
+	std::stringstream ss(example1);
 	parse.readHeaders(ss);
 	EXPECT_EQ(request.getHeaders()["Host"], "localhost:4242");
 	EXPECT_EQ(request.getHeaders()["Connection"], "keep-alive");
-	// TODO : 数を増やしてみる
-	// TODO : bodyのテストも追加
 }
 
 TEST(HTTPRequestParseTest, parseTest1) {
-	char example[] = "GET / HTTP/1.1\r\nHost: localhost:4242\r\nConnection: keep-alive\r\n";
+	char example2[] = "GET / HTTP/1.1\r\nHost: localhost:4242\r\nConnection: keep-alive\r\n";
 	HTTPRequest request;
 	HTTPRequestParse parse(request);
-	parse.parse(example);
+	parse.parse(example2);
 	EXPECT_EQ(request.getMethod(), "GET");
 	EXPECT_EQ(request.getUri(), "/");
 	EXPECT_EQ(request.getVersion(), "HTTP/1.1");
@@ -38,11 +38,20 @@ TEST(HTTPRequestParseTest, parseTest1) {
 }
 
 TEST(HTTPRequestParseTest, parseTest2) {
-	char example[] = "GET /cgi/index.html HTTP/1.1\r\nHost: localhost:4242\r\nConnection: keep-alive\r\n";
 	HTTPRequest request;
 	HTTPRequestParse parse(request);
 	parse.parse(example);
 	EXPECT_EQ(request.getMethod(), "GET");
 	EXPECT_EQ(request.getUri(), "/cgi/index.html");
 	EXPECT_EQ(request.getVersion(), "HTTP/1.1");
+	EXPECT_EQ(request.getHeaders()["Host"], "localhost:4242");
+	EXPECT_EQ(request.getHeaders()["Connection"], "keep-alive");
+	EXPECT_EQ(request.getHeaders()["sec-ch-ua"], "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"");
+}
+
+TEST(HTTPRequestParseTest, locationTest) {
+	HTTPRequest request;
+	HTTPRequestParse parse(request);
+	parse.parse(example);
+	EXPECT_EQ(request.getLocation(), "/cgi/");
 }
