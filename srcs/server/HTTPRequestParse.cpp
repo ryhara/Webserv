@@ -15,7 +15,7 @@ HTTPRequest &HTTPRequestParse::getRequest(void) const
 
 int HTTPRequestParse::getlineWithCRLF(std::stringstream &ss, std::string &line)
 {
-	if (!std::getline(ss, line))
+	if (!std::getline(ss, line) && line.empty())
 		return (0);
 	if (!line.empty() && line[line.size() - 1] == '\r')
 		line.erase(line.size() - 1);
@@ -44,15 +44,12 @@ void HTTPRequestParse::parse(char *buffer)
 	if (!getlineWithCRLF(bufferStream, line))
 		log_exit("getline", __LINE__, __FILE__);
 	readRequestLine(line);
-	_request.print();
 	readHeaders(bufferStream);
+	_request.print();
 }
 
-// TODO : 情報セットする
 void HTTPRequestParse::readRequestLine(std::string &line)
 {
-	std::cout << "--- readRequestLine ---" << std::endl;
-	std::cout << line << std::endl;
 	std::vector<std::string> request_line = split(line, ' ');
 	if (request_line.size() != 3)
 		log_exit("request_line.size() != 3", __LINE__, __FILE__);
@@ -61,20 +58,25 @@ void HTTPRequestParse::readRequestLine(std::string &line)
 	this->_request.setVersion(request_line[2]);
 }
 
-// TODO : mapで情報セットする
 void HTTPRequestParse::readHeaders(std::stringstream &ss)
 {
-	std::cout << "--- readHeaders ---" << std::endl;
 	std::string line;
-	std::string key;
-	std::string value;
+	std::pair<std::string, std::string> pair;
 	std::vector<std::string> header;
 	while (getlineWithCRLF(ss, line))
 	{
-		// TODO : ": "で区切って、keyとvalueに分ける -> mapに入れる
 		if (line.empty())
 			break;
 		std::vector<std::string> header = split(line, ':');
-		// TODO : 空白を削除する
+		pair.first = header[0];
+		pair.second = header[1];
+		pair.second.erase(0, 1);
+		this->_request.setHeaders(pair);
 	}
+}
+
+// TODO : /cgi/index.html -> /cgi/ みたいにlocationを探す
+void HTTPRequestParse::searchLocation(void)
+{
+
 }

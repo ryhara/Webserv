@@ -88,7 +88,6 @@ void HTTPRequest::print(void)
 	std::cout << "protocol_version: " << this->_version << std::endl;
 	std::cout << "message_body: " << this->_body << std::endl;
 	std::cout << "location: " << this->_location << std::endl;
-	std::cout << "--------------------------------------------------------------------" << std::endl;
 	std::cout << "headers: " << std::endl;
 	for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != this->_headers.end(); it++)
 	{

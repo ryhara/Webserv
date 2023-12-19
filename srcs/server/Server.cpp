@@ -136,7 +136,6 @@ void Server::mainLoop(void)
 				close(events[i].ident);
 				log_exit("EV_ERROR", __LINE__, __FILE__);
 			} else if (events[i].filter == EVFILT_READ) {
-				std::cout << "EVFILT_READ" << std::endl;
 				if (static_cast<int>(events[i].ident) == _server_fd) {
 					client_fd = acceptSocket();
 					EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);

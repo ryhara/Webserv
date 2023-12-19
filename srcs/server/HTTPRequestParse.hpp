@@ -23,6 +23,7 @@ class HTTPRequestParse
 		std::vector<std::string> split(std::string str, char del);
 		void readRequestLine(std::string &line);
 		void readHeaders(std::stringstream &ss);
+		void searchLocation(void);
 		int getlineWithCRLF(std::stringstream &ss, std::string &line);
 };
 
