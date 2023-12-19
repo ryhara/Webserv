@@ -17,7 +17,9 @@ int HTTPRequestParse::getlineWithCRLF(std::stringstream &ss, std::string &line)
 {
 	if (!std::getline(ss, line))
 		return (0);
-	if (line == "\r")
+	if (!line.empty() && line[line.size() - 1] == '\r')
+		line.erase(line.size() - 1);
+	if (line.empty())
 		return (0);
 	return (1);
 }
@@ -25,13 +27,13 @@ int HTTPRequestParse::getlineWithCRLF(std::stringstream &ss, std::string &line)
 void HTTPRequestParse::parse(char *buffer)
 {
 	std::string line;
-	std::stringstream ss(buffer);
+	std::stringstream bufferStream(buffer);
 
 	// TODO : 1行ずつ読み込む
-	if (!getlineWithCRLF(ss, line))
+	if (!getlineWithCRLF(bufferStream, line))
 		log_exit("getline", __LINE__, __FILE__);
 	readRequestLine(line);
-	readHeaders(ss);
+	readHeaders(bufferStream);
 }
 
 // TODO : 情報セットする
