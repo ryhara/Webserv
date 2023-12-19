@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
 
 #include "HTTPRequest.hpp"
 #include "utils.hpp"
@@ -19,6 +20,7 @@ class HTTPRequestParse
 
 		HTTPRequest &getRequest(void) const;
 		void parse(char *buffer);
+		std::vector<std::string> split(std::string str, char del);
 		void readRequestLine(std::string &line);
 		void readHeaders(std::stringstream &ss);
 		int getlineWithCRLF(std::stringstream &ss, std::string &line);

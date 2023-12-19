@@ -18,6 +18,7 @@ class HTTPRequest
 		~HTTPRequest(void);
 
 		void			clear(void);
+		void			print(void);
 		// getter
 		std::string		&getMethod(void) const;
 		std::string		&getUri(void) const;
