@@ -2,6 +2,9 @@
 
 Server::Server(void)
 {
+	ft_memset(&_hints, 0, sizeof(_hints));
+	_res = NULL;
+	ft_memset(_buffer, 0, sizeof(_buffer));
 }
 
 Server::~Server(void)
@@ -20,10 +23,12 @@ void Server::initServerAddr(void)
 
 void Server::createSocket(void)
 {
+	int option_value = 1; // setsockopt
+
 	_server_fd = socket(_res->ai_family, _res->ai_socktype, _res->ai_protocol);
 	if (_server_fd < 0)
 		log_exit("socket", __LINE__, __FILE__);
-	setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, NULL, 0);
+	setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&option_value, sizeof(option_value));
 }
 
 void Server::bindSocket(void)
@@ -38,7 +43,7 @@ void Server::bindSocket(void)
 
 void Server::listenSocket(void)
 {
-	if (listen(_server_fd, MAX_CLIENTS) < 0)
+	if (listen(_server_fd, QUEUE_LENGTH) < 0)
 	{
 		close(_server_fd);
 		log_exit("listen", __LINE__, __FILE__);
@@ -64,6 +69,7 @@ int Server::acceptSocket(void)
 void Server::childProcess(int client_fd)
 {
 	// TODO : buffer size調整、第3引数の調べる(MSG_DONTWAIT : ノンブロッキングモードなので使えそう)
+	HTTPRequestParse request_parse(_request);
 	ssize_t n = recv(client_fd, _buffer, sizeof(_buffer) - 1, 0);
 	if (n < 0)
 	{
@@ -71,10 +77,18 @@ void Server::childProcess(int client_fd)
 		log_exit("recv", __LINE__, __FILE__);
 	}
 	_buffer[n] = '\0';
-	std::cout << "Received: " << _buffer << std::endl;
+	std::cout << "-- request -- " << std::endl << _buffer << "-----" << std::endl;
+	request_parse.parse(_buffer);
+	// TODO : responseを正しく実装する （一時的）
+	std::string _response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>\r\n";
+	ssize_t send_n = send(client_fd, _response.c_str(), _response.size(), 0);
+	if (send_n < 0)
+	{
+		close(client_fd);
+		log_exit("send", __LINE__, __FILE__);
+	}
 	close(client_fd);
-	std::cout << "Client connected" << std::endl;
-	std::exit(EXIT_SUCCESS);
+	std::cout << "================= one request end =================" << std::endl;
 }
 
 void Server::parentProcess(pid_t pid)
@@ -90,26 +104,49 @@ void Server::parentProcess(pid_t pid)
 
 void Server::mainLoop(void)
 {
-	int client_fd;
-	for (;;)
+	int client_fd, kq, event_number;
+	struct kevent change_event;
+	struct kevent events[MAX_EVENTS];
+
+	// TODO : kqueueを分割
+	kq = kqueue();
+	if (kq < 0)
 	{
-		// Accept
-		client_fd =  acceptSocket();
-		// Fork
-		// TODO : signal handle forkはCGIの時だけにする　pollを使う
-		pid_t pid = fork();
-		if (pid < 0) {
+		close(_server_fd);
+		log_exit("kqueue", __LINE__, __FILE__);
+	}
+
+	EV_SET(&change_event, _server_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+	if (kevent(kq, &change_event, 1, NULL, 0, NULL) < 0)
+	{
+		close(_server_fd);
+		log_exit("kevent", __LINE__, __FILE__);
+	}
+
+	for (;;) {
+		event_number = kevent(kq, NULL, 0, events, MAX_EVENTS, NULL);
+		if (event_number < 0)
+		{
 			close(_server_fd);
-			close(client_fd);
-			log_exit("fork", __LINE__, __FILE__);
+			log_exit("kevent", __LINE__, __FILE__);
 		}
-		else if (pid == 0) {
-			close(_server_fd);
-			childProcess(client_fd);
-		}
-		else {
-			close(client_fd);
-			parentProcess(pid);
+		std::cout << "event_number : " << event_number << std::endl;
+		for (int i = 0; i < event_number; i++) {
+			if (events[i].flags & EV_ERROR) {
+				close(events[i].ident);
+				log_exit("EV_ERROR", __LINE__, __FILE__);
+			} else if (events[i].filter == EVFILT_READ) {
+				if (static_cast<int>(events[i].ident) == _server_fd) {
+					client_fd = acceptSocket();
+					EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
+					if (kevent(kq, &change_event, 1, NULL, 0, NULL) < 0)
+					{
+						close(_server_fd);
+						log_exit("kevent", __LINE__, __FILE__);
+					}
+					childProcess(client_fd);
+				}
+			}
 		}
 	}
 }
@@ -122,8 +159,7 @@ void Server::start(void)
 	initServerAddr();
 	// Create socket
 	createSocket();
-	// TODO : search SIGCHLD
-	// signal(SIGCHLD, SIG_IGN);
+	// TODO : search SIGCHLD, signal(SIGCHLD, SIG_IGN);
 	// Bind
 	bindSocket();
 	// Listen

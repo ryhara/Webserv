@@ -14,13 +14,16 @@
 #include <netdb.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <sys/event.h>
 
+#include "HTTPRequestParse.hpp"
 #include "Color.hpp"
 #include "utils.hpp"
 
 # define SERVER_PORT			4242
 # define SERVER_PORT_STR		"4242"
-# define MAX_CLIENTS			10
+# define QUEUE_LENGTH			5
+# define MAX_EVENTS				10
 # define BUFFER_SIZE			8192
 # define SERVER_NAME			"localhost"
 
@@ -31,6 +34,7 @@ class Server
 		struct addrinfo _hints;
 		struct addrinfo *_res;
 		char			_buffer[BUFFER_SIZE];
+		HTTPRequest		_request;
 
 		void	initServerAddr(void);
 		void	createSocket(void);
