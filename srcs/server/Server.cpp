@@ -108,6 +108,7 @@ void Server::mainLoop(void)
 	struct kevent change_event;
 	struct kevent events[MAX_EVENTS];
 
+	// TODO : kqueueを分割
 	kq = kqueue();
 	if (kq < 0)
 	{
@@ -159,8 +160,7 @@ void Server::start(void)
 	initServerAddr();
 	// Create socket
 	createSocket();
-	// TODO : search SIGCHLD
-	// signal(SIGCHLD, SIG_IGN);
+	// TODO : search SIGCHLD, signal(SIGCHLD, SIG_IGN);
 	// Bind
 	bindSocket();
 	// Listen
