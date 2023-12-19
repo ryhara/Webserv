@@ -2,6 +2,9 @@
 
 Server::Server(void)
 {
+	ft_memset(&_hints, 0, sizeof(_hints));
+	_res = NULL;
+	ft_memset(_buffer, 0, sizeof(_buffer));
 }
 
 Server::~Server(void)
