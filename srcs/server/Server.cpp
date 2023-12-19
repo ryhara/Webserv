@@ -79,8 +79,16 @@ void Server::childProcess(int client_fd)
 	_buffer[n] = '\0';
 	std::cout << "-- request -- " << std::endl << _buffer << "-----" << std::endl;
 	request_parse.parse(_buffer);
-	close(client_fd);
 	std::cout << "Client connected" << std::endl;
+	// TODO : responseを正しく実装する （一時的）
+	std::string _response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>\r\n";
+	ssize_t send_n = send(client_fd, _response.c_str(), _response.size(), 0);
+	if (send_n < 0)
+	{
+		close(client_fd);
+		log_exit("send", __LINE__, __FILE__);
+	}
+	close(client_fd);
 	std::exit(EXIT_SUCCESS);
 }
 
