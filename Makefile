@@ -70,6 +70,9 @@ use_cfunc :
 debug : CXXFLAGS += -D DEBUG -fsanitize=address
 debug : re
 
-.PHONY : all clean fclean re test debug func_test use_cfunc
+leak :
+	while true; do leaks -q $(NAME); sleep 1; done
+
+.PHONY : all clean fclean re test debug func_test use_cfunc leak
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)
