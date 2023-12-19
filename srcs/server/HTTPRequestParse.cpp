@@ -75,5 +75,6 @@ void HTTPRequestParse::readHeaders(std::stringstream &ss)
 		if (line.empty())
 			break;
 		std::vector<std::string> header = split(line, ':');
+		// TODO : 空白を削除する
 	}
 }

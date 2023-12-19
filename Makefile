@@ -61,6 +61,7 @@ test : all
 
 func_test :
 	g++ -o a.out ./tests/*_test.cpp $(SRCS) $(SRCDIR)/test.cpp $(INC) -pthread -lgtest_main -lgtest -std=c++14
+	@./a.out
 
 use_cfunc :
 	nm -u $(NAME) | grep "^_[a-z]"
