@@ -28,7 +28,7 @@ class HTTPRequestParse
 
 /* request example */
 
-// Received: GET / HTTP/1.1
+// GET / HTTP/1.1
 // Host: localhost:4242
 // Connection: keep-alive
 // sec-ch-ua: "Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"

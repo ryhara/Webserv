@@ -77,7 +77,7 @@ void Server::childProcess(int client_fd)
 		log_exit("recv", __LINE__, __FILE__);
 	}
 	_buffer[n] = '\0';
-	std::cout << "Received: " << _buffer << std::endl;
+	std::cout << "-- request -- " << std::endl << _buffer << "-----" << std::endl;
 	request_parse.parse(_buffer);
 	close(client_fd);
 	std::cout << "Client connected" << std::endl;
