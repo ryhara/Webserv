@@ -69,6 +69,7 @@ void HTTPRequestParse::readRequestLine(std::string &line)
 	this->_request.setMethod(request_line[0]);
 	this->_request.setUri(request_line[1]);
 	this->_request.setVersion(request_line[2]);
+	searchLocation();
 }
 
 void HTTPRequestParse::readHeaders(std::stringstream &ss)
@@ -90,5 +91,9 @@ void HTTPRequestParse::readHeaders(std::stringstream &ss)
 // TODO : /cgi/index.html -> /cgi/ みたいにlocationを探す
 void HTTPRequestParse::searchLocation(void)
 {
-
+	std::string uri = this->_request.getUri();
+	std::vector<std::string> uri_split = split(uri, '/');
+	std::string location = uri_split[1];
+	location = "/" + location + "/";
+	this->_request.setLocation(location);
 }
