@@ -19,8 +19,6 @@ int HTTPRequestParse::getlineWithCRLF(std::stringstream &ss, std::string &line)
 		return (0);
 	if (!line.empty() && line[line.size() - 1] == '\r')
 		line.erase(line.size() - 1);
-	if (line.empty())
-		return (0);
 	return (1);
 }
 
@@ -74,6 +72,8 @@ void HTTPRequestParse::readHeaders(std::stringstream &ss)
 	while (getlineWithCRLF(ss, line))
 	{
 		// TODO : ": "で区切って、keyとvalueに分ける -> mapに入れる
+		if (line.empty())
+			break;
 		std::vector<std::string> header = split(line, ':');
 	}
 }
