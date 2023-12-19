@@ -18,8 +18,11 @@ FetchContent_MakeAvailable(googletest)
 # Google Testのモジュールをインクルード
 include(GoogleTest)
 
+# main関数、kqueueを用いているファイルを除外(kqueueはMacOSのみで使用可能)
 file(GLOB_RECURSE SOURCES "${PROJECT_SOURCE_DIR}/srcs/*.cpp")
-list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/srcs/main.cpp") # メイン関数を含むファイルを除外
+list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/srcs/main.cpp")
+list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/srcs/server/Server.cpp")
+list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/srcs/server/Kqueue.cpp")
 file(GLOB TEST_FILES "${PROJECT_SOURCE_DIR}/tests/*_test.cpp") # テストファイルの指定
 
 enable_testing()
