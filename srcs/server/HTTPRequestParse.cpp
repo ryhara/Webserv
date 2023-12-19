@@ -92,6 +92,11 @@ void HTTPRequestParse::readHeaders(std::stringstream &ss)
 void HTTPRequestParse::searchLocation(void)
 {
 	std::string uri = this->_request.getUri();
+	if (uri.compare("/") == 0)
+	{
+		this->_request.setLocation("/");
+		return ;
+	}
 	std::vector<std::string> uri_split = split(uri, '/');
 	std::string location = uri_split[1];
 	location = "/" + location + "/";
