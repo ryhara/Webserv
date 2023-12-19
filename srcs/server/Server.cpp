@@ -23,10 +23,12 @@ void Server::initServerAddr(void)
 
 void Server::createSocket(void)
 {
+	int option_value = 1; // setsockopt
+	
 	_server_fd = socket(_res->ai_family, _res->ai_socktype, _res->ai_protocol);
 	if (_server_fd < 0)
 		log_exit("socket", __LINE__, __FILE__);
-	setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, NULL, 0);
+	setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&option_value, sizeof(option_value));
 }
 
 void Server::bindSocket(void)
