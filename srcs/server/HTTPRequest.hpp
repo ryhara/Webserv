@@ -7,17 +7,18 @@
 class HTTPRequest
 {
 	private:
-		std::string _method;
-		std::string _uri;
-		std::string _version;
-		std::map<std::string, std::string> _headers;
-		std::string _body;
-		std::string _location;
+		std::string _method; // GET, POST etc...
+		std::string _uri; // /, /cgi/index.html
+		std::string _version; // HTTP/1.1 etc...
+		std::map<std::string, std::string> _headers; // etc...
+		std::string _body; // TODO : POSTなどのときに使う
+		std::string _location; // TODO : /, /cgi/
 	public :
 		HTTPRequest(void);
 		~HTTPRequest(void);
+
+		void			clear(void);
 		// getter
-		void			parse(std::string request);
 		std::string		&getMethod(void) const;
 		std::string		&getUri(void) const;
 		std::string		&getVersion(void) const;

@@ -15,6 +15,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 
+#include "HTTPRequestParse.hpp"
 #include "Color.hpp"
 #include "utils.hpp"
 
@@ -31,6 +32,7 @@ class Server
 		struct addrinfo _hints;
 		struct addrinfo *_res;
 		char			_buffer[BUFFER_SIZE];
+		HTTPRequest		_request;
 
 		void	initServerAddr(void);
 		void	createSocket(void);

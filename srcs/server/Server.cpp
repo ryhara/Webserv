@@ -24,7 +24,7 @@ void Server::initServerAddr(void)
 void Server::createSocket(void)
 {
 	int option_value = 1; // setsockopt
-	
+
 	_server_fd = socket(_res->ai_family, _res->ai_socktype, _res->ai_protocol);
 	if (_server_fd < 0)
 		log_exit("socket", __LINE__, __FILE__);
@@ -69,6 +69,7 @@ int Server::acceptSocket(void)
 void Server::childProcess(int client_fd)
 {
 	// TODO : buffer size調整、第3引数の調べる(MSG_DONTWAIT : ノンブロッキングモードなので使えそう)
+	HTTPRequestParse request_parse(_request);
 	ssize_t n = recv(client_fd, _buffer, sizeof(_buffer) - 1, 0);
 	if (n < 0)
 	{
@@ -77,6 +78,7 @@ void Server::childProcess(int client_fd)
 	}
 	_buffer[n] = '\0';
 	std::cout << "Received: " << _buffer << std::endl;
+	request_parse.parse(_buffer);
 	close(client_fd);
 	std::cout << "Client connected" << std::endl;
 	std::exit(EXIT_SUCCESS);

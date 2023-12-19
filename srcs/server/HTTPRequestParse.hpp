@@ -2,7 +2,10 @@
 
 #include <iostream>
 #include <string>
+#include <sstream>
+
 #include "HTTPRequest.hpp"
+#include "utils.hpp"
 
 class HTTPRequest;
 
@@ -15,7 +18,10 @@ class HTTPRequestParse
 		~HTTPRequestParse(void);
 
 		HTTPRequest &getRequest(void) const;
-
+		void parse(char *buffer);
+		void readRequestLine(std::string &line);
+		void readHeaders(std::stringstream &ss);
+		int getlineWithCRLF(std::stringstream &ss, std::string &line);
 };
 
 /* request example */
