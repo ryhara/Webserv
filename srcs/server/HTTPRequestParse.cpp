@@ -48,7 +48,8 @@ std::vector<std::string> HTTPRequestParse::split(std::string str, std::string de
 	return (result);
 }
 
-
+// TODO : parse失敗時にはexitではなく、例外を投げる（ステータスコード400など）、プログラム的なエラーはexit
+// TODO : https通信の場合は、parseできないので、例外を投げる 
 void HTTPRequestParse::parse(char *buffer)
 {
 	std::string line;

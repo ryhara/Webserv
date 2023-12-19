@@ -77,7 +77,10 @@ void Server::childProcess(int client_fd)
 		log_exit("recv", __LINE__, __FILE__);
 	}
 	_buffer[n] = '\0';
-	std::cout << "-- request -- " << std::endl << _buffer << "-----" << std::endl;
+	std::cout << "-- request -- " << std::endl;
+	for (int i = 0; i < n; i++)
+		std::cout << _buffer[i];
+	std::cout << "--------------" << std::endl;
 	request_parse.parse(_buffer);
 	// TODO : responseを正しく実装する （一時的）
 	std::string _response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>\r\n";
