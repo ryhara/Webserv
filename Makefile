@@ -60,7 +60,7 @@ test : all
 	./$(NAME) ./config/test.conf
 
 func_test :
-	g++ -o a.out ./tests/*_test.cpp $(SRCS) $(SRCDIR)/test.cpp $(INC) -pthread -lgtest_main -lgtest -std=c++14
+	g++ -o a.out ./tests/*_test.cpp $(SRCS) $(INC) -pthread -lgtest_main -lgtest -std=c++14
 	@./a.out
 
 use_cfunc :

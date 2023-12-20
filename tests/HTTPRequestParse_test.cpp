@@ -42,7 +42,6 @@ TEST(HTTPRequestParseTest, parseTest1) {
 	EXPECT_EQ(request.getMethod(), "GET");
 	EXPECT_EQ(request.getUri(), "/");
 	EXPECT_EQ(request.getVersion(), "HTTP/1.1");
-	// TODO : その他の変数のテストも追加
 }
 
 TEST(HTTPRequestParseTest, parseTest2) {
@@ -61,7 +60,7 @@ TEST(HTTPRequestParseTest, parseTest2) {
 
 TEST(HTTPRequestParseTest, locationTest) {
 	SurpressOutput surpressOutput;
-	
+
 	HTTPRequest request;
 	HTTPRequestParse parse(request);
 	parse.parse(example);

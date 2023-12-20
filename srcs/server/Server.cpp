@@ -111,7 +111,7 @@ void Server::mainLoop(void)
 	struct kevent change_event;
 	struct kevent events[MAX_EVENTS];
 
-	// TODO : kqueueを分割
+	// TODO : kqueueを分割, childProcess, ParentProcessを修正
 	kq = kqueue();
 	if (kq < 0)
 	{
@@ -154,7 +154,6 @@ void Server::mainLoop(void)
 	}
 }
 
-// TODO : split into smaller functions
 void Server::start(void)
 {
 	std::cout << "================= Server::start =================" << std::endl;
