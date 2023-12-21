@@ -179,3 +179,11 @@ void Server::start(void)
 	mainLoop();
 	close(_server_fd);
 }
+
+/* example */
+// TODO : fcntlを使ったノンブロッキングモードの実装または pollを使った実装
+// if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
+//     perror("fcntl");
+//     close(fd);
+//     exit(EXIT_FAILURE);
+// }
