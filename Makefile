@@ -53,6 +53,7 @@ clean :
 
 fclean : clean
 	$(RM) $(NAME)
+	$(RM) a.out
 
 re : fclean all
 
