@@ -3,8 +3,12 @@
 #include <string>
 #include <iostream>
 
+
+#include "HTTPStatusCode.hpp"
+
 class HTTPResponse
 {
+
 
 };
 
