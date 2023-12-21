@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <vector>
 #include "ServerConfig.hpp"
 
 class Config
