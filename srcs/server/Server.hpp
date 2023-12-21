@@ -19,6 +19,7 @@
 #include "HTTPRequestParse.hpp"
 #include "Color.hpp"
 #include "utils.hpp"
+#include "Config.hpp"
 
 # define SERVER_PORT			4242
 # define SERVER_PORT_STR		"4242"
@@ -35,6 +36,7 @@ class Server
 		struct addrinfo *_res;
 		char			_buffer[BUFFER_SIZE];
 		HTTPRequest		_request;
+		Config			_config;
 
 		void	initServerAddr(void);
 		void	createSocket(void);
@@ -48,4 +50,5 @@ class Server
 		Server(void);
 		~Server(void);
 		void	start(void);
+		Config	&getConfig(void) const;
 };

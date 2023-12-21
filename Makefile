@@ -1,7 +1,7 @@
 NAME = webserv
 SRC = main.cpp
 
-CONFIG = ConfigParse.cpp
+CONFIG = ConfigParse.cpp Config.cpp ServerConfig.cpp
 
 SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp Kqueue.cpp
 
