@@ -139,7 +139,10 @@ void Server::mainLoop(void)
 				close(events[i].ident);
 				log_exit("EV_ERROR", __LINE__, __FILE__);
 			} else if (events[i].filter == EVFILT_READ) {
-				if (static_cast<int>(events[i].ident) == _server_fd) {
+				// TODO : 上下のif文の条件を調べる, 下のif文なくても動く
+				// if (static_cast<int>(events[i].ident) == _server_fd) {
+					std::cout << "events[" << i << "].ident : " << events[i].ident << std::endl;
+					std::cout << "_server_fd : " << _server_fd << std::endl;
 					client_fd = acceptSocket();
 					EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
 					if (kevent(kq, &change_event, 1, NULL, 0, NULL) < 0)
@@ -148,10 +151,11 @@ void Server::mainLoop(void)
 						log_exit("kevent", __LINE__, __FILE__);
 					}
 					childProcess(client_fd);
-				}
+				// }
 			}
 		}
 	}
+	close(kq);
 }
 
 void Server::start(void)
