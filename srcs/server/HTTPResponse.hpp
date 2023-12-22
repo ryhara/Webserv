@@ -3,10 +3,17 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <ctime>
 
 #include "HTTPStatusCode.hpp"
 
 #define CRLF "\r\n"
+#define SP " "
+#define HTTP_VERSION "HTTP/1.1"
+#define DATE_BUF_SIZE 128
+#define DATE_FORMAT "%a, %d %b %Y %H:%M:%S GMT"
+
+
 
 class HTTPResponse
 {
@@ -19,6 +26,7 @@ class HTTPResponse
 		size_t _contentLength;
 		std::map<std::string, std::string> _headers;
 		std::string _body;
+		std::map<HTTPStatusCode, std::string> _statusMessageMap;
 	public :
 		HTTPResponse();
 		~HTTPResponse();
@@ -27,11 +35,12 @@ class HTTPResponse
 		void setVersion(const std::string &version);
 		void setStatusCode(const HTTPStatusCode &statusCode);
 		void setStatusMessage(const std::string &statusMessage);
-		void setStatusLine(const std::string &statusLine);
+		void setStatusLine(void);
 		void setKeepAlive(const bool &keepAlive);
 		void setContentLength(const size_t &contentLength);
 		void setHeader(const std::string &key, const std::string &value);
 		void setBody(const std::string &body);
+		void setStatusMessageMap(void);
 		// getter
 		const std::string &getVersion() const;
 		const HTTPStatusCode &getStatusCode() const;
@@ -41,6 +50,9 @@ class HTTPResponse
 		const size_t &getContentLength() const;
 		const std::map<std::string, std::string> &getHeaders() const;
 		const std::string &getBody() const;
+		const std::string &getStatusMessageFromMap(const HTTPStatusCode &statusCode) const;
+
+		std::string getDateTimestamp(void) const;
 };
 
 /* response example */
