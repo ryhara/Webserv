@@ -16,6 +16,7 @@ Config &Server::getConfig(void) const
 	return const_cast<Config &>(_config);
 }
 
+// TODO : log_exitをexceptionにして、catchしてstatus codeを返す
 void Server::initServerAddr(void)
 {
 	ft_memset(&_hints, 0, sizeof(_hints));
