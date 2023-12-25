@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <exception>
 
 #include <sys/socket.h>
 #include <sys/types.h>

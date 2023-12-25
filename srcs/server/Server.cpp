@@ -166,18 +166,23 @@ void Server::mainLoop(void)
 void Server::start(void)
 {
 	std::cout << "================= Server::start =================" << std::endl;
-	// Init server_addr
-	initServerAddr();
-	// Create socket
-	createSocket();
-	// TODO : search SIGCHLD, signal(SIGCHLD, SIG_IGN);
-	// Bind
-	bindSocket();
-	// Listen
-	listenSocket();
-	// Main loop
-	mainLoop();
-	close(_server_fd);
+	try {
+		// Init server_addr
+		initServerAddr();
+		// Create socket
+		createSocket();
+		// TODO : search SIGCHLD, signal(SIGCHLD, SIG_IGN);
+		// Bind
+		bindSocket();
+		// Listen
+		listenSocket();
+		// Main loop
+		mainLoop();
+		close(_server_fd);
+	}
+	catch (std::exception &e) {
+		std::cout << e.what() << std::endl;
+	}
 }
 
 /* example */
