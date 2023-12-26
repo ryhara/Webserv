@@ -63,9 +63,11 @@ func_test :
 	g++ -o a.out ./tests/*_test.cpp $(SRCS) $(SRCDIR)/test.cpp $(INC) -pthread -lgtest_main -lgtest -std=c++14
 	@./a.out
 
-use_cfunc :
-	nm -u $(NAME) | grep "^_[a-z]"
-	@echo "使用していない関数も含まれるので注意"
+check_cfunc :
+	@chmod +x ./tests/check_cfunctions.sh
+	@./tests/check_cfunctions.sh ./$(NAME)
+# nm -u $(NAME) | grep "^_[a-z] | sed 's/^_//g'
+# @echo "使用していない関数も含まれるので注意"
 
 debug : CXXFLAGS += -D DEBUG -fsanitize=address
 debug : re
