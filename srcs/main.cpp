@@ -1,3 +1,5 @@
+#include "ConfigParse.hpp"
+#include "Server.hpp"
 #include "Webserv.hpp"
 
 // TODO : 全クラスにおいてデストラクタやerror時のfreeやclear処理を実装する
