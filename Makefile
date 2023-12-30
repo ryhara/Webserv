@@ -64,6 +64,10 @@ func_test :
 	g++ -o a.out ./tests/*_test.cpp $(SRCS) $(INC) -pthread -lgtest_main -lgtest -std=c++14
 	@./a.out
 
+invalid_test :
+	@chmod +x ./tests/invalid_conf_test.sh
+	./tests/invalid_conf_test.sh ./config/invalid
+
 use_cfunc :
 	nm -u $(NAME) | grep "^_[a-z]"
 	@echo "使用していない関数も含まれるので注意"
