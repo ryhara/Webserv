@@ -2,18 +2,20 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <map>
 #include <ctime>
 
+#include "Webserv.hpp"
 #include "HTTPStatusCode.hpp"
+#include "HTTPRequest.hpp"
 
-#define CRLF "\r\n"
-#define SP " "
-#define HTTP_VERSION "HTTP/1.1"
 #define DATE_BUF_SIZE 128
 #define DATE_FORMAT "%a, %d %b %Y %H:%M:%S GMT"
 
 
+// TODO : 取得したパスのファイルの内容を取得する→HTTPレスポンスのメッセージを作成する→ソケットディスクリプタにレスポンス内容を書き込む→使い終わったファイルのクローズ
 
 class HTTPResponse
 {
@@ -40,6 +42,7 @@ class HTTPResponse
 		void setContentLength(const size_t &contentLength);
 		void setHeader(const std::string &key, const std::string &value);
 		void setBody(const std::string &body);
+		void setBodyAll(void);
 		void setStatusMessageMap(void);
 		// getter
 		const std::string &getVersion() const;
@@ -53,6 +56,12 @@ class HTTPResponse
 		const std::string &getStatusMessageFromMap(const HTTPStatusCode &statusCode) const;
 
 		std::string getDateTimestamp(void) const;
+		std::string makeResponseMessage(HTTPRequest &request);
+		void makeGetResponseBody(HTTPRequest &request);
+		void makePostResponseBody(HTTPRequest &request);
+		void makeDeleteResponseBody(HTTPRequest &request);
+		std::string makeResponseStatusLine(void);
+
 };
 
 /* response example */

@@ -16,14 +16,14 @@ Config &Server::getConfig(void) const
 	return const_cast<Config &>(_config);
 }
 
-// TODO : log_exitをexceptionにして、catchしてstatus codeを返す
+// TODO : サーバーを立ち上げる際のエラーはlog_exitで処理する,リクエストやレスポンスのエラーは例外を投げてSTATUS CODEを返す
 void Server::initServerAddr(void)
 {
 	ft_memset(&_hints, 0, sizeof(_hints));
 	_hints.ai_family = AF_INET;
 	_hints.ai_socktype = SOCK_STREAM;
 	_hints.ai_flags = AI_PASSIVE;
-	if (getaddrinfo(NULL, "4242", &_hints, &_res) != 0)
+	if (getaddrinfo(NULL, SERVER_PORT_STR, &_hints, &_res) != 0)
 		log_exit("getaddrinfo", __LINE__, __FILE__);
 }
 
@@ -75,7 +75,8 @@ int Server::acceptSocket(void)
 void Server::childProcess(int client_fd)
 {
 	// TODO : buffer size調整、第3引数の調べる(MSG_DONTWAIT : ノンブロッキングモードなので使えそう)
-	HTTPRequestParse request_parse(_request);
+	HTTPRequest request;
+	HTTPRequestParse request_parse(request);
 	ssize_t n = recv(client_fd, _buffer, sizeof(_buffer) - 1, 0);
 	if (n < 0)
 	{
@@ -89,8 +90,10 @@ void Server::childProcess(int client_fd)
 	std::cout << "--------------" << std::endl;
 	request_parse.parse(_buffer);
 	// TODO : responseを正しく実装する （一時的）
-	std::string _response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>\r\n";
-	ssize_t send_n = send(client_fd, _response.c_str(), _response.size(), 0);
+	HTTPResponse response;
+	std::string responseMessage = response.makeResponseMessage(request);
+	// std::string responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>\r\n";
+	ssize_t send_n = send(client_fd, responseMessage.c_str(), responseMessage.size(), 0);
 	if (send_n < 0)
 	{
 		close(client_fd);

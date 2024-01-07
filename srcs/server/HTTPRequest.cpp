@@ -83,6 +83,7 @@ void			HTTPRequest::setLocation(const std::string &location)
 
 void HTTPRequest::print(void)
 {
+	std::cout << "----------------- HTTPRequest Result -----------------" << std::endl;
 	std::cout << "method: " << this->_method << std::endl;
 	std::cout << "uri: " << this->_uri << std::endl;
 	std::cout << "protocol_version: " << this->_version << std::endl;
@@ -93,4 +94,5 @@ void HTTPRequest::print(void)
 	{
 		std::cout << it->first << ": " << it->second << std::endl;
 	}
+	std::cout << "------------------------------------------------------" << std::endl;
 }

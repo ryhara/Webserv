@@ -30,7 +30,8 @@ std::vector<std::string> HTTPRequestParse::split(std::string str, char del)
 
 	while (getline(ss, tmp, del))
 	{
-		result.push_back(tmp);
+		if (!tmp.empty())
+			result.push_back(tmp);
 	}
 	return (result);
 }
@@ -98,7 +99,12 @@ void HTTPRequestParse::searchLocation(void)
 		return ;
 	}
 	std::vector<std::string> uri_split = split(uri, '/');
-	std::string location = uri_split[1];
+	if (uri_split.size() < 2)
+	{
+		this->_request.setLocation("/");
+		return ;
+	}
+	std::string location = uri_split[0];
 	location = "/" + location + "/";
 	this->_request.setLocation(location);
 }

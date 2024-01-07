@@ -17,8 +17,9 @@
 #include <signal.h>
 #include <sys/event.h>
 
+#include "Webserv.hpp"
 #include "HTTPRequestParse.hpp"
-#include "Color.hpp"
+#include "HTTPResponse.hpp"
 #include "utils.hpp"
 #include "Config.hpp"
 
@@ -27,7 +28,13 @@
 # define QUEUE_LENGTH			5
 # define MAX_EVENTS				10
 # define BUFFER_SIZE			8192
-# define SERVER_NAME			"localhost"
+
+// TODO : 全てにおいてコピーコンストラクタと代入演算子を禁止する
+// TODO : vectorやmapのメモリを開放する
+// TODO : 同時にリクエストを行うテストスクリプトを作成する
+# define DISALLOW_COPY_AND_ASSIGN(ClassName) \
+	ClassName(const ClassName &); \
+	ClassName &operator=(const ClassName &)
 
 class Server
 {

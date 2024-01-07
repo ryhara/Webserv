@@ -1,8 +1,9 @@
 #include "HTTPResponse.hpp"
 
-HTTPResponse::HTTPResponse() : _version(HTTP_VERSION), keepAlive(false), _contentLength(0)
+HTTPResponse::HTTPResponse() : _version(HTTP_VERSION), _statusCode(STATUS_200), keepAlive(true), _contentLength(0)
 {
 	setStatusMessageMap();
+	setStatusMessage(_statusMessageMap[_statusCode]);
 }
 
 HTTPResponse::~HTTPResponse()
@@ -98,7 +99,12 @@ void HTTPResponse::setBody(const std::string &body)
 	this->_body = body;
 }
 
-// TODO : 初期化
+void SetBodyAll(void)
+{
+
+}
+
+
 void HTTPResponse::setStatusMessageMap(void)
 {
 	_statusMessageMap[STATUS_100] = "Continue";
@@ -177,4 +183,74 @@ std::string HTTPResponse::getDateTimestamp(void) const
 	std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", gmt);
 	ret = buf;
 	return ret;
+}
+
+void HTTPResponse::makeGetResponseBody(HTTPRequest &request)
+{
+	std::string responseMessage;
+	std::string path = request.getUri();
+	std::ifstream ifs;
+	// TODO : configの設定によって、pathを変更する
+	ifs.open("./www" + path);
+	if (!ifs)
+	{
+		// TODO : 404 Not Found
+		responseMessage = "HTTP/1.1 404 Not Found\r\n";
+	}
+	else
+	{
+		std::string line;
+		while (getline(ifs, line))
+		{
+			_body += line;
+			_body += CRLF;
+		}
+		_body += CRLF;
+	}
+	ifs.close();
+}
+
+void HTTPResponse::makePostResponseBody(HTTPRequest &request)
+{
+	std::string responseMessage;
+	std::string path = request.getUri();
+}
+
+void HTTPResponse::makeDeleteResponseBody(HTTPRequest &request)
+{
+	std::string responseMessage;
+	std::string path = request.getUri();
+}
+
+std::string HTTPResponse::makeResponseMessage(HTTPRequest &request)
+{
+	std::ifstream ifs;
+	std::string responseMessage;
+	std::string method = request.getMethod();
+	if (method == "GET")
+		makeGetResponseBody(request);
+	else if (method == "POST")
+		makePostResponseBody(request);
+	else if (method == "DELETE")
+		makeDeleteResponseBody(request);
+	else
+		responseMessage = "HTTP/1.1 501 Not Implemented\r\n";
+	// TODO : 構造の見直し
+	setStatusLine();
+	if (keepAlive)
+		setHeader("Connection", "keep-alive");
+	else
+		setHeader("Connection", "close");
+	setHeader("Date", getDateTimestamp());
+	setHeader("Server", SERVER_NAME);
+	setContentLength(_body.size());
+	setHeader("Content-Length", std::to_string(_contentLength));
+	responseMessage += _statusLine;
+	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
+	{
+		responseMessage += it->first + ": " + it->second + CRLF;
+	}
+	responseMessage += CRLF;
+	responseMessage += _body;
+	return responseMessage;
 }
