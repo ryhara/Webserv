@@ -53,6 +53,7 @@ clean :
 
 fclean : clean
 	$(RM) $(NAME)
+	$(RM) a.out
 
 re : fclean all
 
@@ -60,14 +61,16 @@ test : all
 	./$(NAME) ./config/test.conf
 
 func_test :
-	g++ -o a.out ./tests/*_test.cpp $(SRCS) $(SRCDIR)/test.cpp $(INC) -pthread -lgtest_main -lgtest -std=c++14
+	g++ -o a.out ./tests/*_test.cpp $(SRCS) $(INC) -pthread -lgtest_main -lgtest -std=c++14
 	@./a.out
 
-check_cfunc :
-	@chmod +x ./tests/check_cfunctions.sh
-	@./tests/check_cfunctions.sh ./$(NAME)
-# nm -u $(NAME) | grep "^_[a-z] | sed 's/^_//g'
-# @echo "使用していない関数も含まれるので注意"
+invalid_test :
+	@chmod +x ./tests/invalid_conf_test.sh
+	./tests/invalid_conf_test.sh ./config/invalid
+
+use_cfunc :
+	nm -u $(NAME) | grep "^_[a-z]"
+	@echo "使用していない関数も含まれるので注意"
 
 debug : CXXFLAGS += -D DEBUG -fsanitize=address
 debug : re

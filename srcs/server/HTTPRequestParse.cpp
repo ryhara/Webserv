@@ -30,7 +30,8 @@ std::vector<std::string> HTTPRequestParse::split(std::string str, char del)
 
 	while (getline(ss, tmp, del))
 	{
-		result.push_back(tmp);
+		if (!tmp.empty())
+			result.push_back(tmp);
 	}
 	return (result);
 }
@@ -48,7 +49,8 @@ std::vector<std::string> HTTPRequestParse::split(std::string str, std::string de
 	return (result);
 }
 
-
+// TODO : parse失敗時にはexitではなく、例外を投げる（ステータスコード400など）、プログラム的なエラーはexit
+// TODO : https通信の場合は、parseできないので、例外を投げる
 void HTTPRequestParse::parse(char *buffer)
 {
 	std::string line;
@@ -88,7 +90,6 @@ void HTTPRequestParse::readHeaders(std::stringstream &ss)
 	}
 }
 
-// TODO : /cgi/index.html -> /cgi/ みたいにlocationを探す
 void HTTPRequestParse::searchLocation(void)
 {
 	std::string uri = this->_request.getUri();
@@ -98,7 +99,12 @@ void HTTPRequestParse::searchLocation(void)
 		return ;
 	}
 	std::vector<std::string> uri_split = split(uri, '/');
-	std::string location = uri_split[1];
+	if (uri_split.size() < 2)
+	{
+		this->_request.setLocation("/");
+		return ;
+	}
+	std::string location = uri_split[0];
 	location = "/" + location + "/";
 	this->_request.setLocation(location);
 }
