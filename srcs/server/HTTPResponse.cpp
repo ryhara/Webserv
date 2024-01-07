@@ -203,9 +203,9 @@ void HTTPResponse::makeGetResponseBody(HTTPRequest &request)
 		while (getline(ifs, line))
 		{
 			_body += line;
-			_body += CRLF;
+			if (ifs.peek() != EOF)
+				_body += CRLF;
 		}
-		_body += CRLF;
 	}
 	ifs.close();
 }

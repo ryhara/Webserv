@@ -46,6 +46,5 @@ TEST(HTTPResponseTest, makeResponseMessageTest) {
 	HTTPResponse response;
 	std::string responseMessage = response.makeResponseMessage(request);
 	removeDate(responseMessage);
-
 	EXPECT_EQ(responseMessage, answer);
 }

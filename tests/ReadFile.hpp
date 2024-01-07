@@ -21,7 +21,8 @@ class ReadFile {
 				std::string line;
 				getline(ifs, line);
 				_body += line;
-				_body += CRLF;
+				if (ifs.peek() != EOF)
+					_body += CRLF;
 			}
 			ifs.close();
 		};
