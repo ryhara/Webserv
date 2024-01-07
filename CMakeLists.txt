@@ -25,7 +25,7 @@ list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/srcs/server/Server.cpp")
 list(REMOVE_ITEM SOURCES "${PROJECT_SOURCE_DIR}/srcs/server/Kqueue.cpp")
 file(GLOB TEST_FILES "${PROJECT_SOURCE_DIR}/tests/*_test.cpp") # テストファイルの指定
 # ファイルをビルドディレクトリにコピーする
-file(COPY ${PROJECT_SOURCE_DIR}/www/* DESTINATION ${CMAKE_BINARY_DIR}/home/runner/work/Webserv/Webserv/build/www/)
+file(COPY ${PROJECT_SOURCE_DIR}/www/ DESTINATION ${CMAKE_BINARY_DIR}/www/)
 
 
 enable_testing()
