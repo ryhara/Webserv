@@ -222,6 +222,7 @@ void HTTPResponse::makeDeleteResponseBody(HTTPRequest &request)
 	std::string path = request.getUri();
 }
 
+// https://developer.mozilla.org/ja/docs/Web/HTTP/Methods/DELETE
 std::string HTTPResponse::makeResponseMessage(HTTPRequest &request)
 {
 	std::ifstream ifs;
