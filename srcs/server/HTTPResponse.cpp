@@ -194,8 +194,16 @@ void HTTPResponse::makeGetResponseBody(HTTPRequest &request)
 	ifs.open("./www" + path);
 	if (!ifs)
 	{
-		// TODO : 404 Not Found
-		responseMessage = "HTTP/1.1 404 Not Found\r\n";
+		std::ifstream ifs;
+		ifs.open("./www/error_page/404.html");
+		std::string line;
+		while (getline(ifs, line))
+		{
+			_body += line;
+			if (ifs.peek() != EOF)
+				_body += CRLF;
+		}
+		ifs.close();
 	}
 	else
 	{
