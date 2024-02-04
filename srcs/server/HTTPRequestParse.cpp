@@ -71,7 +71,7 @@ void HTTPRequestParse::readRequestLine(std::string &line)
 {
 	std::vector<std::string> request_line = split(line, ' ');
 	if (request_line.size() != 3)
-		log_exit("request_line.size() != 3", __LINE__, __FILE__);
+		log_exit("request_line.size() != 3", __LINE__, __FILE__, errno);
 	this->_request.setMethod(request_line[0]);
 	this->_request.setUri(request_line[1]);
 	this->_request.setVersion(request_line[2]);
