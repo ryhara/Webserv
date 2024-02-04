@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <string>
+#include <cstring>
 #include <fcntl.h>
 
 void	*ft_memset(void *s, int c, size_t n);
