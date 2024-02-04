@@ -99,9 +99,18 @@ void HTTPResponse::setBody(const std::string &body)
 	this->_body = body;
 }
 
-void SetBodyAll(void)
-{
 
+// TODO : accessやstatでファイルの存在を確認したあとファイルパスを渡して、openするようにする
+void HTTPResponse::makeFileBody(std::ifstream &ifs)
+{
+	std::string line;
+		while (getline(ifs, line))
+		{
+			_body += line;
+			if (ifs.peek() != EOF)
+				_body += CRLF;
+		}
+		ifs.close();
 }
 
 
@@ -185,51 +194,34 @@ std::string HTTPResponse::getDateTimestamp(void) const
 	return ret;
 }
 
-void HTTPResponse::makeGetResponseBody(HTTPRequest &request)
+bool HTTPResponse::isFileExist(const std::string &path , struct stat *s_stat)
 {
-	std::string responseMessage;
-	std::string path = request.getUri();
-	std::ifstream ifs;
-	// TODO : configの設定によって、pathを変更する
-	ifs.open("./www" + path);
-	if (!ifs)
-	{
-		std::ifstream ifs;
-		ifs.open("./www/error_page/404.html");
-		std::string line;
-		while (getline(ifs, line))
-		{
-			_body += line;
-			if (ifs.peek() != EOF)
-				_body += CRLF;
-		}
-		ifs.close();
+	if (stat(path.c_str(), s_stat) == 0) {
+		return true;
 	}
-	else
-	{
-		std::string line;
-		while (getline(ifs, line))
-		{
-			_body += line;
-			if (ifs.peek() != EOF)
-				_body += CRLF;
-		}
-	}
-	ifs.close();
+	return false;
 }
 
-void HTTPResponse::makePostResponseBody(HTTPRequest &request)
+bool HTTPResponse::isDirectory(struct stat &stat)
 {
-	std::string responseMessage;
-	std::string path = request.getUri();
+	return S_ISDIR(stat.st_mode);
 }
 
-void HTTPResponse::makeDeleteResponseBody(HTTPRequest &request)
+bool HTTPResponse::isFile(struct stat &stat)
 {
-	std::string responseMessage;
-	std::string path = request.getUri();
+	return S_ISREG(stat.st_mode);
 }
 
+// TODO : 要求されていることがFile, CGI, autoindex, redirectのどれかを判定する
+void selectResponse(HTTPRequest &request)
+{
+
+}
+
+// TODO : handleFileRequest, handleCGIRequest, handleAutoindexRequest, handleRedirectRequestを作成
+
+
+// TODO : これはfile限定
 std::string HTTPResponse::makeResponseMessage(HTTPRequest &request)
 {
 	std::ifstream ifs;
@@ -254,8 +246,7 @@ std::string HTTPResponse::makeResponseMessage(HTTPRequest &request)
 	setContentLength(_body.size());
 	setHeader("Content-Length", std::to_string(_contentLength));
 	responseMessage += _statusLine;
-	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
-	{
+	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++) {
 		responseMessage += it->first + ": " + it->second + CRLF;
 	}
 	responseMessage += CRLF;

@@ -6,6 +6,8 @@
 #include <fstream>
 #include <map>
 #include <ctime>
+#include <sys/stat.h>
+#include <cstdio>
 
 #include "Webserv.hpp"
 #include "HTTPStatusCode.hpp"
@@ -55,12 +57,17 @@ class HTTPResponse
 		const std::string &getBody() const;
 		const std::string &getStatusMessageFromMap(const HTTPStatusCode &statusCode) const;
 
-		std::string getDateTimestamp(void) const;
 		std::string makeResponseMessage(HTTPRequest &request);
+		void makeFileBody(std::ifstream &ifs);
 		void makeGetResponseBody(HTTPRequest &request);
 		void makePostResponseBody(HTTPRequest &request);
 		void makeDeleteResponseBody(HTTPRequest &request);
 		std::string makeResponseStatusLine(void);
+
+		std::string getDateTimestamp(void) const;
+		bool isFileExist(const std::string &path, struct stat *stat);
+		bool isDirectory(struct stat &stat);
+		bool isFile(struct stat &stat);
 
 };
 
