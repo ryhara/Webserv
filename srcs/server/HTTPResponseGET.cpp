@@ -8,7 +8,7 @@ void HTTPResponse::makeGetResponseBody(HTTPRequest &request)
 		path = path.substr(0, found);
 	}
 	// TODO : configの設定によって、pathを変更する ./www以外にも対応できるように
-	if (isFileExist("./www/" + path, request.getStat()) == false) {
+	if (isFileExist("./www" + path, request.getStat()) == false) {
 		std::ifstream ifs;
 		// TODO : error_pageのパスをconfigから取得する
 		makeFileBody(std::string("./www/error_page/404.html"));
