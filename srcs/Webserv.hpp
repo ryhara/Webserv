@@ -11,6 +11,21 @@
 # define HTTP_VERSION	"HTTP/1.1"
 # define DEFAULT_CONFIG_FILE "./config/default.conf"
 
+enum methods
+{
+	GET,
+	POST,
+	DELETE
+};
+
+enum response_mode
+{
+	FILEMODE,
+	CGI,
+	AUTOINDEX,
+	REDIRECT
+};
+
 # define DISALLOW_COPY_AND_ASSIGN(ClassName) \
 	ClassName(const ClassName &); \
 	ClassName &operator=(const ClassName &)

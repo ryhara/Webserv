@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <sys/stat.h>
+#include "Webserv.hpp"
 
 class HTTPRequest
 {
@@ -15,6 +16,10 @@ class HTTPRequest
 		std::string _body; // TODO : POSTのときなど、使い方調査
 		std::string _location;
 		struct stat _stat;
+		enum response_mode _mode;
+
+		DISALLOW_COPY_AND_ASSIGN(HTTPRequest);
+
 	public :
 		HTTPRequest(void);
 		~HTTPRequest(void);
@@ -29,6 +34,7 @@ class HTTPRequest
 		std::string		&getBody(void) const;
 		std::string		&getLocation(void) const;
 		struct stat		*getStat(void) const;
+		enum response_mode getMode(void) const;
 		// setter
 		void			setMethod(const std::string &method);
 		void			setUri(const std::string &uri);
@@ -37,5 +43,6 @@ class HTTPRequest
 		void			setBody(const std::string &body);
 		void			setLocation(const std::string &location);
 		void 			setStat(const struct stat &stat);
+		void			setMode(const enum response_mode &mode);
 
 };

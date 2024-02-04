@@ -31,6 +31,7 @@ class HTTPResponse
 		std::map<std::string, std::string> _headers;
 		std::string _body;
 		std::map<HTTPStatusCode, std::string> _statusMessageMap;
+		DISALLOW_COPY_AND_ASSIGN(HTTPResponse);
 	public :
 		HTTPResponse();
 		~HTTPResponse();

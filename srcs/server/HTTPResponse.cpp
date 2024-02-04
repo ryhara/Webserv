@@ -213,10 +213,10 @@ bool HTTPResponse::isFile(struct stat &stat)
 }
 
 // TODO : 要求されていることがFile, CGI, autoindex, redirectのどれかを判定する
-void selectResponse(HTTPRequest &request)
-{
+// void selectResponse(HTTPRequest &request)
+// {
 
-}
+// }
 
 // TODO : handleFileRequest, handleCGIRequest, handleAutoindexRequest, handleRedirectRequestを作成
 
