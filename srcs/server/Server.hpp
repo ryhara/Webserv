@@ -15,7 +15,6 @@
 #include <netdb.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <sys/event.h>
 
 #include "Webserv.hpp"
 #include "HTTPRequestParse.hpp"
