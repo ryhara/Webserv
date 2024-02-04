@@ -2,9 +2,10 @@
 
 Server::Server(void)
 {
-	ft_memset(&_hints, 0, sizeof(_hints));
+	ft_memset(&_hints, 0, sizeof(addrinfo));
 	_res = NULL;
-	ft_memset(_buffer, 0, sizeof(_buffer));
+	ft_memset(_buffer, 0, sizeof(char) * BUFFER_SIZE);
+	ft_memset(&fds_, 0, sizeof(struct pollfd) * (MAX_CLIENTS + 1));
 }
 
 Server::~Server(void)
@@ -24,7 +25,7 @@ void Server::initServerAddr(void)
 	_hints.ai_socktype = SOCK_STREAM;
 	_hints.ai_flags = AI_PASSIVE;
 	if (getaddrinfo(NULL, SERVER_PORT_STR, &_hints, &_res) != 0)
-		log_exit("getaddrinfo", __LINE__, __FILE__);
+		log_exit("getaddrinfo", __LINE__, __FILE__, errno);
 }
 
 void Server::createSocket(void)
@@ -32,9 +33,14 @@ void Server::createSocket(void)
 	int option_value = 1; // setsockopt
 
 	_server_fd = socket(_res->ai_family, _res->ai_socktype, _res->ai_protocol);
+	setNonBlockingFd(_server_fd);
 	if (_server_fd < 0)
-		log_exit("socket", __LINE__, __FILE__);
-	setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&option_value, sizeof(option_value));
+		log_exit("socket", __LINE__, __FILE__, errno);
+	if (setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&option_value, sizeof(option_value)) < 0)
+	{
+		close(_server_fd);
+		log_exit("setsockopt", __LINE__, __FILE__, errno);
+	}
 }
 
 void Server::bindSocket(void)
@@ -42,7 +48,7 @@ void Server::bindSocket(void)
 	if (bind(_server_fd, _res->ai_addr, _res->ai_addrlen) < 0)
 	{
 		close(_server_fd);
-		log_exit("bind", __LINE__, __FILE__);
+		log_exit("bind", __LINE__, __FILE__, errno);
 	}
 	freeaddrinfo(_res);
 }
@@ -52,7 +58,7 @@ void Server::listenSocket(void)
 	if (listen(_server_fd, QUEUE_LENGTH) < 0)
 	{
 		close(_server_fd);
-		log_exit("listen", __LINE__, __FILE__);
+		log_exit("listen", __LINE__, __FILE__, errno);
 	}
 }
 
@@ -64,10 +70,11 @@ int Server::acceptSocket(void)
 
 	client_addr_len = sizeof(client_addr);
 	client_fd = accept(_server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
+	setNonBlockingFd(client_fd);
 	if (client_fd < 0)
 	{
 		close(_server_fd);
-		log_exit("accept", __LINE__, __FILE__);
+		log_exit("accept", __LINE__, __FILE__, errno);
 	}
 	return client_fd;
 }
@@ -81,7 +88,8 @@ void Server::childProcess(int client_fd)
 	if (n < 0)
 	{
 		close(client_fd);
-		log_exit("recv", __LINE__, __FILE__);
+		close(_server_fd);
+		log_exit("recv", __LINE__, __FILE__, errno);
 	}
 	_buffer[n] = '\0';
 	#if DEBUG
@@ -104,74 +112,55 @@ void Server::childProcess(int client_fd)
 	if (send_n < 0)
 	{
 		close(client_fd);
-		log_exit("send", __LINE__, __FILE__);
+		close(_server_fd);
+		log_exit("send", __LINE__, __FILE__, errno);
 	}
-	close(client_fd);
 	std::cout << "================= one request end =================" << std::endl;
 }
 
-void Server::parentProcess(pid_t pid)
+void Server::pollInit(void)
 {
-	int status;
-
-	if (waitpid(pid, &status, 0) < 0)
-	{
-		close(_server_fd);
-		log_exit("waitpid", __LINE__, __FILE__);
+	this->fds_[0].fd = this->_server_fd;
+	this->fds_[0].events = POLLIN;
+	for (int i = 1; i <= MAX_CLIENTS; ++i) {
+		this->fds_[i].fd = -1;
+		this->fds_[i].events = POLLIN;
 	}
 }
 
 void Server::mainLoop(void)
 {
-	int client_fd, kq, event_number;
-	struct kevent change_event;
-	struct kevent events[MAX_EVENTS];
+	int client_fd;
 
-	// TODO : kqueueを分割, childProcess, ParentProcessを修正
-	kq = kqueue();
-	if (kq < 0)
-	{
-		close(_server_fd);
-		log_exit("kqueue", __LINE__, __FILE__);
-	}
-
-	EV_SET(&change_event, _server_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-	if (kevent(kq, &change_event, 1, NULL, 0, NULL) < 0)
-	{
-		close(_server_fd);
-		log_exit("kevent", __LINE__, __FILE__);
-	}
-
+	pollInit();
 	for (;;) {
-		event_number = kevent(kq, NULL, 0, events, MAX_EVENTS, NULL);
-		if (event_number < 0)
-		{
-			close(_server_fd);
-			log_exit("kevent", __LINE__, __FILE__);
+		int	result = poll(fds_, MAX_CLIENTS + 1, -1);
+		if (result == -1) {
+			log_exit("poll", __LINE__, __FILE__, errno);
 		}
-		std::cout << "event_number : " << event_number << std::endl;
-		for (int i = 0; i < event_number; i++) {
-			if (events[i].flags & EV_ERROR) {
-				close(events[i].ident);
-				log_exit("EV_ERROR", __LINE__, __FILE__);
-			} else if (events[i].filter == EVFILT_READ) {
-				// TODO : 上下のif文の条件を調べる, 下のif文なくても動く
-				// if (static_cast<int>(events[i].ident) == _server_fd) {
-					std::cout << "events[" << i << "].ident : " << events[i].ident << std::endl;
-					std::cout << "_server_fd : " << _server_fd << std::endl;
-					client_fd = acceptSocket();
-					EV_SET(&change_event, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-					if (kevent(kq, &change_event, 1, NULL, 0, NULL) < 0)
-					{
-						close(_server_fd);
-						log_exit("kevent", __LINE__, __FILE__);
-					}
-					childProcess(client_fd);
-				// }
+		else if (result == 0) {
+			// timeout
+			continue;
+		}
+		if (fds_[0].revents & (POLLIN | POLLERR)) {
+			client_fd = acceptSocket();
+			for (int i = 1; i <= MAX_CLIENTS; ++i) {
+				if (fds_[i].fd == -1) {
+					fds_[i].fd = client_fd;
+					fds_[i].events = POLLIN;
+					break;
+				}
+			}
+		}
+		for (int i = 1; i <= MAX_CLIENTS; ++i) {
+			if (fds_[i].fd != -1 && (fds_[i].revents & (POLLIN | POLLERR))) {
+				std::cout << "i : " << i << " / client_fd : " << client_fd << std::endl;
+				childProcess(fds_[i].fd);
+				close(client_fd);
+				fds_[i].fd = -1;
 			}
 		}
 	}
-	close(kq);
 }
 
 void Server::start(void)

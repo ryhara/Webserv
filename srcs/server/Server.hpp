@@ -28,6 +28,7 @@
 # define QUEUE_LENGTH			5
 # define MAX_EVENTS				10
 # define BUFFER_SIZE			8192
+# define MAX_CLIENTS			6
 
 // TODO : 全てにおいてコピーコンストラクタと代入演算子を禁止する
 // TODO : vectorやmapのメモリを開放する
@@ -42,6 +43,7 @@ class Server
 		int				_server_fd;
 		struct addrinfo _hints;
 		struct addrinfo *_res;
+		struct pollfd				fds_[MAX_CLIENTS + 1];
 		char			_buffer[BUFFER_SIZE];
 		HTTPRequest		_request;
 		Config			_config;
@@ -51,6 +53,7 @@ class Server
 		void	createSocket(void);
 		void	bindSocket(void);
 		void	listenSocket(void);
+		void	pollInit(void);
 		void	mainLoop(void);
 		int		acceptSocket(void);
 		void	childProcess(int client_fd);
