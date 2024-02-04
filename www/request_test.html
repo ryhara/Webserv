@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>HTTP Server Test</title>
-</head>
-<body>
+  </head>
+  <body>
     <h2>POST Request Test</h2>
-    <form action="http://yourserver.com/post" method="post">
-        <label for="data">Data:</label>
-        <input type="text" id="data" name="data"><br><br>
-        <input type="submit" value="Submit">
+    <form action="http://localhost:4242" method="post">
+      <label for="data">Data:</label>
+      <input type="text" id="data" name="data" /><br /><br />
+      <input type="submit" value="Submit" />
     </form>
 
     <h2>GET Request Test</h2>
-    <p><a href="http://yourserver.com/get?param1=value1&param2=value2">Send GET Request</a></p>
-</body>
+    <p>
+      <a href="http://localhost:4242/index.html?param1=value1&param2=value2"
+        >Send GET Request</a
+      >
+    </p>
+  </body>
 </html>
