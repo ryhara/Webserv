@@ -11,20 +11,13 @@ void HTTPResponse::makeGetResponseBody(HTTPRequest &request)
 	if (isFileExist("./www/" + path, request.getStat()) == false) {
 		std::ifstream ifs;
 		// TODO : error_pageのパスをconfigから取得する
-		ifs.open("./www/error_page/404.html");
-		makeFileBody(ifs);
+		makeFileBody(std::string("./www/error_page/404.html"));
 	} else if (isFile(*request.getStat())) {
-		std::ifstream ifs;
-		ifs.open("./www" + path);
-		makeFileBody(ifs);
+		makeFileBody("./www" + path);
 	} else if (isDirectory(*request.getStat())) {
 		// TODO : directoryの場合,configで設定されたファイルを返す, 今は必ずindex.htmlを返す
-		std::ifstream ifs;
-		ifs.open("./www" + path + "/index.html");
-		makeFileBody(ifs);
+		makeFileBody(std::string("./www" + path + "/index.html"));
 	} else {
-		std::ifstream ifs;
-		ifs.open("./www/error_page/404.html");
-		makeFileBody(ifs);
+		makeFileBody("./www/error_page/404.html");
 	}
 }

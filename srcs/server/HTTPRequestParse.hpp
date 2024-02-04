@@ -27,6 +27,7 @@ class HTTPRequestParse
 		void readRequestLine(std::string &line);
 		void readHeaders(std::stringstream &ss);
 		void searchLocation(void);
+		void searchRequestMode(void);
 		int getlineWithCRLF(std::stringstream &ss, std::string &line);
 };
 

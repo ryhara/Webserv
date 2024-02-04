@@ -15,15 +15,16 @@ enum methods
 {
 	GET,
 	POST,
-	DELETE
+	DELETE,
+	OTHERS
 };
 
 enum response_mode
 {
-	FILEMODE,
+	NORMAL,
 	CGI,
 	AUTOINDEX,
-	REDIRECT
+	REDIRECT,
 };
 
 # define DISALLOW_COPY_AND_ASSIGN(ClassName) \

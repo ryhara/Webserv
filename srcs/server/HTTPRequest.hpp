@@ -43,6 +43,6 @@ class HTTPRequest
 		void			setBody(const std::string &body);
 		void			setLocation(const std::string &location);
 		void 			setStat(const struct stat &stat);
-		void			setMode(const enum response_mode &mode);
+		void			setMode(const enum response_mode mode);
 
 };

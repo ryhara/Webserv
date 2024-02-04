@@ -58,6 +58,11 @@ const std::string &HTTPResponse::getStatusMessageFromMap(const HTTPStatusCode &s
 	return this->_statusMessageMap.at(statusCode);
 }
 
+const std::string &HTTPResponse::getResponseMessage() const
+{
+	return this->_responseMessage;
+}
+
 // setter
 void HTTPResponse::setVersion(const std::string &version)
 {
@@ -99,18 +104,18 @@ void HTTPResponse::setBody(const std::string &body)
 	this->_body = body;
 }
 
-
-// TODO : accessやstatでファイルの存在を確認したあとファイルパスを渡して、openするようにする
-void HTTPResponse::makeFileBody(std::ifstream &ifs)
+void HTTPResponse::makeFileBody(const std::string  &path)
 {
+	std::ifstream ifs;
 	std::string line;
-		while (getline(ifs, line))
-		{
-			_body += line;
-			if (ifs.peek() != EOF)
-				_body += CRLF;
-		}
-		ifs.close();
+	ifs.open(path.c_str());
+	while (getline(ifs, line))
+	{
+		_body += line;
+		if (ifs.peek() != EOF)
+			_body += CRLF;
+	}
+	ifs.close();
 }
 
 
@@ -212,16 +217,7 @@ bool HTTPResponse::isFile(struct stat &stat)
 	return S_ISREG(stat.st_mode);
 }
 
-// TODO : 要求されていることがFile, CGI, autoindex, redirectのどれかを判定する
-// void selectResponse(HTTPRequest &request)
-// {
-
-// }
-
-// TODO : handleFileRequest, handleCGIRequest, handleAutoindexRequest, handleRedirectRequestを作成
-
-
-// TODO : これはfile限定
+// TODO : handleNormalRequestに変更済み、頃合いを見て削除
 std::string HTTPResponse::makeResponseMessage(HTTPRequest &request)
 {
 	std::ifstream ifs;
@@ -235,7 +231,6 @@ std::string HTTPResponse::makeResponseMessage(HTTPRequest &request)
 		makeDeleteResponseBody(request);
 	else
 		responseMessage = "HTTP/1.1 501 Not Implemented\r\n";
-	// TODO : 構造の見直し
 	setStatusLine();
 	if (keepAlive)
 		setHeader("Connection", "keep-alive");

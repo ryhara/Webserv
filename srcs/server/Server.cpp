@@ -94,7 +94,8 @@ void Server::childProcess(int client_fd)
 	request_parse.parse(_buffer);
 	// TODO : responseを正しく実装する （一時的）
 	HTTPResponse response;
-	std::string responseMessage = response.makeResponseMessage(request);
+	response.selectResponse(request);
+	std::string responseMessage = response.getResponseMessage();
 	#if DEBUG
 		std::cout << "##### [ DEBUG ] responseMessage ####" << std::endl << responseMessage << std::endl << "##########" << std::endl;
 	#endif

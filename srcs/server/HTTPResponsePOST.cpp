@@ -5,7 +5,6 @@
 // TODO : POSTはとりあえずファイルのアップロードとCGIに対応すればよいかもしれない
 void HTTPResponse::makePostResponseBody(HTTPRequest &request)
 {
-	std::string responseMessage;
 	std::string path = request.getUri();
-	responseMessage = "HTTP/1.1 200 OK\r\n";
+
 }

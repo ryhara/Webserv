@@ -34,7 +34,7 @@ void removeDate(std::string& str) {
     }
 }
 
-TEST(HTTPResponseTest, makeResponseMessageTest) {
+TEST(HTTPResponseTEST, handleNormalRequestTest) {
 	ReadFile readFile("./www/cgi/index.html");
 	std::string statusLine = "HTTP/1.1 200 OK\r\n";
 	std::string body = readFile.getBody();
@@ -44,7 +44,9 @@ TEST(HTTPResponseTest, makeResponseMessageTest) {
 	setRequest();
 
 	HTTPResponse response;
-	std::string responseMessage = response.makeResponseMessage(request);
+	std::string responseMessage;
+	response.handleNormalRequest(request);
+	responseMessage = response.getResponseMessage();
 	removeDate(responseMessage);
 	EXPECT_EQ(responseMessage, answer);
 }

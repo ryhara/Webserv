@@ -4,7 +4,7 @@ SRC = main.cpp
 CONFIG = ConfigParse.cpp Config.cpp ServerConfig.cpp
 
 SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp \
-	HTTPResponseGET.cpp HTTPResponsePOST.cpp  HTTPResponseDELETE.cpp
+	HTTPResponseGET.cpp HTTPResponsePOST.cpp  HTTPResponseDELETE.cpp HTTPResponseHandle.cpp
 
 UTILS = ft_memset.cpp error.cpp
 
