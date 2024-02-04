@@ -7,6 +7,7 @@
 
 #include "HTTPRequest.hpp"
 #include "utils.hpp"
+#include "Webserv.hpp"
 
 class HTTPRequest;
 
@@ -14,6 +15,7 @@ class HTTPRequestParse
 {
 	private:
 		HTTPRequest &_request;
+		DISALLOW_COPY_AND_ASSIGN(HTTPRequestParse);
 	public:
 		HTTPRequestParse(HTTPRequest &request);
 		~HTTPRequestParse(void);
@@ -25,6 +27,7 @@ class HTTPRequestParse
 		void readRequestLine(std::string &line);
 		void readHeaders(std::stringstream &ss);
 		void searchLocation(void);
+		void searchRequestMode(void);
 		int getlineWithCRLF(std::stringstream &ss, std::string &line);
 };
 

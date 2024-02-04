@@ -58,6 +58,11 @@ const std::string &HTTPResponse::getStatusMessageFromMap(const HTTPStatusCode &s
 	return this->_statusMessageMap.at(statusCode);
 }
 
+const std::string &HTTPResponse::getResponseMessage() const
+{
+	return this->_responseMessage;
+}
+
 // setter
 void HTTPResponse::setVersion(const std::string &version)
 {
@@ -99,9 +104,18 @@ void HTTPResponse::setBody(const std::string &body)
 	this->_body = body;
 }
 
-void SetBodyAll(void)
+void HTTPResponse::makeFileBody(const std::string  &path)
 {
-
+	std::ifstream ifs;
+	std::string line;
+	ifs.open(path.c_str());
+	while (getline(ifs, line))
+	{
+		_body += line;
+		if (ifs.peek() != EOF)
+			_body += CRLF;
+	}
+	ifs.close();
 }
 
 
@@ -185,44 +199,25 @@ std::string HTTPResponse::getDateTimestamp(void) const
 	return ret;
 }
 
-void HTTPResponse::makeGetResponseBody(HTTPRequest &request)
+bool HTTPResponse::isFileExist(const std::string &path , struct stat *s_stat)
 {
-	std::string responseMessage;
-	std::string path = request.getUri();
-	std::ifstream ifs;
-	// TODO : configの設定によって、pathを変更する
-	ifs.open("./www" + path);
-	if (!ifs)
-	{
-		// TODO : 404 Not Found
-		responseMessage = "HTTP/1.1 404 Not Found\r\n";
+	if (stat(path.c_str(), s_stat) == 0) {
+		return true;
 	}
-	else
-	{
-		std::string line;
-		while (getline(ifs, line))
-		{
-			_body += line;
-			if (ifs.peek() != EOF)
-				_body += CRLF;
-		}
-	}
-	ifs.close();
+	return false;
 }
 
-void HTTPResponse::makePostResponseBody(HTTPRequest &request)
+bool HTTPResponse::isDirectory(struct stat &stat)
 {
-	std::string responseMessage;
-	std::string path = request.getUri();
+	return S_ISDIR(stat.st_mode);
 }
 
-void HTTPResponse::makeDeleteResponseBody(HTTPRequest &request)
+bool HTTPResponse::isFile(struct stat &stat)
 {
-	std::string responseMessage;
-	std::string path = request.getUri();
+	return S_ISREG(stat.st_mode);
 }
 
-// https://developer.mozilla.org/ja/docs/Web/HTTP/Methods/DELETE
+// TODO : handleNormalRequestに変更済み、頃合いを見て削除
 std::string HTTPResponse::makeResponseMessage(HTTPRequest &request)
 {
 	std::ifstream ifs;
@@ -236,7 +231,6 @@ std::string HTTPResponse::makeResponseMessage(HTTPRequest &request)
 		makeDeleteResponseBody(request);
 	else
 		responseMessage = "HTTP/1.1 501 Not Implemented\r\n";
-	// TODO : 構造の見直し
 	setStatusLine();
 	if (keepAlive)
 		setHeader("Connection", "keep-alive");
@@ -247,8 +241,7 @@ std::string HTTPResponse::makeResponseMessage(HTTPRequest &request)
 	setContentLength(_body.size());
 	setHeader("Content-Length", std::to_string(_contentLength));
 	responseMessage += _statusLine;
-	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++)
-	{
+	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++) {
 		responseMessage += it->first + ": " + it->second + CRLF;
 	}
 	responseMessage += CRLF;

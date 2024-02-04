@@ -50,6 +50,16 @@ std::string		&HTTPRequest::getLocation(void) const
 	return (const_cast<std::string &>(this->_location));
 }
 
+struct stat		*HTTPRequest::getStat(void) const
+{
+	return (const_cast<struct stat *>(&this->_stat));
+}
+
+enum response_mode HTTPRequest::getMode(void) const
+{
+	return (this->_mode);
+}
+
 // setter
 void			HTTPRequest::setMethod(const std::string &method)
 {
@@ -79,6 +89,16 @@ void			HTTPRequest::setBody(const std::string &body)
 void			HTTPRequest::setLocation(const std::string &location)
 {
 	this->_location = location;
+}
+
+void 			HTTPRequest::setStat(const struct stat &stat)
+{
+	this->_stat = stat;
+}
+
+void			HTTPRequest::setMode(const enum response_mode mode)
+{
+	this->_mode = mode;
 }
 
 void HTTPRequest::print(void)

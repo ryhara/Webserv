@@ -15,7 +15,7 @@ HTTPRequest &HTTPRequestParse::getRequest(void) const
 
 int HTTPRequestParse::getlineWithCRLF(std::stringstream &ss, std::string &line)
 {
-	if (!std::getline(ss, line) && line.empty())
+	if (!std::getline(ss, line))
 		return (0);
 	if (!line.empty() && line[line.size() - 1] == '\r')
 		line.erase(line.size() - 1);
@@ -49,18 +49,22 @@ std::vector<std::string> HTTPRequestParse::split(std::string str, std::string de
 	return (result);
 }
 
-// TODO : parse失敗時にはexitではなく、例外を投げる（ステータスコード400など）、プログラム的なエラーはexit
-// TODO : https通信の場合は、parseできないので、例外を投げる
+// TODO : parse失敗時にはexitではなく、例外を投げる（ステータスコード400など）、プログラム的なエラーはexit,https通信の場合は、parseできないので、例外を投げる
 void HTTPRequestParse::parse(char *buffer)
 {
 	std::string line;
 	std::stringstream bufferStream(buffer);
 
-	if (!getlineWithCRLF(bufferStream, line))
-		log_exit("getline", __LINE__, __FILE__);
+	getlineWithCRLF(bufferStream, line);
+	if (line.empty()) {
+		// TODO : error message
+		return ;
+	}
 	readRequestLine(line);
 	readHeaders(bufferStream);
 	_request.print();
+	bufferStream.clear();
+	bufferStream.str("");
 }
 
 void HTTPRequestParse::readRequestLine(std::string &line)
@@ -72,6 +76,7 @@ void HTTPRequestParse::readRequestLine(std::string &line)
 	this->_request.setUri(request_line[1]);
 	this->_request.setVersion(request_line[2]);
 	searchLocation();
+	searchRequestMode();
 }
 
 void HTTPRequestParse::readHeaders(std::stringstream &ss)
@@ -79,6 +84,7 @@ void HTTPRequestParse::readHeaders(std::stringstream &ss)
 	std::string line;
 	std::pair<std::string, std::string> pair;
 	std::vector<std::string> header;
+	std::string body;
 	while (getlineWithCRLF(ss, line))
 	{
 		if (line.empty())
@@ -88,6 +94,14 @@ void HTTPRequestParse::readHeaders(std::stringstream &ss)
 		pair.second = header[1];
 		this->_request.setHeaders(pair);
 	}
+	while (getlineWithCRLF(ss, line))
+	{
+		if (line.empty())
+			break;
+		body += line;
+	}
+	if (!body.empty())
+		this->_request.setBody(body);
 }
 
 void HTTPRequestParse::searchLocation(void)
@@ -107,4 +121,18 @@ void HTTPRequestParse::searchLocation(void)
 	std::string location = uri_split[0];
 	location = "/" + location + "/";
 	this->_request.setLocation(location);
+}
+
+void HTTPRequestParse::searchRequestMode(void)
+{
+	std::string location = this->_request.getLocation();
+	if (location.compare("/cgi/") == 0) {
+		this->_request.setMode(CGI);
+	} else if (location.compare("/autoindex/") == 0) {
+		this->_request.setMode(AUTOINDEX);
+	} else if (location.compare("/redirect/") == 0) {
+		this->_request.setMode(REDIRECT);
+	} else {
+		this->_request.setMode(NORMAL);
+	}
 }

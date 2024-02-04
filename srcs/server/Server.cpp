@@ -84,14 +84,21 @@ void Server::childProcess(int client_fd)
 		log_exit("recv", __LINE__, __FILE__);
 	}
 	_buffer[n] = '\0';
-	std::cout << "-- request -- " << std::endl;
-	for (int i = 0; i < n; i++)
-		std::cout << _buffer[i];
-	std::cout << "--------------" << std::endl;
+	#if DEBUG
+		std::cout << "#### [ DEBUG ] request ####" << std::endl << _buffer << std::endl << "##########" << std::endl;
+	#endif
+	// std::cout << "-- request -- " << std::endl;
+	// for (int i = 0; i < n; i++)
+	// 	std::cout << _buffer[i];
+	// std::cout << "--------------" << std::endl;
 	request_parse.parse(_buffer);
 	// TODO : responseを正しく実装する （一時的）
 	HTTPResponse response;
-	std::string responseMessage = response.makeResponseMessage(request);
+	response.selectResponse(request);
+	std::string responseMessage = response.getResponseMessage();
+	#if DEBUG
+		std::cout << "##### [ DEBUG ] responseMessage ####" << std::endl << responseMessage << std::endl << "##########" << std::endl;
+	#endif
 	// std::string responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>\r\n";
 	ssize_t send_n = send(client_fd, responseMessage.c_str(), responseMessage.size(), 0);
 	if (send_n < 0)

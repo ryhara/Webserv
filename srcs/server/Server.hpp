@@ -45,6 +45,7 @@ class Server
 		char			_buffer[BUFFER_SIZE];
 		HTTPRequest		_request;
 		Config			_config;
+		DISALLOW_COPY_AND_ASSIGN(Server);
 
 		void	initServerAddr(void);
 		void	createSocket(void);
@@ -54,6 +55,7 @@ class Server
 		int		acceptSocket(void);
 		void	childProcess(int client_fd);
 		void	parentProcess(pid_t pid);
+
 	public:
 		Server(void);
 		~Server(void);
