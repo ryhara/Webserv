@@ -26,7 +26,7 @@ undefined_symbols=($(nm -u "$1" | grep "^_[a-z]" | sed 's/^_//' | tr '\n' ' '))
 for symbol in "${undefined_symbols[@]}"; do
 	found=0
 	for func in "${functions[@]}"; do
-		if [ "$symbol" = "$func" ]; then
+		if [[ "$symbol" = "$func" ]]; then
 			echo -e "\033[32m$symbol\033[0m" # 緑色で表示
 			found=1
 			break
