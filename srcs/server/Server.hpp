@@ -6,15 +6,12 @@
 #include <exception>
 
 #include <sys/socket.h>
-#include <sys/types.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <poll.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <netdb.h>
-#include <sys/wait.h>
-#include <signal.h>
 
 #include "Webserv.hpp"
 #include "HTTPRequestParse.hpp"
