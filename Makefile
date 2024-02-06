@@ -70,8 +70,7 @@ invalid_test :
 	./tests/invalid_conf_test.sh ./config/invalid
 
 use_cfunc :
-	nm -u $(NAME) | grep "^_[a-z]"
-	@echo "使用していない関数も含まれるので注意"
+	./tests/check_cfunctions.sh $(NAME)
 
 debug : CXXFLAGS += -D DEBUG -fsanitize=address
 debug : re

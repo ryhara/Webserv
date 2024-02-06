@@ -1,5 +1,9 @@
 #include "Server.hpp"
 
+// TODO : 複数ポートに対応する
+// ServerSetupクラスを作成し、configのポートの数だけServerクラスを作成する
+// pollは一回よびだして、複数のポートを監視する
+
 Server::Server(void)
 {
 	ft_memset(&_hints, 0, sizeof(addrinfo));
@@ -135,11 +139,12 @@ void Server::mainLoop(void)
 	pollInit();
 	for (;;) {
 		int	result = poll(fds_, MAX_CLIENTS + 1, -1);
-		if (result == -1) {
+		if (result < 0) {
 			log_exit("poll", __LINE__, __FILE__, errno);
 		}
 		else if (result == 0) {
 			// timeout
+			std::cout << "-- poll timeout --" << std::endl;
 			continue;
 		}
 		if (fds_[0].revents & (POLLIN | POLLERR)) {
@@ -156,7 +161,7 @@ void Server::mainLoop(void)
 			if (fds_[i].fd != -1 && (fds_[i].revents & (POLLIN | POLLERR))) {
 				std::cout << "i : " << i << " / client_fd : " << client_fd << std::endl;
 				childProcess(fds_[i].fd);
-				close(client_fd);
+				close(fds_[i].fd);
 				fds_[i].fd = -1;
 			}
 		}
