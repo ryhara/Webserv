@@ -27,9 +27,8 @@
 # define BUFFER_SIZE			8192
 # define MAX_CLIENTS			6
 
-// TODO : 全てにおいてコピーコンストラクタと代入演算子を禁止する
 // TODO : vectorやmapのメモリを開放する
-// TODO : 同時にリクエストを行うテストスクリプトを作成する
+
 # define DISALLOW_COPY_AND_ASSIGN(ClassName) \
 	ClassName(const ClassName &); \
 	ClassName &operator=(const ClassName &)

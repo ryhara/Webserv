@@ -7,6 +7,7 @@
 class ConfigParse {
 	private:
 		Config &_config;
+		DISALLOW_COPY_AND_ASSIGN(ConfigParse);
 	public:
 		ConfigParse(Config &config);
 		~ConfigParse(void);

@@ -81,7 +81,7 @@ void HTTPResponse::setStatusMessage(const std::string &statusMessage)
 
 void HTTPResponse::setStatusLine(void)
 {
-	this->_statusLine = this->_version + SP + std::to_string(this->_statusCode) + SP + this->_statusMessage + CRLF;
+	this->_statusLine = this->_version + SP + ft_stoi(this->_statusCode) + SP + this->_statusMessage + CRLF;
 }
 
 void HTTPResponse::setKeepAlive(const bool &keepAlive)
@@ -239,7 +239,7 @@ std::string HTTPResponse::makeResponseMessage(HTTPRequest &request)
 	setHeader("Date", getDateTimestamp());
 	setHeader("Server", SERVER_NAME);
 	setContentLength(_body.size());
-	setHeader("Content-Length", std::to_string(_contentLength));
+	setHeader("Content-Length", ft_stoi(_contentLength));
 	responseMessage += _statusLine;
 	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++) {
 		responseMessage += it->first + ": " + it->second + CRLF;
