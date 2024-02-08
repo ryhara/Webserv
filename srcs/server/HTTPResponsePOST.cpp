@@ -30,6 +30,5 @@ void HTTPResponse::makePostResponseBody(HTTPRequest &request)
 	}
 	ofs << body;
 	ofs.close();
-	// TODO : 何も返さないなら 201 Created
-	_responseMessage = "HTTP/1.1 200 OK\r\n\r\n<html><body><h1>POST " + uploadPath + "post_" + timestamp + " successfully !!</h1></body></html>\r\n";
+	_responseMessage = "HTTP/1.1 201 Created\r\n";
 }
