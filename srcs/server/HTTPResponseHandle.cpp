@@ -35,7 +35,7 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 		setHeader("Date", getDateTimestamp());
 		setHeader("Server", SERVER_NAME);
 		setContentLength(_body.size());
-		setHeader("Content-Length", std::to_string(_contentLength));
+		setHeader("Content-Length", ft_stoi(_contentLength));
 		_responseMessage += _statusLine;
 		for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++) {
 			_responseMessage += it->first + ": " + it->second + CRLF;
@@ -44,11 +44,8 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 		_responseMessage += _body;
 	} else if (method == "POST") {
 		makePostResponseBody(request);
-		_responseMessage = "HTTP/1.1 200 OK\r\n";
 	} else if (method == "DELETE") {
 		makeDeleteResponseBody(request);
-		_responseMessage = "HTTP/1.1 200 OK\r\n";
-		_responseMessage += CRLF + _body;
 	}
 	else {
 		// TODO : error message

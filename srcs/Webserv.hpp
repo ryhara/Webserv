@@ -4,6 +4,7 @@
 #include <string>
 
 #include "Color.hpp"
+#include "utils.hpp"
 
 # define CRLF "\r\n"
 # define SP " "

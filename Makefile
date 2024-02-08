@@ -6,7 +6,7 @@ CONFIG = ConfigParse.cpp Config.cpp ServerConfig.cpp
 SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp \
 	HTTPResponseGET.cpp HTTPResponsePOST.cpp  HTTPResponseDELETE.cpp HTTPResponseHandle.cpp
 
-UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp
+UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp ft_stoi.cpp
 
 CGI = CGI.cpp
 
@@ -71,6 +71,9 @@ invalid_test :
 
 use_cfunc :
 	./tests/check_cfunctions.sh $(NAME)
+
+clean_post :
+	$(RM) ./uploads/post_*
 
 debug : CXXFLAGS += -D DEBUG -fsanitize=address
 debug : re

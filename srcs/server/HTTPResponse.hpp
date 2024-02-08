@@ -23,7 +23,7 @@ class HTTPResponse
 		HTTPStatusCode _statusCode;
 		std::string _statusMessage;
 		std::string _statusLine;
-		bool keepAlive; // TODO : keepAlive 調べる
+		bool keepAlive;
 		size_t _contentLength;
 		std::map<std::string, std::string> _headers;
 		std::string _body;
@@ -73,6 +73,7 @@ class HTTPResponse
 		std::string makeResponseStatusLine(void);
 
 		std::string getDateTimestamp(void) const;
+		std::string getTimeStampForPost(void) const;
 		bool isFileExist(const std::string &path, struct stat *stat);
 		bool isDirectory(struct stat &stat);
 		bool isFile(struct stat &stat);

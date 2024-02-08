@@ -1,10 +1,36 @@
 #include "HTTPResponse.hpp"
 
 
-//  TODO : POSTはどの形式に対応するか、他者の挙動を確認する
-// TODO : POSTはとりあえずファイルのアップロードとCGIに対応すればよいかもしれない
+std::string HTTPResponse::getTimeStampForPost(void) const
+{
+	std::string ret;
+	time_t now = std::time(NULL);
+	now += (9 * 60 * 60); // JST
+	struct tm *gmt = std::gmtime(&now);
+	char buf[DATE_BUF_SIZE] = {0};
+
+	std::strftime(buf, sizeof(buf), "%y%m%d_%H%M%S", gmt);
+	ret = buf;
+	return ret;
+}
+
 void HTTPResponse::makePostResponseBody(HTTPRequest &request)
 {
-	std::string path = request.getUri();
+	std::string body = request.getBody();
+	std::string timestamp = getTimeStampForPost();
+	std::string uploadPath = "./uploads/";
+	std::ofstream ofs;
 
+	// TODO : configから保存先を取得する
+	ofs.open(uploadPath + "post_" + timestamp);
+	if (!ofs.is_open())
+	{
+		_statusCode = STATUS_500;
+		_responseMessage = "HTTP/1.1 500 Internal Server Error\r\n";
+		return;
+	}
+	ofs << body;
+	ofs.close();
+	_statusCode = STATUS_201;
+	_responseMessage = "HTTP/1.1 201 Created\r\n";
 }
