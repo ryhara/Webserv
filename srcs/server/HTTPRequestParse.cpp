@@ -62,7 +62,9 @@ void HTTPRequestParse::parse(char *buffer)
 	}
 	readRequestLine(line);
 	readHeaders(bufferStream);
-	_request.print();
+	#if DEBUG
+		_request.print();
+	# endif
 	bufferStream.clear();
 	bufferStream.str("");
 }
@@ -71,7 +73,7 @@ void HTTPRequestParse::readRequestLine(std::string &line)
 {
 	std::vector<std::string> request_line = split(line, ' ');
 	if (request_line.size() != 3)
-		log_exit("request_line.size() != 3", __LINE__, __FILE__, errno);
+		throw std::runtime_error("request line parse error");
 	this->_request.setMethod(request_line[0]);
 	this->_request.setUri(request_line[1]);
 	this->_request.setVersion(request_line[2]);

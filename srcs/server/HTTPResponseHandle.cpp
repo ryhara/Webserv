@@ -27,25 +27,13 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 	std::string method = request.getMethod();
 	if (method == "GET") {
 		makeGetResponseBody(request);
-		setStatusLine();
-		if (keepAlive)
-			setHeader("Connection", "keep-alive");
-		else
-			setHeader("Connection", "close");
-		setHeader("Date", getDateTimestamp());
-		setHeader("Server", SERVER_NAME);
-		setContentLength(_body.size());
-		setHeader("Content-Length", ft_stoi(_contentLength));
-		_responseMessage += _statusLine;
-		for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++) {
-			_responseMessage += it->first + ": " + it->second + CRLF;
-		}
-		_responseMessage += CRLF;
-		_responseMessage += _body;
+		makeResponseMessage(request);
 	} else if (method == "POST") {
 		makePostResponseBody(request);
+		makeResponseMessage(request);
 	} else if (method == "DELETE") {
 		makeDeleteResponseBody(request);
+		makeResponseMessage(request);
 	}
 	else {
 		// TODO : error message
