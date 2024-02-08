@@ -81,7 +81,7 @@ void HTTPResponse::setStatusMessage(const std::string &statusMessage)
 
 void HTTPResponse::setStatusLine(void)
 {
-	this->_statusLine = this->_version + SP + ft_stoi(this->_statusCode) + SP + this->_statusMessage + CRLF;
+	this->_statusLine = this->_version + SP + ft_stoi(this->_statusCode) + SP + _statusMessageMap[this->_statusCode] + CRLF;
 }
 
 void HTTPResponse::setKeepAlive(const bool &keepAlive)
