@@ -87,7 +87,9 @@ void Server::childProcess(int client_fd)
 {
 	// TODO : buffer size調整、第3引数の調べる(MSG_DONTWAIT : ノンブロッキングモードなので使えそう)
 	HTTPRequest request;
+	HTTPResponse response;
 	HTTPRequestParse request_parse(request);
+	std::string responseMessage;
 	ssize_t n = recv(client_fd, _buffer, sizeof(_buffer) - 1, 0);
 	if (n < 0)
 	{
@@ -97,21 +99,22 @@ void Server::childProcess(int client_fd)
 	}
 	_buffer[n] = '\0';
 	#if DEBUG
-		std::cout << "#### [ DEBUG ] request ####" << std::endl << _buffer << std::endl << "##########" << std::endl;
+		std::cout << "#### [ DEBUG ] request message ####" << std::endl << _buffer << std::endl << "##########" << std::endl;
 	#endif
-	// std::cout << "-- request -- " << std::endl;
-	// for (int i = 0; i < n; i++)
-	// 	std::cout << _buffer[i];
-	// std::cout << "--------------" << std::endl;
-	request_parse.parse(_buffer);
-	// TODO : responseを正しく実装する （一時的）
-	HTTPResponse response;
-	response.selectResponse(request);
-	std::string responseMessage = response.getResponseMessage();
+	// TODO : parseでエラーが起きたらthrowしてここらへんでcatchしてエラーメッセージを作成して返す
+	try {
+		request_parse.parse(_buffer);
+		response.selectResponse(request);
+		responseMessage = response.getResponseMessage();
+	} catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		response.setStatusCode(STATUS_500);
+		response.setStatusLine();
+		responseMessage = response.getStatusLine();
+	}
 	#if DEBUG
-		std::cout << "##### [ DEBUG ] responseMessage ####" << std::endl << responseMessage << std::endl << "##########" << std::endl;
+		std::cout << "##### [ DEBUG ] response message ####" << std::endl << responseMessage << std::endl << "##########" << std::endl;
 	#endif
-	// std::string responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>\r\n";
 	ssize_t send_n = send(client_fd, responseMessage.c_str(), responseMessage.size(), 0);
 	if (send_n < 0)
 	{
@@ -119,7 +122,9 @@ void Server::childProcess(int client_fd)
 		close(_server_fd);
 		log_exit("send", __LINE__, __FILE__, errno);
 	}
-	std::cout << "================= one request end =================" << std::endl;
+	# if DEBUG
+		std::cout << "==================================================" << std::endl;
+	# endif
 }
 
 void Server::pollInit(void)
@@ -171,23 +176,18 @@ void Server::mainLoop(void)
 void Server::start(void)
 {
 	std::cout << "================= Server::start =================" << std::endl;
-	try {
-		// Init server_addr
-		initServerAddr();
-		// Create socket
-		createSocket();
-		// TODO : search SIGCHLD, signal(SIGCHLD, SIG_IGN);
-		// Bind
-		bindSocket();
-		// Listen
-		listenSocket();
-		// Main loop
-		mainLoop();
-		close(_server_fd);
-	}
-	catch (std::exception &e) {
-		std::cout << e.what() << std::endl;
-	}
+	// Init server_addr
+	initServerAddr();
+	// Create socket
+	createSocket();
+	// TODO : search SIGCHLD, signal(SIGCHLD, SIG_IGN);
+	// Bind
+	bindSocket();
+	// Listen
+	listenSocket();
+	// Main loop
+	mainLoop();
+	close(_server_fd);
 }
 
 /* example */

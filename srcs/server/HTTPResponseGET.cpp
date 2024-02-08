@@ -10,7 +10,7 @@ void HTTPResponse::makeGetResponseBody(HTTPRequest &request)
 	// TODO : configの設定によって、pathを変更する ./www以外にも対応できるように
 	if (isFileExist("./www" + path, request.getStat()) == false) {
 		_statusCode = STATUS_404;
-		makeFileBody("./www/error/404.html");
+		makeFileBody("./www/error_page/404.html");
 		return ;
 	} else if (isFile(*request.getStat())) {
 		makeFileBody("./www" + path);
@@ -19,6 +19,6 @@ void HTTPResponse::makeGetResponseBody(HTTPRequest &request)
 		makeFileBody(std::string("./www" + path + "/index.html"));
 	} else {
 		_statusCode = STATUS_404;
-		makeFileBody("./www/error/404.html");
+		makeFileBody("./www/error_page/404.html");
 	}
 }

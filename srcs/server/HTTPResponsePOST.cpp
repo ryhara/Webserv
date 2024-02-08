@@ -26,11 +26,9 @@ void HTTPResponse::makePostResponseBody(HTTPRequest &request)
 	if (!ofs.is_open())
 	{
 		_statusCode = STATUS_500;
-		_responseMessage = "HTTP/1.1 500 Internal Server Error\r\n";
 		return;
 	}
 	ofs << body;
 	ofs.close();
 	_statusCode = STATUS_201;
-	_responseMessage = "HTTP/1.1 201 Created\r\n";
 }
