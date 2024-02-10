@@ -52,7 +52,7 @@ class Server
 		void	pollInit(void);
 		void	mainLoop(void);
 		int		acceptSocket(void);
-		void	childProcess(int client_fd);
+		void	clientProcess(int client_fd);
 		void	parentProcess(pid_t pid);
 
 	public:
