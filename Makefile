@@ -56,10 +56,13 @@ clean :
 fclean : clean
 	$(RM) $(NAME)
 
-allclean : fclean clean_post
+allclean : fclean post_clean
 	$(RM) a.out
 	$(RM) hoge.dummy
 	$(RM) ./tests/__pycache__
+
+post_clean :
+	$(RM) ./uploads/post_*
 
 re : fclean all
 
@@ -77,9 +80,6 @@ invalid_test :
 use_cfunc :
 	./tests/check_cfunctions.sh $(NAME)
 
-clean_post :
-	$(RM) ./uploads/post_*
-
 dummy :
 	base64 -i /dev/urandom | head -c 1048576 > hoge.dummy
 
@@ -90,6 +90,6 @@ debug : re
 leak :
 	while true; do leaks -q $(NAME); sleep 1; done
 
-.PHONY : all clean fclean re test debug func_test use_cfunc leak clean_post invalid_test dummy allclean
+.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)
