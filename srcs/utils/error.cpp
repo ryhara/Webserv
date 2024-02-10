@@ -1,5 +1,4 @@
 #include "utils.hpp"
-#include "Color.hpp"
 
 void log_exit(const char *msg, int line, const char *file, int error)
 {
