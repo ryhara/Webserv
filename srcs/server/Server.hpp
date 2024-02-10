@@ -17,13 +17,13 @@
 #include "Webserv.hpp"
 #include "HTTPRequestParse.hpp"
 #include "HTTPResponse.hpp"
+#include "Client.hpp"
 #include "utils.hpp"
 #include "Config.hpp"
 
 # define SERVER_PORT			4242
 # define SERVER_PORT_STR		"4242"
 # define QUEUE_LENGTH			5
-# define MAX_EVENTS				10
 # define BUFFER_SIZE			8192
 # define MAX_CLIENTS			6
 
@@ -36,24 +36,27 @@
 class Server
 {
 	private:
-		int				_server_fd;
+		std::map<std::string, int>	_server_fds; // PORT_STR, server_fd
 		struct addrinfo _hints;
 		struct addrinfo *_res;
-		struct pollfd				fds_[MAX_CLIENTS + 1];
+		struct pollfd				fds_[MAX_CLIENTS];
 		char			_buffer[BUFFER_SIZE];
 		HTTPRequest		_request;
 		Config			_config;
 		DISALLOW_COPY_AND_ASSIGN(Server);
 
-		void	initServerAddr(void);
-		void	createSocket(void);
-		void	bindSocket(void);
-		void	listenSocket(void);
+		void setPortAndServerFd(std::string &port, int server_fd);
+
+		void	initServerAddr(std::string &port);
+		void	createSocket(std::string &port);
+		void	bindSocket(int &server_fd);
+		void	listenSocket(int &server_fd);
 		void	pollInit(void);
 		void	mainLoop(void);
-		int		acceptSocket(void);
+		int		acceptSocket(int &server_fd);
 		void	clientProcess(int client_fd);
 		void	parentProcess(pid_t pid);
+		void	closeServerFds(void);
 
 	public:
 		Server(void);

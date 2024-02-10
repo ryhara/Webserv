@@ -3,10 +3,10 @@ SRC = main.cpp
 
 CONFIG = ConfigParse.cpp Config.cpp ServerConfig.cpp
 
-SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp \
+SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp Client.cpp \
 	HTTPResponseGET.cpp HTTPResponsePOST.cpp  HTTPResponseDELETE.cpp HTTPResponseHandle.cpp
 
-UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp ft_to_string.cpp isHex.cpp
+UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp ft_to_string.cpp isHex.cpp ft_stoi.cpp
 
 CGI = CGI.cpp
 
@@ -85,6 +85,7 @@ dummy :
 
 debug : CXXFLAGS += -D DEBUG -fsanitize=address
 debug : re
+	./$(NAME)
 
 leak :
 	while true; do leaks -q $(NAME); sleep 1; done

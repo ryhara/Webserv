@@ -14,6 +14,9 @@ Server::Server(void)
 
 Server::~Server(void)
 {
+	_server_fds.clear();
+	if (_res)
+		freeaddrinfo(_res);
 }
 
 Config &Server::getConfig(void) const
@@ -21,71 +24,95 @@ Config &Server::getConfig(void) const
 	return const_cast<Config &>(_config);
 }
 
-// TODO : サーバーを立ち上げる際のエラーはlog_exitで処理する,リクエストやレスポンスのエラーは例外を投げてSTATUS CODEを返す
-void Server::initServerAddr(void)
+void Server::setPortAndServerFd(std::string &port, int server_fd)
 {
+	_server_fds[port] = server_fd;
+}
+
+void Server::closeServerFds(void)
+{
+	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
+	{
+		close(it->second);
+	}
+}
+
+void Server::initServerAddr(std::string &port)
+{
+	char *port_str = const_cast<char *>(port.c_str());
 	ft_memset(&_hints, 0, sizeof(_hints));
 	_hints.ai_family = AF_INET;
 	_hints.ai_socktype = SOCK_STREAM;
 	_hints.ai_flags = AI_PASSIVE;
-	if (getaddrinfo(NULL, SERVER_PORT_STR, &_hints, &_res) != 0)
+	if (getaddrinfo(NULL, port_str, &_hints, &_res) != 0)
 		log_exit("getaddrinfo", __LINE__, __FILE__, errno);
 }
 
-void Server::createSocket(void)
+void Server::createSocket(std::string &port)
 {
 	int option_value = 1; // setsockopt
+	int server_fd;
 
-	_server_fd = socket(_res->ai_family, _res->ai_socktype, _res->ai_protocol);
-	setNonBlockingFd(_server_fd);
-	if (_server_fd < 0)
+	server_fd = socket(_res->ai_family, _res->ai_socktype, _res->ai_protocol);
+	#if DEBUG
+		std::cout << "#### [ DEBUG ] server_fd ####" << std::endl << server_fd << std::endl << "##########" << std::endl;
+	#endif
+	if (server_fd < 0) {
+		closeServerFds();
 		log_exit("socket", __LINE__, __FILE__, errno);
-	if (setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&option_value, sizeof(option_value)) < 0)
+	}
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&option_value, sizeof(option_value)) < 0)
 	{
-		close(_server_fd);
+		close(server_fd);
+		closeServerFds();
 		log_exit("setsockopt", __LINE__, __FILE__, errno);
 	}
+	setNonBlockingFd(server_fd);
+	setPortAndServerFd(port, server_fd);
 }
 
-void Server::bindSocket(void)
+void Server::bindSocket(int &server_fd)
 {
-	if (bind(_server_fd, _res->ai_addr, _res->ai_addrlen) < 0)
+	if (bind(server_fd, _res->ai_addr, _res->ai_addrlen) < 0)
 	{
-		close(_server_fd);
+		closeServerFds();
+		freeaddrinfo(_res);
+		_res = NULL;
 		log_exit("bind", __LINE__, __FILE__, errno);
 	}
 	freeaddrinfo(_res);
+	_res = NULL;
 }
 
-void Server::listenSocket(void)
+void Server::listenSocket(int &server_fd)
 {
-	if (listen(_server_fd, QUEUE_LENGTH) < 0)
+	if (listen(server_fd, QUEUE_LENGTH) < 0)
 	{
-		close(_server_fd);
+		closeServerFds();
 		log_exit("listen", __LINE__, __FILE__, errno);
 	}
 }
 
-int Server::acceptSocket(void)
+int Server::acceptSocket(int &server_fd)
 {
 	int 				client_fd;
 	socklen_t 			client_addr_len;
 	struct sockaddr_in	client_addr;
 
 	client_addr_len = sizeof(client_addr);
-	client_fd = accept(_server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
-	setNonBlockingFd(client_fd);
-	if (client_fd < 0)
-	{
-		close(_server_fd);
-		log_exit("accept", __LINE__, __FILE__, errno);
+	client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
+	#if DEBUG
+		std::cout << "#### [ DEBUG ] client_fd ####" << std::endl << client_fd << std::endl << "##########" << std::endl;
+	#endif
+	if (client_fd < 0) {
+		return -1;
 	}
 	return client_fd;
 }
 
+// TODO : Clientクラスへ以降、頃合いを見て削除
 void Server::clientProcess(int client_fd)
 {
-	// TODO : buffer size調整、第3引数の調べる(MSG_DONTWAIT : ノンブロッキングモードなので使えそう)
 	HTTPRequest request;
 	HTTPResponse response;
 	HTTPRequestParse request_parse(request);
@@ -94,7 +121,7 @@ void Server::clientProcess(int client_fd)
 	if (n < 0)
 	{
 		close(client_fd);
-		close(_server_fd);
+		closeServerFds();
 		log_exit("recv", __LINE__, __FILE__, errno);
 	}
 	_buffer[n] = '\0';
@@ -115,6 +142,11 @@ void Server::clientProcess(int client_fd)
 		response.setStatusCode(STATUS_500);
 		response.setStatusLine();
 		responseMessage = response.getStatusLine();
+	} catch (HTTPRequestPayloadTooLargeError &e) {
+		std::cerr << e.what() << std::endl;
+		response.setStatusCode(STATUS_413);
+		response.setStatusLine();
+		responseMessage = response.getStatusLine();
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		response.setStatusCode(STATUS_500);
@@ -128,7 +160,7 @@ void Server::clientProcess(int client_fd)
 	if (send_n < 0)
 	{
 		close(client_fd);
-		close(_server_fd);
+		closeServerFds();
 		log_exit("send", __LINE__, __FILE__, errno);
 	}
 	# if DEBUG
@@ -138,11 +170,20 @@ void Server::clientProcess(int client_fd)
 
 void Server::pollInit(void)
 {
-	this->fds_[0].fd = this->_server_fd;
-	this->fds_[0].events = POLLIN;
-	for (int i = 1; i <= MAX_CLIENTS; ++i) {
+
+	int index = 0;
+	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
+	{
+		this->fds_[index].fd = it->second;
+		this->fds_[index].events = POLLIN;
+		this->fds_[index].revents = 0;
+		index++;
+	}
+	for (int i = index; i < MAX_CLIENTS + 1; ++i)
+	{
 		this->fds_[i].fd = -1;
 		this->fds_[i].events = POLLIN;
+		this->fds_[i].revents = 0;
 	}
 }
 
@@ -152,7 +193,7 @@ void Server::mainLoop(void)
 
 	pollInit();
 	for (;;) {
-		int	result = poll(fds_, MAX_CLIENTS + 1, -1);
+		int	result = poll(fds_, MAX_CLIENTS, -1);
 		if (result < 0) {
 			log_exit("poll", __LINE__, __FILE__, errno);
 		}
@@ -161,22 +202,25 @@ void Server::mainLoop(void)
 			std::cout << "-- poll timeout --" << std::endl;
 			continue;
 		}
-		if (fds_[0].revents & (POLLIN | POLLERR)) {
-			client_fd = acceptSocket();
-			for (int i = 1; i <= MAX_CLIENTS; ++i) {
-				if (fds_[i].fd == -1) {
-					fds_[i].fd = client_fd;
-					fds_[i].events = POLLIN;
-					break;
-				}
-			}
-		}
-		for (int i = 1; i <= MAX_CLIENTS; ++i) {
+		for (int i = 0; i < MAX_CLIENTS; ++i) {
 			if (fds_[i].fd != -1 && (fds_[i].revents & (POLLIN | POLLERR))) {
-				std::cout << "i : " << i << " / client_fd : " << client_fd << std::endl;
-				clientProcess(fds_[i].fd);
-				close(fds_[i].fd);
-				fds_[i].fd = -1;
+				client_fd = acceptSocket(fds_[i].fd);
+				if (client_fd < 0) {
+					if (errno == EWOULDBLOCK || errno == EAGAIN) {
+						continue;
+					} else {
+						closeServerFds();
+						log_exit("accept", __LINE__, __FILE__, errno);
+					}
+				}
+				setNonBlockingFd(client_fd);
+				Client client(client_fd, fds_[i].fd);
+				if (client.clientProcess() < 0) {
+					close(client_fd);
+					closeServerFds();
+					log_exit("clientProcess", __LINE__, __FILE__, errno);
+				}
+				close(client_fd);
 			}
 		}
 	}
@@ -185,16 +229,23 @@ void Server::mainLoop(void)
 void Server::start(void)
 {
 	std::cout << "================= Server::start =================" << std::endl;
-	// Init server_addr
-	initServerAddr();
-	// Create socket
-	createSocket();
-	// TODO : search SIGCHLD, signal(SIGCHLD, SIG_IGN);
-	// Bind
-	bindSocket();
-	// Listen
-	listenSocket();
-	// Main loop
+	std::vector<std::string> list;
+	list.push_back("4242");
+	list.push_back("4243");
+	// TODO : MAX_CLIENTSを超えた分はエラーを返す. CONFIG段階でエラーにしとく
+	if (list.size() > MAX_CLIENTS)
+	{
+		log_exit("server start", __LINE__, __FILE__, errno);
+	}
+	// TODO : configのサーバーの数だけループする。
+	for (int i = 0; i < 2; ++i) {
+		std::string current_server_port = list[i];
+		initServerAddr(list[i]);
+		createSocket(current_server_port);
+		int current_server_fd = _server_fds[list[i]];
+		bindSocket(current_server_fd);
+		listenSocket(current_server_fd);
+	}
 	mainLoop();
-	close(_server_fd);
+	closeServerFds();
 }
