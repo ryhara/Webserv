@@ -101,11 +101,20 @@ void Server::clientProcess(int client_fd)
 	#if DEBUG
 		std::cout << "#### [ DEBUG ] request message ####" << std::endl << _buffer << std::endl << "##########" << std::endl;
 	#endif
-	// TODO : parseでエラーが起きたらthrowしてここらへんでcatchしてエラーメッセージを作成して返す
 	try {
 		request_parse.parse(_buffer);
 		response.selectResponse(request);
 		responseMessage = response.getResponseMessage();
+	} catch (HTTPRequestParseError &e) {
+		std::cerr << e.what() << std::endl;
+		response.setStatusCode(STATUS_400);
+		response.setStatusLine();
+		responseMessage = response.getStatusLine();
+	} catch (InternalServerError &e) {
+		std::cerr << e.what() << std::endl;
+		response.setStatusCode(STATUS_500);
+		response.setStatusLine();
+		responseMessage = response.getStatusLine();
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		response.setStatusCode(STATUS_500);

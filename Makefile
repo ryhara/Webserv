@@ -15,6 +15,7 @@ CONFIGDIR = ./srcs/config
 SERVERDIR = ./srcs/server
 UTILSDIR = ./srcs/utils
 CGIDIR = ./srcs/cgi
+EXCEPTIONDIR = ./srcs/exception
 
 SRCS = $(addprefix $(CONFIGDIR)/, $(CONFIG)) $(addprefix $(SERVERDIR)/, $(SERVER)) $(addprefix $(UTILSDIR)/, $(UTILS)) $(addprefix $(CGIDIR)/, $(CGI))
 
@@ -24,7 +25,7 @@ DEPENDS = $(OBJS:.o=.d)
 CXX = c++
 RM = rm -rf
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98  -MMD -MP -g
-INC = -I$(CONFIGDIR) -I$(SERVERDIR) -I$(SRCDIR) -I$(UTILSDIR) -I$(CGIDIR)
+INC = -I$(CONFIGDIR) -I$(SERVERDIR) -I$(SRCDIR) -I$(UTILSDIR) -I$(CGIDIR) -I$(EXCEPTIONDIR)
 
 all : $(OBJDIR) $(NAME)
 
@@ -63,7 +64,7 @@ allclean : fclean clean_post
 re : fclean all
 
 test : all
-	./$(NAME) ./config/test.conf
+	./$(NAME) ./config/default.conf
 
 func_test :
 	g++ -o a.out ./tests/*_test.cpp $(SRCS) $(INC) -pthread -lgtest_main -lgtest -std=c++14
