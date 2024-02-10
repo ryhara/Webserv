@@ -7,3 +7,6 @@ a.out
 .vscode
 .DS_Store
 post_*
+*.dummy
+__pycache__
+*.pyc

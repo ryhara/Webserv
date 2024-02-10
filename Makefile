@@ -6,7 +6,7 @@ CONFIG = ConfigParse.cpp Config.cpp ServerConfig.cpp
 SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp \
 	HTTPResponseGET.cpp HTTPResponsePOST.cpp  HTTPResponseDELETE.cpp HTTPResponseHandle.cpp
 
-UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp ft_stoi.cpp
+UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp ft_stoi.cpp isHex.cpp
 
 CGI = CGI.cpp
 
@@ -54,7 +54,11 @@ clean :
 
 fclean : clean
 	$(RM) $(NAME)
+
+allclean : fclean clean_post
 	$(RM) a.out
+	$(RM) hoge.dummy
+	$(RM) ./tests/__pycache__
 
 re : fclean all
 
@@ -75,12 +79,15 @@ use_cfunc :
 clean_post :
 	$(RM) ./uploads/post_*
 
+dummy :
+	base64 -i /dev/urandom | head -c 1048576 > hoge.dummy
+
 debug : CXXFLAGS += -D DEBUG -fsanitize=address
 debug : re
 
 leak :
 	while true; do leaks -q $(NAME); sleep 1; done
 
-.PHONY : all clean fclean re test debug func_test use_cfunc leak
+.PHONY : all clean fclean re test debug func_test use_cfunc leak clean_post invalid_test dummy allclean
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)
