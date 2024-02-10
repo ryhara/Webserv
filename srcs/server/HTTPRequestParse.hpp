@@ -15,6 +15,7 @@ class HTTPRequestParse
 {
 	private:
 		HTTPRequest &_request;
+		bool _isChunked;
 		DISALLOW_COPY_AND_ASSIGN(HTTPRequestParse);
 	public:
 		HTTPRequestParse(HTTPRequest &request);
@@ -29,6 +30,8 @@ class HTTPRequestParse
 		void searchLocation(void);
 		void searchRequestMode(void);
 		int getlineWithCRLF(std::stringstream &ss, std::string &line);
+		void parseChunkedBody(std::stringstream &ss);
+		void parseNormalBody(std::stringstream &ss);
 };
 
 /* request example */

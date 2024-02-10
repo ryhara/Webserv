@@ -83,7 +83,7 @@ int Server::acceptSocket(void)
 	return client_fd;
 }
 
-void Server::childProcess(int client_fd)
+void Server::clientProcess(int client_fd)
 {
 	// TODO : buffer size調整、第3引数の調べる(MSG_DONTWAIT : ノンブロッキングモードなので使えそう)
 	HTTPRequest request;
@@ -101,11 +101,20 @@ void Server::childProcess(int client_fd)
 	#if DEBUG
 		std::cout << "#### [ DEBUG ] request message ####" << std::endl << _buffer << std::endl << "##########" << std::endl;
 	#endif
-	// TODO : parseでエラーが起きたらthrowしてここらへんでcatchしてエラーメッセージを作成して返す
 	try {
 		request_parse.parse(_buffer);
 		response.selectResponse(request);
 		responseMessage = response.getResponseMessage();
+	} catch (HTTPRequestParseError &e) {
+		std::cerr << e.what() << std::endl;
+		response.setStatusCode(STATUS_400);
+		response.setStatusLine();
+		responseMessage = response.getStatusLine();
+	} catch (InternalServerError &e) {
+		std::cerr << e.what() << std::endl;
+		response.setStatusCode(STATUS_500);
+		response.setStatusLine();
+		responseMessage = response.getStatusLine();
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		response.setStatusCode(STATUS_500);
@@ -165,7 +174,7 @@ void Server::mainLoop(void)
 		for (int i = 1; i <= MAX_CLIENTS; ++i) {
 			if (fds_[i].fd != -1 && (fds_[i].revents & (POLLIN | POLLERR))) {
 				std::cout << "i : " << i << " / client_fd : " << client_fd << std::endl;
-				childProcess(fds_[i].fd);
+				clientProcess(fds_[i].fd);
 				close(fds_[i].fd);
 				fds_[i].fd = -1;
 			}
@@ -189,11 +198,3 @@ void Server::start(void)
 	mainLoop();
 	close(_server_fd);
 }
-
-/* example */
-// TODO : fcntlを使ったノンブロッキングモードの実装または pollを使った実装
-// if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
-//     perror("fcntl");
-//     close(fd);
-//     exit(EXIT_FAILURE);
-// }

@@ -49,7 +49,6 @@ std::vector<std::string> HTTPRequestParse::split(std::string str, std::string de
 	return (result);
 }
 
-// TODO : parse失敗時にはexitではなく、例外を投げる（ステータスコード400など）、プログラム的なエラーはexit,https通信の場合は、parseできないので、例外を投げる
 void HTTPRequestParse::parse(char *buffer)
 {
 	std::string line;
@@ -73,7 +72,7 @@ void HTTPRequestParse::readRequestLine(std::string &line)
 {
 	std::vector<std::string> request_line = split(line, ' ');
 	if (request_line.size() != 3)
-		throw std::runtime_error("request line parse error");
+		throw HTTPRequestParseError();
 	this->_request.setMethod(request_line[0]);
 	this->_request.setUri(request_line[1]);
 	this->_request.setVersion(request_line[2]);
@@ -81,21 +80,37 @@ void HTTPRequestParse::readRequestLine(std::string &line)
 	searchRequestMode();
 }
 
-void HTTPRequestParse::readHeaders(std::stringstream &ss)
+void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 {
-	std::string line;
-	std::pair<std::string, std::string> pair;
-	std::vector<std::string> header;
-	std::string body;
+	std::string line, body;
+	size_t count = 0;
+	int size;
 	while (getlineWithCRLF(ss, line))
 	{
 		if (line.empty())
 			break;
-		std::vector<std::string> header = split(line, std::string(": "));
-		pair.first = header[0];
-		pair.second = header[1];
-		this->_request.setHeaders(pair);
+		if (count % 2 == 0) {
+			if (!isHex(line))
+				throw HTTPRequestParseError();
+			std::stringstream ss(line);
+			ss >> std::hex >> size;
+			if (size == 0)
+				break;
+			ss.clear();
+			ss.str("");
+		} else {
+			body += line;
+		}
+		count++;
 	}
+	if (!body.empty())
+		this->_request.setBody(body);
+}
+
+void HTTPRequestParse::parseNormalBody(std::stringstream &ss)
+{
+	std::string body;
+	std::string line;
 	while (getlineWithCRLF(ss, line))
 	{
 		if (line.empty())
@@ -104,6 +119,30 @@ void HTTPRequestParse::readHeaders(std::stringstream &ss)
 	}
 	if (!body.empty())
 		this->_request.setBody(body);
+}
+
+void HTTPRequestParse::readHeaders(std::stringstream &ss)
+{
+	std::string line;
+	std::pair<std::string, std::string> pair;
+	std::vector<std::string> header;
+	while (getlineWithCRLF(ss, line))
+	{
+		if (line.empty())
+			break;
+		std::vector<std::string> header = split(line, std::string(": "));
+		pair.first = header[0];
+		if (header[0].compare("Transfer-Encoding") == 0 && header[1].compare("chunked") == 0)
+			this->_isChunked = true;
+		pair.second = header[1];
+		this->_request.setHeaders(pair);
+	}
+	if (this->_isChunked)
+	{
+		parseChunkedBody(ss);
+	} else {
+		parseNormalBody(ss);
+	}
 }
 
 void HTTPRequestParse::searchLocation(void)
