@@ -3,12 +3,17 @@ import requests
 url = 'http://localhost:4242'
 
 # # GET
-url += "/index.html"
+url += "/empty.html"
 response = requests.get(url)
 
 # POST
 # data = {'key1': 'value1'}
 # response = requests.post(url, data=data)
+
+# POST ファイル転送
+# with open('hoge.dummy', 'rb') as f:
+# 	file_data = f.read()
+# response = requests.post(url, data=file_data)
 
 # DELETE
 # url = 'http://localhost:4242/delete.html'
