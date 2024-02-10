@@ -56,7 +56,7 @@ void HTTPRequestParse::parse(char *buffer)
 
 	getlineWithCRLF(bufferStream, line);
 	if (line.empty()) {
-		// TODO : error message
+		throw HTTPRequestParseError();
 		return ;
 	}
 	readRequestLine(line);

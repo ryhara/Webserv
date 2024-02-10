@@ -217,9 +217,8 @@ bool HTTPResponse::isFile(struct stat &stat)
 	return S_ISREG(stat.st_mode);
 }
 
-void HTTPResponse::makeResponseMessage(HTTPRequest &request)
+void HTTPResponse::makeResponseMessage()
 {
-	std::string method = request.getMethod();
 	setStatusLine();
 	if (_keepAlive)
 		setHeader("Connection", "keep-alive");

@@ -42,7 +42,8 @@ int Client::requestProcess(HTTPRequest &request)
 	}
 	buffer[n] = '\0';
 	#if DEBUG
-		std::cout << "#### [ DEBUG ] request message ####" << std::endl << buffer << std::endl << "##########" << std::endl;
+		std::cout << "########## [ DEBUG ] request message ##########" << std::endl << buffer << std::endl
+		<< "###############################################" << std::endl;
 	#endif
 	request_parse.parse(buffer);
 	return 0;
@@ -50,6 +51,9 @@ int Client::requestProcess(HTTPRequest &request)
 
 void Client::responseProcess(HTTPRequest &request, HTTPResponse &response)
 {
+	std::string keep_alive = request.getHeader("Connection");
+	if (keep_alive == "close")
+		response.setKeepAlive(false);
 	response.selectResponse(request);
 }
 
@@ -75,30 +79,15 @@ int Client::clientProcess()
 		if (requestProcess(request) < 0)
 			return -1;
 		responseProcess(request, response);
-	} catch (HTTPRequestParseError &e) {
-		std::cerr << e.what() << std::endl;
-		response.setStatusCode(STATUS_400);
-		response.setStatusLine();
-		responseMessage = response.getStatusLine();
-	} catch (InternalServerError &e) {
-		std::cerr << e.what() << std::endl;
-		response.setStatusCode(STATUS_500);
-		response.setStatusLine();
-		responseMessage = response.getStatusLine();
-	} catch (HTTPRequestPayloadTooLargeError &e) {
-		std::cerr << e.what() << std::endl;
-		response.setStatusCode(STATUS_413);
-		response.setStatusLine();
-		responseMessage = response.getStatusLine();
-	} catch (std::exception &e) {
-		std::cerr << e.what() << std::endl;
-		response.setStatusCode(STATUS_500);
-		response.setStatusLine();
-		responseMessage = response.getStatusLine();
+	} catch (ServerException &e) {
+		response.setStatusCode(e.getStatusCode());
+		response.makeResponseMessage();
+		responseMessage = response.getResponseMessage();
 	}
 	responseMessage = response.getResponseMessage();
 	#if DEBUG
-		std::cout << "##### [ DEBUG ] response message ####" << std::endl << responseMessage << std::endl << "##########" << std::endl;
+		std::cout << "########## [ DEBUG ] response message ##########" << std::endl << responseMessage << std::endl
+			<< "################################################" << std::endl;
 	#endif
 	if (sendResponse(responseMessage) < 0)
 		return -1;

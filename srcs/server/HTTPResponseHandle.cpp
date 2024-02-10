@@ -17,26 +17,27 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 		handleRedirectRequest(request);
 		break;
 	default:
-		// TODO : error	message
+		throw InternalServerError();
 		break;
 	}
 }
 
 void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 {
+	// TODO : GETは必須、POSTとDELETEは任意で, configで許可されていない場合405 Method Not Allowed
 	std::string method = request.getMethod();
 	if (method == "GET") {
 		makeGetResponseBody(request);
-		makeResponseMessage(request);
+		makeResponseMessage();
 	} else if (method == "POST") {
 		makePostResponseBody(request);
-		makeResponseMessage(request);
+		makeResponseMessage();
 	} else if (method == "DELETE") {
 		makeDeleteResponseBody(request);
-		makeResponseMessage(request);
+		makeResponseMessage();
 	}
 	else {
-		// TODO : error message
+		throw NotImplementedError();
 	}
 }
 

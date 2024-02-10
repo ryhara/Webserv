@@ -36,6 +36,7 @@
 class Server
 {
 	private:
+		// TODO : index, fdにする。index番号のConfigの値を取得したいため
 		std::map<std::string, int>	_server_fds; // PORT_STR, server_fd
 		struct addrinfo _hints;
 		struct addrinfo *_res;

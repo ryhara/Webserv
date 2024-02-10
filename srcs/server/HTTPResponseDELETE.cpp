@@ -1,7 +1,7 @@
 #include "HTTPResponse.hpp"
 
 
-// TODO : 相対パスはcurlやブラウザでかき消されてるかもしれない
+// TODO : 相対パスの挙動調査(curlでリクエストの出力すると良いかも)、相対パスはcurlやブラウザでかき消されてるかもしれない
 void HTTPResponse::makeDeleteResponseBody(HTTPRequest &request)
 {
 	std::string path = request.getUri();

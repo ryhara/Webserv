@@ -1,9 +1,5 @@
 #include "Server.hpp"
 
-// TODO : 複数ポートに対応する
-// ServerSetupクラスを作成し、configのポートの数だけServerクラスを作成する
-// pollは一回よびだして、複数のポートを監視する
-
 Server::Server(void)
 {
 	ft_memset(&_hints, 0, sizeof(addrinfo));
@@ -54,9 +50,6 @@ void Server::createSocket(std::string &port)
 	int server_fd;
 
 	server_fd = socket(_res->ai_family, _res->ai_socktype, _res->ai_protocol);
-	#if DEBUG
-		std::cout << "#### [ DEBUG ] server_fd ####" << std::endl << server_fd << std::endl << "##########" << std::endl;
-	#endif
 	if (server_fd < 0) {
 		closeServerFds();
 		log_exit("socket", __LINE__, __FILE__, errno);
@@ -101,9 +94,6 @@ int Server::acceptSocket(int &server_fd)
 
 	client_addr_len = sizeof(client_addr);
 	client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
-	#if DEBUG
-		std::cout << "#### [ DEBUG ] client_fd ####" << std::endl << client_fd << std::endl << "##########" << std::endl;
-	#endif
 	if (client_fd < 0) {
 		return -1;
 	}
@@ -228,7 +218,7 @@ void Server::mainLoop(void)
 
 void Server::start(void)
 {
-	std::cout << "================= Server::start =================" << std::endl;
+	std::cout << "================= Server start =================" << std::endl;
 	std::vector<std::string> list;
 	list.push_back("4242");
 	list.push_back("4243");

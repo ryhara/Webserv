@@ -69,7 +69,7 @@ class HTTPResponse
 		void makeGetResponseBody(HTTPRequest &request);
 		void makePostResponseBody(HTTPRequest &request);
 		void makeDeleteResponseBody(HTTPRequest &request);
-		void makeResponseMessage(HTTPRequest &request);
+		void makeResponseMessage();
 
 		std::string getDateTimestamp(void) const;
 		std::string getTimeStampForPost(void) const;

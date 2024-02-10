@@ -1,28 +1,78 @@
 #include <exception>
 
-class HTTPRequestParseError : public std::exception
+#include "HTTPStatusCode.hpp"
+
+class ServerException : public std::exception
+{
+	protected:
+		HTTPStatusCode _status_code;
+		std::string _status_message;
+	public:
+		ServerException(HTTPStatusCode status_code, std::string status_message) : _status_code(status_code), _status_message(status_message) {}
+		virtual ~ServerException() throw() {}
+		HTTPStatusCode getStatusCode(void) const
+		{
+			return (_status_code);
+		}
+		virtual const char* what() const throw() = 0;
+};
+
+class HTTPRequestParseError : public ServerException
 {
 	public:
+		~HTTPRequestParseError() throw() {}
+		HTTPRequestParseError(void) : ServerException(STATUS_400, "Bad Request") {}
+		HTTPRequestParseError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
 		virtual const char *what() const throw()
 		{
-			return ("HTTP Request Parse Error");
+			return (_status_message.c_str());
 		}
 };
 
-class InternalServerError : public std::exception
+class InternalServerError : public ServerException
 {
 	public:
+		~InternalServerError() throw() {}
+		InternalServerError(void): ServerException(STATUS_500, "Internal Server Error") {}
+		InternalServerError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
 		virtual const char *what() const throw()
 		{
-			return ("Internal Server Error");
+			return (_status_message.c_str());
 		}
 };
 
-class HTTPRequestPayloadTooLargeError: public std::exception
+class HTTPRequestPayloadTooLargeError: public ServerException
 {
 	public:
+		~HTTPRequestPayloadTooLargeError() throw() {}
+		HTTPRequestPayloadTooLargeError(void) : ServerException(STATUS_413, "Request Entity Too Large") {}
+		HTTPRequestPayloadTooLargeError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
 		virtual const char *what() const throw()
 		{
-			return ("Payload Too Large");
+			return (_status_message.c_str());
+		}
+};
+
+class MethodNotAllowedError : public ServerException
+{
+	public:
+		~MethodNotAllowedError() throw() {}
+		MethodNotAllowedError(void) : ServerException(STATUS_405, "Method Not Allowed") {}
+		MethodNotAllowedError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
+		virtual const char *what() const throw()
+		{
+			return (_status_message.c_str());
+		}
+};
+
+class NotImplementedError : public ServerException
+{
+	public:
+		~NotImplementedError() throw() {}
+		NotImplementedError(void) : ServerException(STATUS_501, "Not Implemented") {}
+		NotImplementedError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
+		virtual const char *what() const throw()
+		{
+			return (_status_message.c_str());
 		}
 };
