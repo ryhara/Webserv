@@ -17,3 +17,12 @@ class InternalServerError : public std::exception
 			return ("Internal Server Error");
 		}
 };
+
+class HTTPRequestPayloadTooLargeError: public std::exception
+{
+	public:
+		virtual const char *what() const throw()
+		{
+			return ("Payload Too Large");
+		}
+};

@@ -105,6 +105,8 @@ void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 	}
 	if (!body.empty())
 		this->_request.setBody(body);
+	if (body.size() > MAX_BODY_SIZE)
+		throw HTTPRequestPayloadTooLargeError();
 }
 
 void HTTPRequestParse::parseNormalBody(std::stringstream &ss)
@@ -119,6 +121,8 @@ void HTTPRequestParse::parseNormalBody(std::stringstream &ss)
 	}
 	if (!body.empty())
 		this->_request.setBody(body);
+	if (body.size() > MAX_BODY_SIZE)
+		throw HTTPRequestPayloadTooLargeError();
 }
 
 void HTTPRequestParse::readHeaders(std::stringstream &ss)
