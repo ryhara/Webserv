@@ -158,7 +158,7 @@ void HTTPRequestParse::searchLocation(void)
 		return ;
 	}
 	std::vector<std::string> uri_split = split(uri, '/');
-	if (uri_split.size() < 2)
+	if (uri_split.size() < 2 && uri[uri.size() - 1] != '/')
 	{
 		this->_request.setLocation("/");
 		return ;
