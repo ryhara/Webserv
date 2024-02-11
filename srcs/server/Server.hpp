@@ -60,6 +60,7 @@ class Server
 		void	clientProcess(int client_fd);
 		void	parentProcess(pid_t pid);
 		void	closeServerFds(void);
+		void 	serverEvent(void);
 
 	public:
 		Server(void);

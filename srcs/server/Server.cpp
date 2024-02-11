@@ -155,6 +155,27 @@ void Server::initFds(void)
 	}
 }
 
+void Server::serverEvent(void)
+{
+	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
+	{
+		if (FD_ISSET(it->second, &_readfds))
+		{
+			FD_CLR(it->second, &_readfds);
+			_server_fd = it->second;
+			int client_fd = acceptSocket(it->second);
+			if (client_fd < 0)
+			{
+				closeServerFds();
+				log_exit("accept", __LINE__, __FILE__, errno);
+			}
+			setNonBlockingFd(client_fd);
+			_client_fds.push_back(client_fd);
+			break;
+		}
+	}
+}
+
 void Server::mainLoop(void)
 {
 	while (1) {
@@ -166,29 +187,14 @@ void Server::mainLoop(void)
 		} else if (result == 0) {
 			// timeout
 		} else {
-			for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
-			{
-				if (FD_ISSET(it->second, &_readfds))
-				{
-					FD_CLR(it->second, &_readfds);
-					_server_fd = it->second;
-					int client_fd = acceptSocket(it->second);
-					if (client_fd < 0)
-					{
-						closeServerFds();
-						log_exit("accept", __LINE__, __FILE__, errno);
-					}
-					setNonBlockingFd(client_fd);
-					_client_fds.push_back(client_fd);
-					break;
-				}
-			}
+			serverEvent();
 			for (std::vector<int>::iterator it = _client_fds.begin(); it != _client_fds.end(); ++it)
 			{
 				if (FD_ISSET(*it, &_readfds))
 				{
 					FD_CLR(*it, &_readfds);
 					Client client(*it, _server_fd);
+					// TODO : recvとsendを分けて、実行、RECV_STATE→SEND_STATE→CLOSE_STATEで管理
 					if (client.clientProcess() < 0)
 					{
 						closeServerFds();
