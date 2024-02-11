@@ -38,13 +38,13 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 {
 	// TODO : GETは必須、POSTとDELETEは任意で, configで許可されていない場合405 Method Not Allowed
 	std::string method = request.getMethod();
-	if (method == "GET") {
+	if (method.compare("GET") == 0) {
 		makeGetResponseBody(request);
 		makeResponseMessage();
-	} else if (method == "POST") {
+	} else if (method.compare("POST") == 0) {
 		makePostResponseBody(request);
 		makeResponseMessage();
-	} else if (method == "DELETE") {
+	} else if (method.compare("DELETE") == 0) {
 		makeDeleteResponseBody(request);
 		makeResponseMessage();
 	}

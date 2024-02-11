@@ -40,9 +40,13 @@ std::map<std::string, std::string> &HTTPRequest::getHeaders(void) const
 	return (const_cast<std::map<std::string, std::string> &>(this->_headers));
 }
 
-std::string 	&HTTPRequest::getHeader(const std::string &key) const
+std::string 	HTTPRequest::getHeader(const std::string &key) const
 {
-	return (const_cast<std::string &>(this->_headers.find(key)->second));
+	if (this->_headers.find(key) == this->_headers.end()) {
+		std::string empty = "";
+		return (static_cast<std::string>(empty));
+	}
+	return (static_cast<std::string>(this->_headers.find(key)->second));
 }
 
 std::string		&HTTPRequest::getBody(void) const

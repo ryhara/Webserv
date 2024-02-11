@@ -52,7 +52,7 @@ int Client::recvProcess(HTTPRequest &request)
 void Client::responseProcess(HTTPRequest &request, HTTPResponse &response)
 {
 	std::string keep_alive = request.getHeader("Connection");
-	if (keep_alive == "close")
+	if (keep_alive.compare("keep-alive") == 0)
 		response.setKeepAlive(false);
 	response.selectResponse(request);
 }
