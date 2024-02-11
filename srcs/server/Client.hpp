@@ -27,7 +27,7 @@ class Client
 		void setServerFd(int server_fd);
 
 		int clientProcess();
-		int requestProcess(HTTPRequest &request);
+		int recvProcess(HTTPRequest &request);
 		void responseProcess(HTTPRequest &request, HTTPResponse &response);
 		int sendResponse(std::string &responseMessage);
 };

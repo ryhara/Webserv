@@ -38,13 +38,13 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 {
 	// TODO : GETは必須、POSTとDELETEは任意で, configで許可されていない場合405 Method Not Allowed
 	std::string method = request.getMethod();
-	if (method == "GET") {
+	if (method.compare("GET") == 0) {
 		makeGetResponseBody(request);
 		makeResponseMessage();
-	} else if (method == "POST") {
+	} else if (method.compare("POST") == 0) {
 		makePostResponseBody(request);
 		makeResponseMessage();
-	} else if (method == "DELETE") {
+	} else if (method.compare("DELETE") == 0) {
 		makeDeleteResponseBody(request);
 		makeResponseMessage();
 	}
@@ -73,7 +73,7 @@ void HTTPResponse::handleRedirectRequest(HTTPRequest &request)
 	std::string path = "";
 	// TODO : configで設定されたredirectのpathを取得する
 	std::string redirect_path = "http://google.com";
-	// TODO : リダイレクトの後ろのパスも設定する場合
+	// リダイレクトの後ろのパスも設定する場合
 	// size_t found = uri.find(location);
 	// if (found != std::string::npos) {
 	// 	path = uri.substr(found + location.size(), uri.size());

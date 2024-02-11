@@ -31,7 +31,7 @@ class HTTPRequest
 		std::string		&getUri(void) const;
 		std::string		&getVersion(void) const;
 		std::map<std::string, std::string> &getHeaders(void) const;
-		std::string 	&getHeader(const std::string &key) const;
+		std::string 	getHeader(const std::string &key) const;
 		std::string		&getBody(void) const;
 		std::string		&getLocation(void) const;
 		struct stat		*getStat(void) const;

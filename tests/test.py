@@ -3,7 +3,7 @@ import requests
 url = 'http://localhost:4242'
 
 # # GET
-url += "/empty.html"
+url += "/index.html"
 response = requests.get(url)
 
 # POST

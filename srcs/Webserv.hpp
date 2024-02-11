@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <cerrno>
 
 #include "Color.hpp"
 #include "utils.hpp"

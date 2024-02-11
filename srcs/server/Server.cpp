@@ -5,12 +5,13 @@ Server::Server(void)
 	ft_memset(&_hints, 0, sizeof(addrinfo));
 	_res = NULL;
 	ft_memset(_buffer, 0, sizeof(char) * BUFFER_SIZE);
-	ft_memset(&fds_, 0, sizeof(struct pollfd) * (MAX_CLIENTS + 1));
 }
 
 Server::~Server(void)
 {
 	_server_fds.clear();
+	_client_fds.clear();
+	FD_ZERO(&_readfds);
 	if (_res)
 		freeaddrinfo(_res);
 }
@@ -121,28 +122,11 @@ void Server::clientProcess(int client_fd)
 	try {
 		request_parse.parse(_buffer);
 		response.selectResponse(request);
-		responseMessage = response.getResponseMessage();
-	} catch (HTTPRequestParseError &e) {
-		std::cerr << e.what() << std::endl;
-		response.setStatusCode(STATUS_400);
-		response.setStatusLine();
-		responseMessage = response.getStatusLine();
-	} catch (InternalServerError &e) {
-		std::cerr << e.what() << std::endl;
-		response.setStatusCode(STATUS_500);
-		response.setStatusLine();
-		responseMessage = response.getStatusLine();
-	} catch (HTTPRequestPayloadTooLargeError &e) {
-		std::cerr << e.what() << std::endl;
-		response.setStatusCode(STATUS_413);
-		response.setStatusLine();
-		responseMessage = response.getStatusLine();
-	} catch (std::exception &e) {
-		std::cerr << e.what() << std::endl;
-		response.setStatusCode(STATUS_500);
-		response.setStatusLine();
-		responseMessage = response.getStatusLine();
+	} catch (ServerException &e) {
+		response.setStatusCode(e.getStatusCode());
+		response.makeResponseMessage();
 	}
+	responseMessage = response.getResponseMessage();
 	#if DEBUG
 		std::cout << "##### [ DEBUG ] response message ####" << std::endl << responseMessage << std::endl << "##########" << std::endl;
 	#endif
@@ -158,61 +142,68 @@ void Server::clientProcess(int client_fd)
 	# endif
 }
 
-void Server::pollInit(void)
+void Server::initFds(void)
 {
-
-	int index = 0;
+	FD_ZERO(&_readfds);
 	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
 	{
-		this->fds_[index].fd = it->second;
-		this->fds_[index].events = POLLIN;
-		this->fds_[index].revents = 0;
-		index++;
+		FD_SET(it->second, &_readfds);
 	}
-	for (int i = index; i < MAX_CLIENTS + 1; ++i)
+	for (std::vector<int>::iterator it = _client_fds.begin(); it != _client_fds.end(); ++it)
 	{
-		this->fds_[i].fd = -1;
-		this->fds_[i].events = POLLIN;
-		this->fds_[i].revents = 0;
+		FD_SET(*it, &_readfds);
+	}
+}
+
+void Server::serverEvent(void)
+{
+	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
+	{
+		if (FD_ISSET(it->second, &_readfds))
+		{
+			FD_CLR(it->second, &_readfds);
+			_server_fd = it->second;
+			int client_fd = acceptSocket(it->second);
+			if (client_fd < 0)
+			{
+				closeServerFds();
+				log_exit("accept", __LINE__, __FILE__, errno);
+			}
+			setNonBlockingFd(client_fd);
+			_client_fds.push_back(client_fd);
+			break;
+		}
 	}
 }
 
 void Server::mainLoop(void)
 {
-	int client_fd;
-
-	pollInit();
-	for (;;) {
-		int	result = poll(fds_, MAX_CLIENTS, -1);
+	while (1) {
+		initFds();
+		int result = select(FD_SETSIZE, &_readfds, NULL, NULL, NULL);
 		if (result < 0) {
-			log_exit("poll", __LINE__, __FILE__, errno);
-		}
-		else if (result == 0) {
+			closeServerFds();
+			log_exit("select", __LINE__, __FILE__, errno);
+		} else if (result == 0) {
 			// timeout
-			std::cout << "-- poll timeout --" << std::endl;
-			continue;
-		}
-		for (int i = 0; i < MAX_CLIENTS; ++i) {
-			if (fds_[i].fd != -1 && (fds_[i].revents & (POLLIN))) {
-				std::cout << "File descriptor " << fds_[i].fd << " is ready for reading." << std::endl;
-				client_fd = acceptSocket(fds_[i].fd);
-				if (client_fd < 0) {
-					if (errno == EWOULDBLOCK || errno == EAGAIN) {
-						errno = 0;
-						continue;
-					} else {
+		} else {
+			serverEvent();
+			for (std::vector<int>::iterator it = _client_fds.begin(); it != _client_fds.end(); ++it)
+			{
+				if (FD_ISSET(*it, &_readfds))
+				{
+					FD_CLR(*it, &_readfds);
+					Client client(*it, _server_fd);
+					// TODO : recvとsendを分けて、実行、RECV_STATE→SEND_STATE→CLOSE_STATEで管理
+					if (client.clientProcess() < 0)
+					{
 						closeServerFds();
-						log_exit("accept", __LINE__, __FILE__, errno);
+						log_exit("clientProcess", __LINE__, __FILE__, errno);
 					}
+					close(*it);
+					_client_fds.erase(it);
+					break;
 				}
-				setNonBlockingFd(client_fd);
-				Client client(client_fd, fds_[i].fd);
-				if (client.clientProcess() < 0) {
-					close(client_fd);
-					closeServerFds();
-					log_exit("clientProcess", __LINE__, __FILE__, errno);
-				}
-				close(client_fd);
 			}
 		}
 	}
@@ -225,7 +216,7 @@ void Server::start(void)
 	list.push_back("4242");
 	list.push_back("4243");
 	// TODO : MAX_CLIENTSを超えた分はエラーを返す. CONFIG段階でエラーにしとく
-	if (list.size() > MAX_CLIENTS)
+	if (list.size() > FD_SETSIZE / 2)
 	{
 		log_exit("server start", __LINE__, __FILE__, errno);
 	}
