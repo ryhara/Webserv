@@ -30,7 +30,7 @@ void Client::setServerFd(int server_fd)
 }
 
 
-int Client::requestProcess(HTTPRequest &request)
+int Client::recvProcess(HTTPRequest &request)
 {
 	char buffer[_buffer_size];
 	HTTPRequestParse request_parse(request);
@@ -76,13 +76,12 @@ int Client::clientProcess()
 	std::string responseMessage;
 
 	try {
-		if (requestProcess(request) < 0)
+		if (recvProcess(request) < 0)
 			return -1;
 		responseProcess(request, response);
 	} catch (ServerException &e) {
 		response.setStatusCode(e.getStatusCode());
 		response.makeResponseMessage();
-		responseMessage = response.getResponseMessage();
 	}
 	responseMessage = response.getResponseMessage();
 	#if DEBUG

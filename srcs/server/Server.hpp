@@ -25,7 +25,6 @@
 # define SERVER_PORT_STR		"4242"
 # define QUEUE_LENGTH			5
 # define BUFFER_SIZE			8192
-# define MAX_CLIENTS			6
 
 // TODO : vectorやmapのメモリを開放する
 
@@ -38,9 +37,12 @@ class Server
 	private:
 		// TODO : index, fdにする。index番号のConfigの値を取得したいため
 		std::map<std::string, int>	_server_fds; // PORT_STR, server_fd
+		int							_server_fd;
 		struct addrinfo _hints;
 		struct addrinfo *_res;
-		struct pollfd				fds_[MAX_CLIENTS];
+		struct pollfd				fds_[FD_SETSIZE];
+		fd_set						_readfds;
+		std::vector<int>			_client_fds;
 		char			_buffer[BUFFER_SIZE];
 		HTTPRequest		_request;
 		Config			_config;
@@ -52,7 +54,7 @@ class Server
 		void	createSocket(std::string &port);
 		void	bindSocket(int &server_fd);
 		void	listenSocket(int &server_fd);
-		void	pollInit(void);
+		void	initFds(void);
 		void	mainLoop(void);
 		int		acceptSocket(int &server_fd);
 		void	clientProcess(int client_fd);
