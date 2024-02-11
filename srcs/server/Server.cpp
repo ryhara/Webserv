@@ -193,10 +193,12 @@ void Server::mainLoop(void)
 			continue;
 		}
 		for (int i = 0; i < MAX_CLIENTS; ++i) {
-			if (fds_[i].fd != -1 && (fds_[i].revents & (POLLIN | POLLERR))) {
+			if (fds_[i].fd != -1 && (fds_[i].revents & (POLLIN))) {
+				std::cout << "File descriptor " << fds_[i].fd << " is ready for reading." << std::endl;
 				client_fd = acceptSocket(fds_[i].fd);
 				if (client_fd < 0) {
 					if (errno == EWOULDBLOCK || errno == EAGAIN) {
+						errno = 0;
 						continue;
 					} else {
 						closeServerFds();
