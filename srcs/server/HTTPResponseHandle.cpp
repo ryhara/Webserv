@@ -37,6 +37,7 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 {
 	// TODO : GETは必須、POSTとDELETEは任意で, configで許可されていない場合405 Method Not Allowed
+	// Method Not Allowedの場合は[Allow: GET, POST, DELETE]のようにAllowヘッダをつける
 	std::string method = request.getMethod();
 	if (method.compare("GET") == 0) {
 		makeGetResponseBody(request);

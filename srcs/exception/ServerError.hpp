@@ -76,3 +76,15 @@ class NotImplementedError : public ServerException
 			return (_status_message.c_str());
 		}
 };
+
+class HTTPVersionNotSupportedError : public ServerException
+{
+	public:
+		~HTTPVersionNotSupportedError() throw() {}
+		HTTPVersionNotSupportedError(void) : ServerException(STATUS_505, "HTTP Version Not Supported") {}
+		HTTPVersionNotSupportedError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
+		virtual const char *what() const throw()
+		{
+			return (_status_message.c_str());
+		}
+};

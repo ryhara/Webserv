@@ -12,6 +12,18 @@ HTTPResponse::~HTTPResponse()
 	_statusMessageMap.clear();
 }
 
+void HTTPResponse::clear(void)
+{
+	_version = HTTP_VERSION;
+	_statusCode = STATUS_200;
+	_statusMessage = _statusMessageMap[_statusCode];
+	_keepAlive = true;
+	_contentLength = 0;
+	_headers.clear();
+	_body.clear();
+	_responseMessage.clear();
+}
+
 // getter
 const std::string &HTTPResponse::getVersion() const
 {
