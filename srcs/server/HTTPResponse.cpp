@@ -248,6 +248,7 @@ void HTTPResponse::makeResponseMessage()
 	if (_body.size() > 0) {
 		_responseMessage += CRLF;
 		_responseMessage += _body;
+		_responseMessage += CRLF;
 	} else {
 		_responseMessage += CRLF;
 	}

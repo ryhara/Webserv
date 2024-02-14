@@ -4,33 +4,33 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 {
 	enum response_mode mode = request.getMode();
 	switch (mode) {
-	case NORMAL:
-	#ifdef DEBUG
-		std::cout << "########## [ DEBUG ] NORMAL ##########" << std::endl;
-	#endif
-		handleNormalRequest(request);
-		break;
-	case CGI:
-	#ifdef DEBUG
-		std::cout << "########## [ DEBUG ] CGI ##########" << std::endl;
-	#endif
-		handleCGIRequest(request);
-		break;
-	case AUTOINDEX:
-	#ifdef DEBUG
-		std::cout << "########## [ DEBUG ] AUTOINDEX ##########" << std::endl;
-	#endif
-		handleAutoIndexRequest(request);
-		break;
-	case REDIRECT:
-	#ifdef DEBUG
-		std::cout << "########## [ DEBUG ] REDIRECT ##########" << std::endl;
-	#endif
-		handleRedirectRequest(request);
-		break;
-	default:
-		throw InternalServerError();
-		break;
+		case NORMAL:
+		#ifdef DEBUG
+			std::cout << "########## [ DEBUG ] NORMAL ##########" << std::endl;
+		#endif
+			handleNormalRequest(request);
+			break;
+		case CGI:
+		#ifdef DEBUG
+			std::cout << "########## [ DEBUG ] CGI ##########" << std::endl;
+		#endif
+			handleCGIRequest(request);
+			break;
+		case AUTOINDEX:
+		#ifdef DEBUG
+			std::cout << "########## [ DEBUG ] AUTOINDEX ##########" << std::endl;
+		#endif
+			handleAutoIndexRequest(request);
+			break;
+		case REDIRECT:
+		#ifdef DEBUG
+			std::cout << "########## [ DEBUG ] REDIRECT ##########" << std::endl;
+		#endif
+			handleRedirectRequest(request);
+			break;
+		default:
+			throw InternalServerError();
+			break;
 	}
 }
 

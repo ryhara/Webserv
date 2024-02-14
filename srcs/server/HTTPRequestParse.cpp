@@ -67,6 +67,17 @@ std::vector<std::string> HTTPRequestParse::split(std::string str, std::string de
 	return (result);
 }
 
+int HTTPRequestParse::countSpace(const std::string &str)
+{
+	int count = 0;
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		if (str[i] == ' ')
+			count++;
+	}
+	return (count);
+}
+
 void HTTPRequestParse::parse(char *buffer)
 {
 	std::string line;
@@ -84,7 +95,6 @@ void HTTPRequestParse::parse(char *buffer)
 					std::cout << "#### [ DEBUG ] REQUEST_LINE_STATE ####" << std::endl;
 				#endif
 				_requiredParse = readRequestLine(bufferStream);
-				setHTTPRequestParseState(HEADERS_STATE);
 				break;
 			case HEADERS_STATE:
 				#if DEBUG
@@ -95,16 +105,15 @@ void HTTPRequestParse::parse(char *buffer)
 			case BODY_STATE:
 				#if DEBUG
 					std::cout << "#### [ DEBUG ] BODY_STATE ####" << std::endl;
-					std::cout << _request.getBody() << " " << _request.getBody().size() << std::endl;
 				#endif
 				_requiredParse = readBody(bufferStream);
-				// TODO : telnetでPOST対応するならbodyの読み方変える。
-				setHTTPRequestParseState(FINISH_STATE);
 				break;
 			case FINISH_STATE:
 				#if DEBUG
 					std::cout << "#### [ DEBUG ] FINISH_STATE ####" << std::endl;
 				#endif
+				if (_request.getHeader("Host").empty())
+					throw BadRequestError();
 				_requiredParse = false;
 				break;
 		}
@@ -115,20 +124,6 @@ void HTTPRequestParse::parse(char *buffer)
 	# endif
 	bufferStream.clear();
 	bufferStream.str("");
-
-	// getlineWithCRLF(bufferStream, line);
-	// if (line.empty()) {
-	// 	throw HTTPRequestParseError();
-	// 	return ;
-	// }
-	// readRequestLine(line);
-	// readHeaders(bufferStream);
-	// readBody(bufferStream);
-	// #if DEBUG
-	// 	_request.print();
-	// # endif
-	// bufferStream.clear();
-	// bufferStream.str("");
 }
 
 bool HTTPRequestParse::readRequestLine(std::stringstream &ss)
@@ -137,10 +132,17 @@ bool HTTPRequestParse::readRequestLine(std::stringstream &ss)
 	if (!getlineWithCRLF(ss, line)) {
 		return (false);
 	}
+	if (line.empty()) {
+		return (false);
+	}
 	std::vector<std::string> request_line = split(line, ' ');
+	if (countSpace(line) != 2)
+		throw BadRequestError();
 	if (request_line.size() != 3)
-		throw HTTPRequestParseError();
-	// TODO : methodが対応してない場合にエラー
+		throw BadRequestError();
+	// TODO : configの値で　methodが対応してない場合にエラー
+	if (request_line[0].compare("GET") != 0 && request_line[0].compare("POST") != 0 && request_line[0].compare("DELETE") != 0)
+		throw MethodNotAllowedError();
 	if (request_line[2].compare(HTTP_VERSION) != 0)
 		throw HTTPVersionNotSupportedError();
 	this->_request.setMethod(request_line[0]);
@@ -148,6 +150,8 @@ bool HTTPRequestParse::readRequestLine(std::stringstream &ss)
 	this->_request.setVersion(request_line[2]);
 	searchLocation();
 	searchRequestMode();
+	if (!_request.getMethod().empty())
+		setHTTPRequestParseState(HEADERS_STATE);
 	return (true);
 }
 
@@ -158,7 +162,7 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 	std::vector<std::string> header;
 	if (getlineWithCRLF(ss, line))
 	{
-		if (line.empty() && _contentLength) {
+		if (line.empty() && (_contentLength > 0 || _isChunked)) {
 			setHTTPRequestParseState(BODY_STATE);
 			return (true);
 		} else if (line.empty()) {
@@ -167,7 +171,7 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 		}
 		std::vector<std::string> header = split(line, std::string(": "));
 		if (header.size() != 2)
-			throw HTTPRequestParseError();
+			throw BadRequestError();
 		pair.first = header[0];
 		if (header[0].compare("Transfer-Encoding") == 0 && header[1].compare("chunked") == 0)
 			this->_isChunked = true;
@@ -176,56 +180,68 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 		}
 		pair.second = header[1];
 		this->_request.setHeaders(pair);
+		if (!_request.getHeader("Transfer-Encoding").empty() && !_request.getHeader("Content-Length").empty())
+			throw BadRequestError();
 		return (true);
 	} else {
 		return (false);
 	}
 }
 
+// 1回目はサイズから読み込む
+// 次の行がサイズと一致しなかったらエラー
 void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 {
-	std::string line, body;
-	size_t count = 0;
-	int size;
-	while (getlineWithCRLF(ss, line))
+	std::string line = "";
+	static size_t size = 0;
+	static bool isSize = true;
+	if (!isSize && getlineWithCRLF(ss, line))
 	{
-		if (line.empty())
-			break;
-		if (count % 2 == 0) {
-			if (!isHex(line))
-				throw HTTPRequestParseError();
-			std::stringstream ss(line);
-			ss >> std::hex >> size;
-			if (size == 0)
-				break;
+		if (line.empty()) {
+			setHTTPRequestParseState(FINISH_STATE);
+			isSize = true;
+			return ;
+		}
+		if (!isHex(line))
+			throw BadRequestError();
+		std::stringstream ss(line);
+		ss >> std::hex >> size;
+		std::cout << "size: " << size << std::endl;
+		if (size == 0)  {
 			ss.clear();
 			ss.str("");
-		} else {
-			body += line;
+			setHTTPRequestParseState(FINISH_STATE);
+			return ;
 		}
-		count++;
+		isSize = true;
+	} else {
+		getlineWithCRLF(ss, line);
+		std::cout << "line: " << line << std::endl;
+		if (line.size() != size)
+			throw BadRequestError();
+		_request.addBody(line);
+		if (_request.getBody().size() > MAX_BODY_SIZE)
+			throw HTTPRequestPayloadTooLargeError();
+		isSize = false;
 	}
-	if (!body.empty())
-		this->_request.setBody(body);
-	if (body.size() > MAX_BODY_SIZE)
-		throw HTTPRequestPayloadTooLargeError();
 }
 
 void HTTPRequestParse::parseNormalBody(std::stringstream &ss)
 {
-	std::string body;
 	std::string line = "";
-	while (getlineWithCRLF(ss, line))
+	if (getlineWithCRLF(ss, line))
 	{
 		if (line.empty())
-			break;
-		body += line;
+			return ;
+		_request.addBody(line);
 	}
-	if (!body.empty())
-		this->_request.setBody(body);
-	if (body.size() > MAX_BODY_SIZE)
+	if (_request.getBody().size() > _contentLength || _request.getBody().size() > MAX_BODY_SIZE)
 		throw HTTPRequestPayloadTooLargeError();
+	if (_request.getBody().size() == _contentLength)
+		setHTTPRequestParseState(FINISH_STATE);
 }
+
+// TODO : chunkedやpostの場合の対応
 
 bool HTTPRequestParse::readBody(std::stringstream &ss)
 {

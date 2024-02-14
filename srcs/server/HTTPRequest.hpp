@@ -42,6 +42,7 @@ class HTTPRequest
 		void			setVersion(const std::string &version);
 		void			setHeaders(const std::pair<std::string, std::string> &header);
 		void			setBody(const std::string &body);
+		void			addBody(const std::string &body);
 		void			setLocation(const std::string &location);
 		void 			setStat(const struct stat &stat);
 		void			setMode(const enum response_mode mode);

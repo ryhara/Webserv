@@ -42,6 +42,7 @@ class HTTPRequestParse
 		void parse(char *buffer);
 		std::vector<std::string> split(std::string str, char del);
 		std::vector<std::string> split(std::string str, std::string del);
+		int countSpace(const std::string &str);
 		bool readRequestLine(std::stringstream &ss);
 		bool readHeaders(std::stringstream &ss);
 		bool readBody(std::stringstream &ss);

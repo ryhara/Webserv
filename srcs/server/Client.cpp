@@ -109,7 +109,9 @@ int Client::sendResponse(std::string &responseMessage)
 		return -1;
 	}
 	# if DEBUG
-		std::cout << "########## send end ##########" << std::endl;
+		std::cout << "########## [ DEBUG ] send start ##########" << std::endl;
+		std::cout << responseMessage << std::endl;
+		std::cout << "########## [ DEBUG ] send   end ##########" << std::endl;
 	#endif
 	return 0;
 }

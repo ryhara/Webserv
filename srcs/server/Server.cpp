@@ -154,7 +154,7 @@ void Server::executeSendProcess(std::map<int, Client*>::iterator &it)
 	std::string responseMessage = client->getResponseMessage();
 	if (client->sendResponse(responseMessage) < 0)
 		deleteClient(it);
-	client->setState(CLOSE_STATE);
+	client->setState(RECV_STATE);
 }
 
 void Server::deleteClient(std::map<int, Client*>::iterator &it)
@@ -204,7 +204,7 @@ void Server::mainLoop(void)
 					client->getResponse().makeResponseMessage();
 					responseMessage = client->getResponseMessage();
 					client->sendResponse(responseMessage);
-					client->setState(CLOSE_STATE);
+					client->setState(RECV_STATE);
 					if (client->getKeepAlive() == false)
 						deleteClient(it);
 					else
