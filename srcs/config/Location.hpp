@@ -12,16 +12,19 @@ private:
 	bool		get_method;
 	bool		post_method;
 	bool		delete_method;
+	bool		autoindex;
 	std::string alias;
 	std::string	index;
-	bool		autoindex;
 	std::string upload_path;
-	std::string cgi_path;
-	std::string redir_path;
+	std::vector<std::string> cgi_extension;
+	std::vector<std::string> redir_path;
+
 public:
 	Location(/* args */);
-	Location(std::ifstream &ifs, std::string buf);
+	Location(std::string location);
 	~Location();
-	void getLocation() const;
+
+	size_t		addInfo(std::vector<std::vector<std::string> > &parseLines, size_t startIndex);
+	void	getLocation() const;
 	std::string get_path() const;
 };

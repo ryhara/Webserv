@@ -18,7 +18,7 @@ class ServerConfig
 	public:
 		ServerConfig();
 		~ServerConfig();
-		ServerConfig(std::ifstream &ifs, std::string buf);
+		ServerConfig(std::vector<std::vector<std::string> > &parseLines);
 		// TODO : getter
 		void getServerConfig();
 		// TODO : setter
