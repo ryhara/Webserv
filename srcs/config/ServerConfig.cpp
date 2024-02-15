@@ -21,7 +21,8 @@ bool isNumber(const std::string &str)
 ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) : port(0), server_name(""), max_body_size(0), error_page("")
 {
 	std::vector<std::string> parseLine;
-	for (size_t i = 0; i < parseLines.size(); i++)
+	size_t i = 0;
+	for (; i < parseLines.size(); i++)
 	{
 		parseLine = parseLines[i];
 		if (parseLine[0] == "listen")
@@ -127,6 +128,12 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 			exit (1);
 		}
 	}
+	parseLines.erase(parseLines.begin(), parseLines.begin() + i + 1);
+}
+
+std::string ServerConfig::getServerName() const
+{
+	return this->server_name;
 }
 
 void ServerConfig::getServerConfig()

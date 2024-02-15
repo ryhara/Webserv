@@ -14,10 +14,10 @@ Config::~Config() {
 
 void Config::addServer(ServerConfig &server)
 {
-	this->_server = server;
+	this->_servers.insert(std::make_pair(server.getServerName(), server));
 }
 
-ServerConfig &Config::getServer() const
-{
-	return (ServerConfig &)_server;
-}
+// ServerConfig &Config::getServer() const
+// {
+// 	return (ServerConfig &)_servers[0][0];
+// }

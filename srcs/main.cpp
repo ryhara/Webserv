@@ -1,5 +1,7 @@
 #include "ConfigParse.hpp"
 #include "Server.hpp"
+#include "Config.hpp"
+#include "ServerConfig.hpp"
 #include "Webserv.hpp"
 
 // TODO : 全クラスにおいてデストラクタやerror時のfreeやclear処理を実装する
@@ -11,7 +13,12 @@ int main(int argc, char **argv)
 	Server server;
 	ConfigParse configParse(server.getConfig());
 	configParse.parse(DEFAULT_CONFIG_FILE);
-	configParse.getConfig().getServer().getServerConfig();
+	std::map<std::string, ServerConfig> servers = configParse.getConfig().getServers();
+	std::map<std::string, ServerConfig>::iterator it = servers.begin();
+	for (; it != servers.end(); it++)
+	{
+		it->second.getServerConfig();
+	}
 	return 0;
 }
 

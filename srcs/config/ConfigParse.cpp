@@ -69,12 +69,6 @@ void ConfigParse::parse(const std::string &filename) {
 		std::cout << "ConfigParse : invalid config : empty file" << std::endl;
 		exit (1);
 	}
-	if (_parseLines[0].size() != 2 || _parseLines[0][0] != "server" || _parseLines[0][1] != "{")
-	{
-		std::cout << "ConfigParse : invalid config : not start with 'server {'" << std::endl;
-		exit (1);
-	}
-	_parseLines.erase(_parseLines.begin());
 	endWord = _parseLines.back().back();
 	if (endWord != "}")
 	{
@@ -101,6 +95,15 @@ void ConfigParse::parse(const std::string &filename) {
 		}
 	}
 	//parse
-	ServerConfig server(_parseLines);
-	this->_config.addServer(server);
+	while (!_parseLines.empty())
+	{
+		if (_parseLines[0].size() != 2 || _parseLines[0][0] != "server" || _parseLines[0][1] != "{")
+		{
+			std::cout << "ConfigParse : invalid config : not start with 'server {'" << std::endl;
+			exit (1);
+		}
+		_parseLines.erase(_parseLines.begin());
+		ServerConfig server(_parseLines);
+		this->_config.addServer(server);
+	}
 }

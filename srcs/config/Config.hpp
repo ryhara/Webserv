@@ -11,10 +11,11 @@ class Config
 	private:
 		// TODO : 複数のServer configを持てるようにする
 		// std::map<int, std::vector<ServerConfig> > _servers;
-		ServerConfig _server;
+		std::map<std::string, ServerConfig> _servers;
 	public :
 		Config();
 		~Config();
 		void addServer(ServerConfig &server);
-		ServerConfig &getServer() const;
+		// ServerConfig &getServer() const;
+		std::map<std::string, ServerConfig> &getServers() { return _servers; }
 };
