@@ -36,6 +36,7 @@ class Server
 {
 	private:
 		// TODO : index, fdにする。index番号のConfigの値を取得したいため
+		std::map<int, std::vector<ServerConfig> > _servers;
 		std::map<std::string, int>	_server_fds; // PORT_STR, server_fd
 		int							_server_fd;
 		struct addrinfo _hints;
@@ -67,4 +68,5 @@ class Server
 		~Server(void);
 		void	start(void);
 		Config	&getConfig(void) const;
+		void	setServers(std::map<int, std::vector<ServerConfig> > &servers);
 };

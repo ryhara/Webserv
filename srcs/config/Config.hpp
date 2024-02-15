@@ -13,7 +13,6 @@ class Config
 		// TODO : 複数のServer configを持てるようにする
 		std::map<int, std::vector<ServerConfig> > _servers;
 		// DISALLOW_COPY_AND_ASSIGN(Config);
-		// std::map<std::string, ServerConfig> _servers;
 	public :
 		Config();
 		~Config();

@@ -16,6 +16,11 @@ Server::~Server(void)
 		freeaddrinfo(_res);
 }
 
+void	Server::setServers(std::map<int, std::vector<ServerConfig> > &servers)
+{
+	_servers = servers;
+}
+
 Config &Server::getConfig(void) const
 {
 	return const_cast<Config &>(_config);
