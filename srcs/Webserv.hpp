@@ -12,7 +12,7 @@
 # define SP " "
 # define SERVER_NAME	"webserv/1.0"
 # define HTTP_VERSION	"HTTP/1.1"
-# define DEFAULT_CONFIG_FILE "./config/valid/default.conf"
+# define DEFAULT_CONFIG_FILE "./config/default.conf"
 
 enum methods
 {
