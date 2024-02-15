@@ -103,9 +103,6 @@ void HTTPRequestParse::parse(char *buffer)
 				_requiredParse=  readHeaders(bufferStream);
 				break;
 			case BODY_STATE:
-				#if DEBUG
-					std::cout << "#### [ DEBUG ] BODY_STATE ####" << std::endl;
-				#endif
 				_requiredParse = readBody(bufferStream);
 				break;
 			case FINISH_STATE:
@@ -113,6 +110,8 @@ void HTTPRequestParse::parse(char *buffer)
 					std::cout << "#### [ DEBUG ] FINISH_STATE ####" << std::endl;
 				#endif
 				if (_request.getHeader("Host").empty())
+					throw BadRequestError();
+				if (_contentLength > 0 && _request.getBody().size() != _contentLength)
 					throw BadRequestError();
 				_requiredParse = false;
 				break;
@@ -184,7 +183,13 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 			throw BadRequestError();
 		return (true);
 	} else {
-		return (false);
+		if (_contentLength > 0 || _isChunked) {
+			setHTTPRequestParseState(BODY_STATE);
+			return (false);
+		}
+		else {
+			return (false);
+		}
 	}
 }
 
@@ -194,36 +199,44 @@ void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 {
 	std::string line = "";
 	static size_t size = 0;
-	static bool isSize = true;
-	if (!isSize && getlineWithCRLF(ss, line))
+	static bool isSize = false;
+	while(getlineWithCRLF(ss, line))
 	{
-		if (line.empty()) {
-			setHTTPRequestParseState(FINISH_STATE);
+		if (!isSize) {
+			if (line.empty()) {
+				std::cout << "File" << __FILE__ << "Line" << __LINE__ << std::endl;
+				return ;
+			}
+			if (!isHex(line)) {
+				isSize = false;
+				throw BadRequestError();
+			}
+			std::stringstream ss(line);
+			ss >> std::hex >> size;
+			std::cout << "size: " << size << std::endl;
+			if (size == 0)  {
+				ss.clear();
+				ss.str("");
+				setHTTPRequestParseState(FINISH_STATE);
+				return ;
+			}
 			isSize = true;
-			return ;
 		}
-		if (!isHex(line))
-			throw BadRequestError();
-		std::stringstream ss(line);
-		ss >> std::hex >> size;
-		std::cout << "size: " << size << std::endl;
-		if (size == 0)  {
-			ss.clear();
-			ss.str("");
-			setHTTPRequestParseState(FINISH_STATE);
-			return ;
+		else if (isSize) {
+			std::cout << "line: " << line << std::endl;
+			if (line.size() != size) {
+				isSize = false;
+				throw BadRequestError();
+			}
+			_request.addBody(line);
+			if (_request.getBody().size() > MAX_BODY_SIZE) {
+				isSize = false;
+				throw HTTPRequestPayloadTooLargeError();
+			}
+			isSize = false;
 		}
-		isSize = true;
-	} else {
-		getlineWithCRLF(ss, line);
-		std::cout << "line: " << line << std::endl;
-		if (line.size() != size)
-			throw BadRequestError();
-		_request.addBody(line);
-		if (_request.getBody().size() > MAX_BODY_SIZE)
-			throw HTTPRequestPayloadTooLargeError();
-		isSize = false;
 	}
+
 }
 
 void HTTPRequestParse::parseNormalBody(std::stringstream &ss)
@@ -247,11 +260,19 @@ bool HTTPRequestParse::readBody(std::stringstream &ss)
 {
 	if (this->_isChunked)
 	{
+		#if DEBUG
+			std::cout << "#### [ DEBUG ] CHUNKED_STATE ####" << std::endl;
+		#endif
 		parseChunkedBody(ss);
 	} else {
+			#if DEBUG
+				std::cout << "#### [ DEBUG ] BODY_STATE ####" << std::endl;
+			#endif
 		parseNormalBody(ss);
 	}
-	return (true);
+	if (getHTTPRequestParseState() == FINISH_STATE)
+		return (true);
+	return (false);
 }
 
 void HTTPRequestParse::searchLocation(void)

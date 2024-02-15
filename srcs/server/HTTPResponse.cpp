@@ -239,8 +239,7 @@ void HTTPResponse::makeResponseMessage()
 	setHeader("Date", getDateTimestamp());
 	setHeader("Server", SERVER_NAME);
 	setContentLength(_body.size());
-	if (_contentLength > 0)
-		setHeader("Content-Length", ft_to_string(_contentLength));
+	setHeader("Content-Length", ft_to_string(_contentLength));
 	_responseMessage += _statusLine;
 	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++) {
 		_responseMessage += it->first + ": " + it->second + CRLF;
@@ -248,7 +247,6 @@ void HTTPResponse::makeResponseMessage()
 	if (_body.size() > 0) {
 		_responseMessage += CRLF;
 		_responseMessage += _body;
-		_responseMessage += CRLF;
 	} else {
 		_responseMessage += CRLF;
 	}

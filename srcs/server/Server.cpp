@@ -154,7 +154,6 @@ void Server::executeSendProcess(std::map<int, Client*>::iterator &it)
 	std::string responseMessage = client->getResponseMessage();
 	if (client->sendResponse(responseMessage) < 0)
 		deleteClient(it);
-	client->setState(RECV_STATE);
 }
 
 void Server::deleteClient(std::map<int, Client*>::iterator &it)
@@ -167,10 +166,13 @@ void Server::deleteClient(std::map<int, Client*>::iterator &it)
 void Server::mainLoop(void)
 {
 	std::string responseMessage = "";
+	struct timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
 	while (1) {
 		initFds();
 		// TODO : max_fdを設定する
-		int result = select(FD_SETSIZE, &_readfds, &_writefds, NULL, NULL);
+		int result = select(FD_SETSIZE, &_readfds, &_writefds, NULL, &timeout);
 		if (result < 0) {
 			closeServerFds();
 			log_exit("select", __LINE__, __FILE__, errno);

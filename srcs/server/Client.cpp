@@ -74,10 +74,7 @@ int Client::recvProcess()
 	char buffer[_buffer_size];
 	std::cout << "client_fd: " << _client_fd << std::endl;
 	ssize_t n = recv(_client_fd, buffer, sizeof(buffer) - 1, 0);
-	if (n == 0) {
-		return -1;
-	} else if (n < 0) {
-		log_print("recv", __LINE__, __FILE__, errno);
+	if (n <= 0) {
 		return -1;
 	}
 	buffer[n] = '\0';
@@ -113,5 +110,6 @@ int Client::sendResponse(std::string &responseMessage)
 		std::cout << responseMessage << std::endl;
 		std::cout << "########## [ DEBUG ] send   end ##########" << std::endl;
 	#endif
+	setState(CLOSE_STATE);
 	return 0;
 }
