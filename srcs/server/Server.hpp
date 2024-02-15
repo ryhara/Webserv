@@ -38,11 +38,11 @@ class Server
 		// TODO : index, fdにする。index番号のConfigの値を取得したいため
 		std::map<std::string, int>	_server_fds; // PORT_STR, server_fd
 		int							_server_fd;
+		std::map<int, Client*>		_clients;
 		struct addrinfo _hints;
 		struct addrinfo *_res;
-		struct pollfd				fds_[FD_SETSIZE];
 		fd_set						_readfds;
-		std::vector<int>			_client_fds;
+		fd_set						_writefds;
 		char			_buffer[BUFFER_SIZE];
 		HTTPRequest		_request;
 		Config			_config;
@@ -55,11 +55,15 @@ class Server
 		void	bindSocket(int &server_fd);
 		void	listenSocket(int &server_fd);
 		void	initFds(void);
+		void	executeRecvProcess(std::map<int, Client*>::iterator &it);
+		void	executeSendProcess(std::map<int, Client*>::iterator &it);
+		void	deleteClient(std::map<int, Client*>::iterator &it);
 		void	mainLoop(void);
 		int		acceptSocket(int &server_fd);
 		void	clientProcess(int client_fd);
 		void	parentProcess(pid_t pid);
 		void	closeServerFds(void);
+		void	closeClientFds(int client_fd);
 		void 	serverEvent(void);
 
 	public:
