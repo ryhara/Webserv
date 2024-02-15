@@ -14,8 +14,8 @@ void printServerInfo(std::map<int, std::vector<ServerConfig> > &servers)
 		std::cout << "port : " << it->first << std::endl;
 		for (size_t i = 0; i < it->second.size(); i++)
 		{
-			it->second[i].getServerConfig();
-			// std::cout << "server_name: " << it->second[i].getServerName() << std::endl;
+			// it->second[i].getServerConfig();
+			std::cout << "server_name: " << it->second[i].getServerName() << std::endl;
 		}
 	}
 }
@@ -42,7 +42,9 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	server.setServers(configParse.getConfig().getServers());
-	// printServerInfo(server.getConfig().getServers());
+	#if DEBUG
+		printServerInfo(server.getConfig().getServers());
+	#endif
 	server.start();
 	return 0;
 }
