@@ -1,6 +1,6 @@
 #include "HTTPResponse.hpp"
 
-HTTPResponse::HTTPResponse() : _version(HTTP_VERSION), _statusCode(STATUS_200), keepAlive(true), _contentLength(0)
+HTTPResponse::HTTPResponse() : _version(HTTP_VERSION), _statusCode(STATUS_200), _keepAlive(true), _contentLength(0)
 {
 	setStatusMessageMap();
 	setStatusMessage(_statusMessageMap[_statusCode]);
@@ -35,7 +35,7 @@ const std::string &HTTPResponse::getStatusLine() const
 
 const bool &HTTPResponse::getKeepAlive() const
 {
-	return this->keepAlive;
+	return this->_keepAlive;
 }
 
 const size_t &HTTPResponse::getContentLength() const
@@ -81,12 +81,12 @@ void HTTPResponse::setStatusMessage(const std::string &statusMessage)
 
 void HTTPResponse::setStatusLine(void)
 {
-	this->_statusLine = this->_version + SP + std::to_string(this->_statusCode) + SP + this->_statusMessage + CRLF;
+	this->_statusLine = this->_version + SP + ft_to_string(this->_statusCode) + SP + _statusMessageMap[this->_statusCode] + CRLF;
 }
 
 void HTTPResponse::setKeepAlive(const bool &keepAlive)
 {
-	this->keepAlive = keepAlive;
+	this->_keepAlive = keepAlive;
 }
 
 void HTTPResponse::setContentLength(const size_t &contentLength)
@@ -217,34 +217,26 @@ bool HTTPResponse::isFile(struct stat &stat)
 	return S_ISREG(stat.st_mode);
 }
 
-// TODO : handleNormalRequestに変更済み、頃合いを見て削除
-std::string HTTPResponse::makeResponseMessage(HTTPRequest &request)
+void HTTPResponse::makeResponseMessage()
 {
-	std::ifstream ifs;
-	std::string responseMessage;
-	std::string method = request.getMethod();
-	if (method == "GET")
-		makeGetResponseBody(request);
-	else if (method == "POST")
-		makePostResponseBody(request);
-	else if (method == "DELETE")
-		makeDeleteResponseBody(request);
-	else
-		responseMessage = "HTTP/1.1 501 Not Implemented\r\n";
 	setStatusLine();
-	if (keepAlive)
+	if (_keepAlive)
 		setHeader("Connection", "keep-alive");
 	else
 		setHeader("Connection", "close");
 	setHeader("Date", getDateTimestamp());
 	setHeader("Server", SERVER_NAME);
 	setContentLength(_body.size());
-	setHeader("Content-Length", std::to_string(_contentLength));
-	responseMessage += _statusLine;
+	if (_contentLength > 0)
+		setHeader("Content-Length", ft_to_string(_contentLength));
+	_responseMessage += _statusLine;
 	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++) {
-		responseMessage += it->first + ": " + it->second + CRLF;
+		_responseMessage += it->first + ": " + it->second + CRLF;
 	}
-	responseMessage += CRLF;
-	responseMessage += _body;
-	return responseMessage;
+	if (_body.size() > 0) {
+		_responseMessage += CRLF;
+		_responseMessage += _body;
+	} else {
+		_responseMessage += CRLF;
+	}
 }

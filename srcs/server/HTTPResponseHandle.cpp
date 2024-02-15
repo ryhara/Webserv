@@ -5,53 +5,51 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 	enum response_mode mode = request.getMode();
 	switch (mode) {
 	case NORMAL:
+	#ifdef DEBUG
+		std::cout << "########## [ DEBUG ] NORMAL ##########" << std::endl;
+	#endif
 		handleNormalRequest(request);
 		break;
 	case CGI:
+	#ifdef DEBUG
+		std::cout << "########## [ DEBUG ] CGI ##########" << std::endl;
+	#endif
 		handleCGIRequest(request);
 		break;
 	case AUTOINDEX:
+	#ifdef DEBUG
+		std::cout << "########## [ DEBUG ] AUTOINDEX ##########" << std::endl;
+	#endif
 		handleAutoIndexRequest(request);
 		break;
 	case REDIRECT:
+	#ifdef DEBUG
+		std::cout << "########## [ DEBUG ] REDIRECT ##########" << std::endl;
+	#endif
 		handleRedirectRequest(request);
 		break;
 	default:
-		// TODO : error	message
+		throw InternalServerError();
 		break;
 	}
 }
 
 void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 {
+	// TODO : GETは必須、POSTとDELETEは任意で, configで許可されていない場合405 Method Not Allowed
 	std::string method = request.getMethod();
-	if (method == "GET") {
+	if (method.compare("GET") == 0) {
 		makeGetResponseBody(request);
-		setStatusLine();
-		if (keepAlive)
-			setHeader("Connection", "keep-alive");
-		else
-			setHeader("Connection", "close");
-		setHeader("Date", getDateTimestamp());
-		setHeader("Server", SERVER_NAME);
-		setContentLength(_body.size());
-		setHeader("Content-Length", std::to_string(_contentLength));
-		_responseMessage += _statusLine;
-		for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++) {
-			_responseMessage += it->first + ": " + it->second + CRLF;
-		}
-		_responseMessage += CRLF;
-		_responseMessage += _body;
-	} else if (method == "POST") {
+		makeResponseMessage();
+	} else if (method.compare("POST") == 0) {
 		makePostResponseBody(request);
-		_responseMessage = "HTTP/1.1 200 OK\r\n";
-	} else if (method == "DELETE") {
+		makeResponseMessage();
+	} else if (method.compare("DELETE") == 0) {
 		makeDeleteResponseBody(request);
-		_responseMessage = "HTTP/1.1 200 OK\r\n";
-		_responseMessage += CRLF + _body;
+		makeResponseMessage();
 	}
 	else {
-		// TODO : error message
+		throw NotImplementedError();
 	}
 }
 
@@ -67,10 +65,24 @@ void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)
 	std::cout << request.getUri() << std::endl;
 }
 
+// TODO : curlは成功、ブラウザはEAGAINでexitする
 void HTTPResponse::handleRedirectRequest(HTTPRequest &request)
 {
-	// TODO : redirectの処理
-	std::cout << request.getUri() << std::endl;
+	std::string uri = request.getUri();
+	std::string location = request.getLocation();
+	std::string path = "";
+	// TODO : configで設定されたredirectのpathを取得する
+	std::string redirect_path = "http://google.com";
+	// リダイレクトの後ろのパスも設定する場合
+	// size_t found = uri.find(location);
+	// if (found != std::string::npos) {
+	// 	path = uri.substr(found + location.size(), uri.size());
+	// }
+	// path = redirect_path + "/" + path;
+	path = redirect_path;
+	setHeader("Location", path);
+	setStatusCode(STATUS_301);
+	makeResponseMessage();
 }
 
 void HTTPResponse::handleErrorResponse(HTTPRequest &request)

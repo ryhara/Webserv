@@ -38,7 +38,7 @@ TEST(HTTPResponseTEST, handleNormalRequestTest) {
 	ReadFile readFile("./www/cgi/index.html");
 	std::string statusLine = "HTTP/1.1 200 OK\r\n";
 	std::string body = readFile.getBody();
-	std::string headers = "Connection: keep-alive\r\nContent-Length: " + std::to_string(body.length()) + "\r\n" + "Server: webserv/1.0\r\n\r\n";
+	std::string headers = "Connection: keep-alive\r\nContent-Length: " + ft_to_string(body.length()) + "\r\n" + "Server: webserv/1.0\r\n\r\n";
 	std::string answer = statusLine + headers + body;
 	SurpressOutput surpressOutput;
 	setRequest();

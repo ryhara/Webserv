@@ -10,6 +10,7 @@
 class ConfigParse {
 	private:
 		Config &_config;
+		// DISALLOW_COPY_AND_ASSIGN(ConfigParse);
 		std::vector<std::string> _parseLine;
 		std::vector<std::vector<std::string> > _parseLines;
 	public:

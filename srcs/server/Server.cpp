@@ -1,19 +1,19 @@
 #include "Server.hpp"
 
-// TODO : 複数ポートに対応する
-// ServerSetupクラスを作成し、configのポートの数だけServerクラスを作成する
-// pollは一回よびだして、複数のポートを監視する
-
 Server::Server(void)
 {
 	ft_memset(&_hints, 0, sizeof(addrinfo));
 	_res = NULL;
 	ft_memset(_buffer, 0, sizeof(char) * BUFFER_SIZE);
-	ft_memset(&fds_, 0, sizeof(struct pollfd) * (MAX_CLIENTS + 1));
 }
 
 Server::~Server(void)
 {
+	_server_fds.clear();
+	_client_fds.clear();
+	FD_ZERO(&_readfds);
+	if (_res)
+		freeaddrinfo(_res);
 }
 
 Config &Server::getConfig(void) const
@@ -21,148 +21,189 @@ Config &Server::getConfig(void) const
 	return const_cast<Config &>(_config);
 }
 
-// TODO : サーバーを立ち上げる際のエラーはlog_exitで処理する,リクエストやレスポンスのエラーは例外を投げてSTATUS CODEを返す
-void Server::initServerAddr(void)
+void Server::setPortAndServerFd(std::string &port, int server_fd)
 {
+	_server_fds[port] = server_fd;
+}
+
+void Server::closeServerFds(void)
+{
+	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
+	{
+		close(it->second);
+	}
+}
+
+void Server::initServerAddr(std::string &port)
+{
+	char *port_str = const_cast<char *>(port.c_str());
 	ft_memset(&_hints, 0, sizeof(_hints));
 	_hints.ai_family = AF_INET;
 	_hints.ai_socktype = SOCK_STREAM;
 	_hints.ai_flags = AI_PASSIVE;
-	if (getaddrinfo(NULL, SERVER_PORT_STR, &_hints, &_res) != 0)
+	if (getaddrinfo(NULL, port_str, &_hints, &_res) != 0)
 		log_exit("getaddrinfo", __LINE__, __FILE__, errno);
 }
 
-void Server::createSocket(void)
+void Server::createSocket(std::string &port)
 {
 	int option_value = 1; // setsockopt
+	int server_fd;
 
-	_server_fd = socket(_res->ai_family, _res->ai_socktype, _res->ai_protocol);
-	setNonBlockingFd(_server_fd);
-	if (_server_fd < 0)
+	server_fd = socket(_res->ai_family, _res->ai_socktype, _res->ai_protocol);
+	if (server_fd < 0) {
+		closeServerFds();
 		log_exit("socket", __LINE__, __FILE__, errno);
-	if (setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&option_value, sizeof(option_value)) < 0)
+	}
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&option_value, sizeof(option_value)) < 0)
 	{
-		close(_server_fd);
+		close(server_fd);
+		closeServerFds();
 		log_exit("setsockopt", __LINE__, __FILE__, errno);
 	}
+	setNonBlockingFd(server_fd);
+	setPortAndServerFd(port, server_fd);
 }
 
-void Server::bindSocket(void)
+void Server::bindSocket(int &server_fd)
 {
-	if (bind(_server_fd, _res->ai_addr, _res->ai_addrlen) < 0)
+	if (bind(server_fd, _res->ai_addr, _res->ai_addrlen) < 0)
 	{
-		close(_server_fd);
+		closeServerFds();
+		freeaddrinfo(_res);
+		_res = NULL;
 		log_exit("bind", __LINE__, __FILE__, errno);
 	}
 	freeaddrinfo(_res);
+	_res = NULL;
 }
 
-void Server::listenSocket(void)
+void Server::listenSocket(int &server_fd)
 {
-	if (listen(_server_fd, QUEUE_LENGTH) < 0)
+	if (listen(server_fd, QUEUE_LENGTH) < 0)
 	{
-		close(_server_fd);
+		closeServerFds();
 		log_exit("listen", __LINE__, __FILE__, errno);
 	}
 }
 
-int Server::acceptSocket(void)
+int Server::acceptSocket(int &server_fd)
 {
 	int 				client_fd;
 	socklen_t 			client_addr_len;
 	struct sockaddr_in	client_addr;
 
 	client_addr_len = sizeof(client_addr);
-	client_fd = accept(_server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
-	setNonBlockingFd(client_fd);
-	if (client_fd < 0)
-	{
-		close(_server_fd);
-		log_exit("accept", __LINE__, __FILE__, errno);
+	client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
+	if (client_fd < 0) {
+		return -1;
 	}
 	return client_fd;
 }
 
-void Server::childProcess(int client_fd)
+// TODO : Clientクラスへ以降、頃合いを見て削除
+void Server::clientProcess(int client_fd)
 {
-	// TODO : buffer size調整、第3引数の調べる(MSG_DONTWAIT : ノンブロッキングモードなので使えそう)
 	HTTPRequest request;
+	HTTPResponse response;
 	HTTPRequestParse request_parse(request);
+	std::string responseMessage;
 	ssize_t n = recv(client_fd, _buffer, sizeof(_buffer) - 1, 0);
 	if (n < 0)
 	{
 		close(client_fd);
-		close(_server_fd);
+		closeServerFds();
 		log_exit("recv", __LINE__, __FILE__, errno);
 	}
 	_buffer[n] = '\0';
 	#if DEBUG
-		std::cout << "#### [ DEBUG ] request ####" << std::endl << _buffer << std::endl << "##########" << std::endl;
+		std::cout << "#### [ DEBUG ] request message ####" << std::endl << _buffer << std::endl << "##########" << std::endl;
 	#endif
-	// std::cout << "-- request -- " << std::endl;
-	// for (int i = 0; i < n; i++)
-	// 	std::cout << _buffer[i];
-	// std::cout << "--------------" << std::endl;
-	request_parse.parse(_buffer);
-	// TODO : responseを正しく実装する （一時的）
-	HTTPResponse response;
-	response.selectResponse(request);
-	std::string responseMessage = response.getResponseMessage();
+	try {
+		request_parse.parse(_buffer);
+		response.selectResponse(request);
+	} catch (ServerException &e) {
+		response.setStatusCode(e.getStatusCode());
+		response.makeResponseMessage();
+	}
+	responseMessage = response.getResponseMessage();
 	#if DEBUG
-		std::cout << "##### [ DEBUG ] responseMessage ####" << std::endl << responseMessage << std::endl << "##########" << std::endl;
+		std::cout << "##### [ DEBUG ] response message ####" << std::endl << responseMessage << std::endl << "##########" << std::endl;
 	#endif
-	// std::string responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, World!</h1></body></html>\r\n";
 	ssize_t send_n = send(client_fd, responseMessage.c_str(), responseMessage.size(), 0);
 	if (send_n < 0)
 	{
 		close(client_fd);
-		close(_server_fd);
+		closeServerFds();
 		log_exit("send", __LINE__, __FILE__, errno);
 	}
-	std::cout << "================= one request end =================" << std::endl;
+	# if DEBUG
+		std::cout << "==================================================" << std::endl;
+	# endif
 }
 
-void Server::pollInit(void)
+void Server::initFds(void)
 {
-	this->fds_[0].fd = this->_server_fd;
-	this->fds_[0].events = POLLIN;
-	for (int i = 1; i <= MAX_CLIENTS; ++i) {
-		this->fds_[i].fd = -1;
-		this->fds_[i].events = POLLIN;
+	FD_ZERO(&_readfds);
+	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
+	{
+		FD_SET(it->second, &_readfds);
+	}
+	for (std::vector<int>::iterator it = _client_fds.begin(); it != _client_fds.end(); ++it)
+	{
+		FD_SET(*it, &_readfds);
+	}
+}
+
+void Server::serverEvent(void)
+{
+	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
+	{
+		if (FD_ISSET(it->second, &_readfds))
+		{
+			FD_CLR(it->second, &_readfds);
+			_server_fd = it->second;
+			int client_fd = acceptSocket(it->second);
+			if (client_fd < 0)
+			{
+				closeServerFds();
+				log_exit("accept", __LINE__, __FILE__, errno);
+			}
+			setNonBlockingFd(client_fd);
+			_client_fds.push_back(client_fd);
+			break;
+		}
 	}
 }
 
 void Server::mainLoop(void)
 {
-	int client_fd;
-
-	pollInit();
-	for (;;) {
-		int	result = poll(fds_, MAX_CLIENTS + 1, -1);
+	while (1) {
+		initFds();
+		int result = select(FD_SETSIZE, &_readfds, NULL, NULL, NULL);
 		if (result < 0) {
-			log_exit("poll", __LINE__, __FILE__, errno);
-		}
-		else if (result == 0) {
+			closeServerFds();
+			log_exit("select", __LINE__, __FILE__, errno);
+		} else if (result == 0) {
 			// timeout
-			std::cout << "-- poll timeout --" << std::endl;
-			continue;
-		}
-		if (fds_[0].revents & (POLLIN | POLLERR)) {
-			client_fd = acceptSocket();
-			for (int i = 1; i <= MAX_CLIENTS; ++i) {
-				if (fds_[i].fd == -1) {
-					fds_[i].fd = client_fd;
-					fds_[i].events = POLLIN;
+		} else {
+			serverEvent();
+			for (std::vector<int>::iterator it = _client_fds.begin(); it != _client_fds.end(); ++it)
+			{
+				if (FD_ISSET(*it, &_readfds))
+				{
+					FD_CLR(*it, &_readfds);
+					Client client(*it, _server_fd);
+					// TODO : recvとsendを分けて、実行、RECV_STATE→SEND_STATE→CLOSE_STATEで管理
+					if (client.clientProcess() < 0)
+					{
+						closeServerFds();
+						log_exit("clientProcess", __LINE__, __FILE__, errno);
+					}
+					close(*it);
+					_client_fds.erase(it);
 					break;
 				}
-			}
-		}
-		for (int i = 1; i <= MAX_CLIENTS; ++i) {
-			if (fds_[i].fd != -1 && (fds_[i].revents & (POLLIN | POLLERR))) {
-				std::cout << "i : " << i << " / client_fd : " << client_fd << std::endl;
-				childProcess(fds_[i].fd);
-				close(fds_[i].fd);
-				fds_[i].fd = -1;
 			}
 		}
 	}
@@ -170,30 +211,24 @@ void Server::mainLoop(void)
 
 void Server::start(void)
 {
-	std::cout << "================= Server::start =================" << std::endl;
-	try {
-		// Init server_addr
-		initServerAddr();
-		// Create socket
-		createSocket();
-		// TODO : search SIGCHLD, signal(SIGCHLD, SIG_IGN);
-		// Bind
-		bindSocket();
-		// Listen
-		listenSocket();
-		// Main loop
-		mainLoop();
-		close(_server_fd);
+	std::cout << "================= Server start =================" << std::endl;
+	std::vector<std::string> list;
+	list.push_back("4242");
+	list.push_back("4243");
+	// TODO : MAX_CLIENTSを超えた分はエラーを返す. CONFIG段階でエラーにしとく
+	if (list.size() > FD_SETSIZE / 2)
+	{
+		log_exit("server start", __LINE__, __FILE__, errno);
 	}
-	catch (std::exception &e) {
-		std::cout << e.what() << std::endl;
+	// TODO : configのサーバーの数だけループする。
+	for (int i = 0; i < 2; ++i) {
+		std::string current_server_port = list[i];
+		initServerAddr(list[i]);
+		createSocket(current_server_port);
+		int current_server_fd = _server_fds[list[i]];
+		bindSocket(current_server_fd);
+		listenSocket(current_server_fd);
 	}
+	mainLoop();
+	closeServerFds();
 }
-
-/* example */
-// TODO : fcntlを使ったノンブロッキングモードの実装または pollを使った実装
-// if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
-//     perror("fcntl");
-//     close(fd);
-//     exit(EXIT_FAILURE);
-// }

@@ -9,15 +9,16 @@ void HTTPResponse::makeGetResponseBody(HTTPRequest &request)
 	}
 	// TODO : configの設定によって、pathを変更する ./www以外にも対応できるように
 	if (isFileExist("./www" + path, request.getStat()) == false) {
-		std::ifstream ifs;
-		// TODO : error_pageのパスをconfigから取得する
-		makeFileBody(std::string("./www/error_page/404.html"));
+		_statusCode = STATUS_404;
+		makeFileBody("./www/error_page/404.html");
+		return ;
 	} else if (isFile(*request.getStat())) {
 		makeFileBody("./www" + path);
 	} else if (isDirectory(*request.getStat())) {
 		// TODO : directoryの場合,configで設定されたファイルを返す, 今は必ずindex.htmlを返す
 		makeFileBody(std::string("./www" + path + "/index.html"));
 	} else {
+		_statusCode = STATUS_404;
 		makeFileBody("./www/error_page/404.html");
 	}
 }

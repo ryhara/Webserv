@@ -2,8 +2,11 @@
 
 #include <iostream>
 #include <string>
+#include <cerrno>
 
 #include "Color.hpp"
+#include "utils.hpp"
+#include "ServerError.hpp"
 
 # define CRLF "\r\n"
 # define SP " "

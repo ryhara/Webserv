@@ -40,6 +40,15 @@ std::map<std::string, std::string> &HTTPRequest::getHeaders(void) const
 	return (const_cast<std::map<std::string, std::string> &>(this->_headers));
 }
 
+std::string 	HTTPRequest::getHeader(const std::string &key) const
+{
+	if (this->_headers.find(key) == this->_headers.end()) {
+		std::string empty = "";
+		return (static_cast<std::string>(empty));
+	}
+	return (static_cast<std::string>(this->_headers.find(key)->second));
+}
+
 std::string		&HTTPRequest::getBody(void) const
 {
 	return (const_cast<std::string &>(this->_body));
@@ -103,7 +112,7 @@ void			HTTPRequest::setMode(const enum response_mode mode)
 
 void HTTPRequest::print(void)
 {
-	std::cout << "----------------- HTTPRequest Result -----------------" << std::endl;
+	std::cout << "########## [ DEBUG ]    parse result  ##########" << std::endl;
 	std::cout << "method: " << this->_method << std::endl;
 	std::cout << "uri: " << this->_uri << std::endl;
 	std::cout << "protocol_version: " << this->_version << std::endl;
@@ -114,5 +123,5 @@ void HTTPRequest::print(void)
 	{
 		std::cout << it->first << ": " << it->second << std::endl;
 	}
-	std::cout << "------------------------------------------------------" << std::endl;
+	std::cout << "################################################" << std::endl;
 }

@@ -3,10 +3,10 @@ SRC = main.cpp
 
 CONFIG = ConfigParse.cpp Config.cpp Location.cpp ServerConfig.cpp
 
-SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp \
+SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp Client.cpp \
 	HTTPResponseGET.cpp HTTPResponsePOST.cpp  HTTPResponseDELETE.cpp HTTPResponseHandle.cpp
 
-UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp
+UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp ft_to_string.cpp isHex.cpp ft_stoi.cpp
 
 CGI = CGI.cpp
 
@@ -15,6 +15,7 @@ CONFIGDIR = ./srcs/config
 SERVERDIR = ./srcs/server
 UTILSDIR = ./srcs/utils
 CGIDIR = ./srcs/cgi
+EXCEPTIONDIR = ./srcs/exception
 
 SRCS = $(addprefix $(CONFIGDIR)/, $(CONFIG)) $(addprefix $(SERVERDIR)/, $(SERVER)) $(addprefix $(UTILSDIR)/, $(UTILS)) $(addprefix $(CGIDIR)/, $(CGI))
 
@@ -24,7 +25,7 @@ DEPENDS = $(OBJS:.o=.d)
 CXX = c++
 RM = rm -rf
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98  -MMD -MP -g
-INC = -I$(CONFIGDIR) -I$(SERVERDIR) -I$(SRCDIR) -I$(UTILSDIR) -I$(CGIDIR)
+INC = -I$(CONFIGDIR) -I$(SERVERDIR) -I$(SRCDIR) -I$(UTILSDIR) -I$(CGIDIR) -I$(EXCEPTIONDIR)
 
 all : $(OBJDIR) $(NAME)
 
@@ -54,12 +55,19 @@ clean :
 
 fclean : clean
 	$(RM) $(NAME)
+
+allclean : fclean post_clean
 	$(RM) a.out
+	$(RM) hoge.dummy
+	$(RM) ./tests/__pycache__
+
+post_clean :
+	$(RM) ./uploads/post_*
 
 re : fclean all
 
 test : all
-	./$(NAME) ./config/test.conf
+	./$(NAME) ./config/default.conf
 
 func_test :
 	g++ -o a.out ./tests/*_test.cpp $(SRCS) $(INC) -pthread -lgtest_main -lgtest -std=c++14
@@ -72,12 +80,16 @@ invalid_test :
 use_cfunc :
 	./tests/check_cfunctions.sh $(NAME)
 
+dummy :
+	base64 -i /dev/urandom | head -c 1048576 > hoge.dummy
+
 debug : CXXFLAGS += -D DEBUG -fsanitize=address
 debug : re
+	./$(NAME)
 
 leak :
 	while true; do leaks -q $(NAME); sleep 1; done
 
-.PHONY : all clean fclean re test debug func_test use_cfunc leak
+.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)

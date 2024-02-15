@@ -1,15 +1,12 @@
 #pragma once
 
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <map>
-#include "Location.hpp"
+#include "Webserv.hpp"
 
 class ServerConfig
 {
 	private:
 		// TODO : server１つ分の情報を保持する
+		// DISALLOW_COPY_AND_ASSIGN(ServerConfig);
 		int			port;
 		std::string server_name;
 		int			max_body_size;
