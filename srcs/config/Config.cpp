@@ -7,11 +7,6 @@ Config::Config() {
 Config::~Config() {
 }
 
-// void Config::addServer(ServerConfig &server)
-// {
-// 	this->_servers[0].push_back(server);
-// }
-
 void Config::addServer(ServerConfig &server)
 {
 	std::map<int, std::vector<ServerConfig> >::iterator it = this->_servers.begin();
@@ -39,8 +34,3 @@ void Config::addServer(ServerConfig &server)
 		this->_servers.insert(std::make_pair(server.getPort(), servers));
 	}
 }
-
-// ServerConfig &Config::getServer() const
-// {
-// 	return (ServerConfig &)_servers[0][0];
-// }

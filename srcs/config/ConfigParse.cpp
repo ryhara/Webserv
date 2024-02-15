@@ -12,7 +12,7 @@ Config &ConfigParse::getConfig(void) const {
 
 void ConfigParse::parse(const std::string &filename) {
 	std::string word, buf;
-	std::cout << "parse config file: " << filename << std::endl;
+	std::cout << "Config file: " << filename << std::endl << std::endl;
 	std::ifstream ifs(filename);
 	if (!ifs)
 	{

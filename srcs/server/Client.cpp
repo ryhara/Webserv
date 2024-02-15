@@ -72,7 +72,9 @@ int Client::recvProcess()
 {
 
 	char buffer[_buffer_size];
-	std::cout << "client_fd: " << _client_fd << std::endl;
+	#if DEBUG
+		std::cout << "########## [ DEBUG ] client fd : " << _client_fd << " ##########" << std::endl;
+	#endif
 	ssize_t n = recv(_client_fd, buffer, sizeof(buffer) - 1, 0);
 	if (n <= 0) {
 		return -1;
