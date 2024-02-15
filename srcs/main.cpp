@@ -13,11 +13,16 @@ int main(int argc, char **argv)
 	Server server;
 	ConfigParse configParse(server.getConfig());
 	configParse.parse(DEFAULT_CONFIG_FILE);
-	std::map<std::string, ServerConfig> servers = configParse.getConfig().getServers();
-	std::map<std::string, ServerConfig>::iterator it = servers.begin();
+	std::map<int, std::vector<ServerConfig> > servers = configParse.getConfig().getServers();
+	std::map<int, std::vector<ServerConfig> >::iterator it = servers.begin();
 	for (; it != servers.end(); it++)
 	{
-		it->second.getServerConfig();
+		std::cout << "port : " << it->first << std::endl;
+		for (size_t i = 0; i < it->second.size(); i++)
+		{
+			// it->second[i].getServerConfig();
+			std::cout << "server_name: " << it->second[i].getServerName() << std::endl;
+		}
 	}
 	return 0;
 }

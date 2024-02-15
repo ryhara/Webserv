@@ -16,8 +16,8 @@ private:
 	std::string alias;
 	std::string	index;
 	std::string upload_path;
+	std::string redir_path;
 	std::vector<std::string> cgi_extension;
-	std::vector<std::string> redir_path;
 
 public:
 	Location(/* args */);

@@ -23,6 +23,7 @@ class ServerConfig
 		ServerConfig(std::vector<std::vector<std::string> > &parseLines);
 		// TODO : getter
 		std::string getServerName() const;
+		int getPort() const;
 		void getServerConfig();
 		// TODO : setter
 };

@@ -15,7 +15,6 @@ Location::Location(std::string location) : get_method(true), post_method(false),
 size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, size_t startIndex)
 {
 	this->cgi_extension.clear();
-	this->redir_path.clear();
 	std::vector<std::string> parseLine;
 	while (startIndex < parseLines.size())
 	{
@@ -27,12 +26,12 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 			if (parseLine.size() != 3)
 			{
 				std::cout << "Location: invalid config : alias less or more arguments" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine[2] != ";")
 			{
 				std::cout << "Location: invalid config : alias not end with ';'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			this->alias = parseLine[1];
 		}
@@ -41,12 +40,12 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 			if (parseLine.size() != 3)
 			{
 				std::cout << "Location: invalid config : index less or more arguments" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine[2] != ";")
 			{
 				std::cout << "Location: invalid config : index not end with ';'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			this->index = parseLine[1];
 		}
@@ -55,12 +54,12 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 			if (parseLine.size() != 3)
 			{
 				std::cout << "Location: invalid config : autoindex less or more arguments" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine[2] != ";")
 			{
 				std::cout << "Location: invalid config : autoindex not end with ';'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine[1] == "on")
 				this->autoindex = true;
@@ -69,7 +68,7 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 			else
 			{
 				std::cout << "Location: invalid config : autoindex on, off 以外の入力" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 		}
 		else if (parseLine[0] == "upload_path")
@@ -77,56 +76,55 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 			if (parseLine.size() != 3)
 			{
 				std::cout << "Location: invalid config : upload_path less or more arguments" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine[2] != ";")
 			{
 				std::cout << "Location: invalid config : upload_path not end with ';'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			this->upload_path = parseLine[1];
+		}
+		else if (parseLine[0] == "redir_path")
+		{
+			if (parseLine.size() != 3)
+			{
+				std::cout << "Location: invalid config : redir_path less or more arguments" << std::endl;
+				std::exit (1);
+			}
+			if (parseLine[2] != ";")
+			{
+				std::cout << "Location: invalid config : redir_path not end with ';'" << std::endl;
+				std::exit (1);
+			}
+			this->redir_path = parseLine[1];
 		}
 		else if (parseLine[0] == "cgi_extension")
 		{
 			if (parseLine.size() < 3)
 			{
 				std::cout << "Location: invalid config : cgi_path less arguments" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine.back() != ";")
 			{
 				std::cout << "Location: invalid config : cgi_path not end with ';'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			for (size_t i = 1; i < parseLine.size() - 1; i++)
 				this->cgi_extension.push_back(parseLine[i]);
-		}
-		else if (parseLine[0] == "redir_path")
-		{
-			if (parseLine.size() < 3)
-			{
-				std::cout << "Location: invalid config : redir_path less arguments" << std::endl;
-				exit (1);
-			}
-			if (parseLine.back() != ";")
-			{
-				std::cout << "Location: invalid config : redir_path not end with ';'" << std::endl;
-				exit (1);
-			}
-			for (size_t i = 1; i < parseLine.size() - 1; i++)
-				this->redir_path.push_back(parseLine[i]);
 		}
 		else if (parseLine[0] == "method")
 		{
 			if (parseLine.size() < 3)
 			{
 				std::cout << "Location: invalid config : method less arguments" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine.back() != ";")
 			{
 				std::cout << "Location: invalid config : method not end with ';'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			for (size_t i = 1; i < parseLine.size() - 1; i++)
 			{
@@ -139,7 +137,7 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 				else
 				{
 					std::cout << "Location: invalid config : method GET, POST, DELETE 以外の入力" << std::endl;
-					exit (1);
+					std::exit (1);
 				}
 			}
 		}
@@ -147,12 +145,12 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 		{
 			std::cout << parseLine[0] << std::endl;
 			std::cout << "Location: invalid config : 不適切な要素" << std::endl;
-			exit (1);
+			std::exit (1);
 		}
 		startIndex++;
 	}
 	std::cout << "Location: invalid config : location not end with '}'" << std::endl;
-	exit (1);
+	std::exit (1);
 }
 
 std::string Location::get_path() const
@@ -171,10 +169,7 @@ void Location::getLocation() const
 	for (size_t i = 0; i < this->cgi_extension.size(); i++)
 		std::cout << this->cgi_extension[i] << " ";
 	std::cout << std::endl;
-	std::cout << "redir_path: ";
-	for (size_t i = 0; i < this->redir_path.size(); i++)
-		std::cout << this->redir_path[i] << " ";
-	std::cout << std::endl;
+	std::cout << "redir_path: " << this->redir_path << std::endl;
 	std::cout << "get_method: " << this->get_method << std::endl;
 	std::cout << "post_method: " << this->post_method << std::endl;
 	std::cout << "delete_method: " << this->delete_method << std::endl << std::endl;

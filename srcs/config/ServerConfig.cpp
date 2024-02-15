@@ -30,31 +30,36 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 			if (parseLine.size() != 3)
 			{
 				std::cout << "ServerConfig : invalid config : listen less or more arguments" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (!isNumber(parseLine[1]))
 			{
 				std::cout << "ServerConfig : invalid config : port is not numeric" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine[2] != ";")
 			{
 				std::cout << "ServerConfig : invalid config : listen not end with ';'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
-			this->port = std::stoi(parseLine[1]);
+			this->port = ft_stoi(parseLine[1]);
+			if (this->port < 1 || this->port > 65535)
+			{
+				std::cout << "ServerConfig : invalid config : port is not in range 1-65535" << std::endl;
+				std::exit (1);
+			}
 		}
 		else if (parseLine[0] == "server_name")
 		{
 			if (parseLine.size() != 3)
 			{
 				std::cout << "ServerConfig : invalid config : server_name less or more arguments" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine[2] != ";")
 			{
 				std::cout << "ServerConfig : invalid config : server_name not end with ';'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			this->server_name = parseLine[1];
 		}
@@ -63,17 +68,17 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 			if (parseLine.size() != 3)
 			{
 				std::cout << "ServerConfig : invalid config : max_body_size less or more arguments" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (!isNumber(parseLine[1]))
 			{
 				std::cout << "ServerConfig : invalid config : max_body_size is not numeric" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine[2] != ";")
 			{
 				std::cout << "ServerConfig : invalid config : max_body_size not end with ';'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			this->max_body_size = std::stoi(parseLine[1]);
 		}
@@ -82,12 +87,12 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 			if (parseLine.size() != 3)
 			{
 				std::cout << "ServerConfig : invalid config : error_page less or more arguments" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine[2] != ";")
 			{
 				std::cout << "ServerConfig : invalid config : error_page not end with ';'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			this->error_page = parseLine[1];
 		}
@@ -96,17 +101,17 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 			if (parseLine.size() != 3)
 			{
 				std::cout << "ServerConfig : invalid config : location less or more arguments" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine[1][0] != '/' || parseLine[1][parseLine[1].size() - 1] != '/')
 			{
 				std::cout << "ServerConfig : invalid config : location path not start or end with '/'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			if (parseLine[2] != "{")
 			{
 				std::cout << "ServerConfig : invalid config : location not end with '{'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			// TODO : newしないとだめ？、フリー忘れそう
 			Location *location = new Location(parseLine[1]);
@@ -118,14 +123,14 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 			if (parseLine.size() != 1)
 			{
 				std::cout << "ServerConfig : invalid config : argment before '}'" << std::endl;
-				exit (1);
+				std::exit (1);
 			}
 			break;
 		}
 		else
 		{
 			std::cout << "ServerConfig : invalid config : 不適切な要素" << std::endl;
-			exit (1);
+			std::exit (1);
 		}
 	}
 	parseLines.erase(parseLines.begin(), parseLines.begin() + i + 1);
@@ -134,6 +139,11 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 std::string ServerConfig::getServerName() const
 {
 	return this->server_name;
+}
+
+int	ServerConfig::getPort() const
+{
+	return this->port;
 }
 
 void ServerConfig::getServerConfig()

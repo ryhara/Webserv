@@ -17,7 +17,7 @@ void ConfigParse::parse(const std::string &filename) {
 	if (!ifs)
 	{
 		std::cout << "cannot open file" << std::endl;
-		exit (1);
+		std::exit (1);
 	}
 	while (std::getline(ifs, buf))
 	{
@@ -46,17 +46,6 @@ void ConfigParse::parse(const std::string &filename) {
 				_parseLine.push_back(word);
 				start = end;
 			}
-			// if (buf.find("server") == start)
-			// {
-			// 	// _config.addServer();
-			// 	ServerConfig server(ifs, &buf[start+6]);
-			// 	this->_config.addServer(server);
-			// }
-			// else
-			// {
-			// 	std::cout << "ConfigParse : invalid config : not start with 'server'" << std::endl;
-			// 	exit (1);
-			// }
 		}
 		if (!_parseLine.empty())
 			_parseLines.push_back(_parseLine);
@@ -67,18 +56,18 @@ void ConfigParse::parse(const std::string &filename) {
 	if (_parseLines.empty())
 	{
 		std::cout << "ConfigParse : invalid config : empty file" << std::endl;
-		exit (1);
+		std::exit (1);
 	}
 	endWord = _parseLines.back().back();
 	if (endWord != "}")
 	{
 		std::cout << "ConfigParse : invalid config : file not end with '}'" << std::endl;
-		exit (1);
+		std::exit (1);
 	}
 	if (_parseLines.back().size() != 1)
 	{
 		std::cout << " size not 1   ConfigParse : invalid config : argment before '}'" << std::endl;
-		exit (1);
+		std::exit (1);
 	}
 	for (size_t i = 0; i < _parseLines.size(); i++)
 	{
@@ -86,12 +75,12 @@ void ConfigParse::parse(const std::string &filename) {
 		if (endWord != "{" && endWord != ";" && endWord != "}")
 		{
 			std::cout << "ConfigParse : invalid config : not end with '{' or '}' or ';'" << std::endl;
-			exit (1);
+			std::exit (1);
 		}
 		if (endWord == "}" && _parseLines[i].size() != 1)
 		{
 			std::cout << "ConfigParse : invalid config : argment before '}'" << std::endl;
-			exit (1);
+			std::exit (1);
 		}
 	}
 	//parse
@@ -100,7 +89,7 @@ void ConfigParse::parse(const std::string &filename) {
 		if (_parseLines[0].size() != 2 || _parseLines[0][0] != "server" || _parseLines[0][1] != "{")
 		{
 			std::cout << "ConfigParse : invalid config : not start with 'server {'" << std::endl;
-			exit (1);
+			std::exit (1);
 		}
 		_parseLines.erase(_parseLines.begin());
 		ServerConfig server(_parseLines);
