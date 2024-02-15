@@ -12,6 +12,18 @@ HTTPResponse::~HTTPResponse()
 	_statusMessageMap.clear();
 }
 
+void HTTPResponse::clear(void)
+{
+	_version = HTTP_VERSION;
+	_statusCode = STATUS_200;
+	_statusMessage = _statusMessageMap[_statusCode];
+	_keepAlive = true;
+	_contentLength = 0;
+	_headers.clear();
+	_body.clear();
+	_responseMessage.clear();
+}
+
 // getter
 const std::string &HTTPResponse::getVersion() const
 {
@@ -227,8 +239,7 @@ void HTTPResponse::makeResponseMessage()
 	setHeader("Date", getDateTimestamp());
 	setHeader("Server", SERVER_NAME);
 	setContentLength(_body.size());
-	if (_contentLength > 0)
-		setHeader("Content-Length", ft_to_string(_contentLength));
+	setHeader("Content-Length", ft_to_string(_contentLength));
 	_responseMessage += _statusLine;
 	for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); it++) {
 		_responseMessage += it->first + ": " + it->second + CRLF;

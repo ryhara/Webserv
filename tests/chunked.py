@@ -4,7 +4,6 @@ url = 'http://localhost:4242'
 headers = {'Transfer-Encoding': 'chunked'}
 
 def generate_data():
-    # ここでチャンクデータを生成します
     yield 'hello'
     yield 'world'
     yield 'abcdefghijklmnopqrstuvwxyz'

@@ -1,12 +1,20 @@
 #include "Client.hpp"
 
-
-Client::Client(int client_fd, int server_fd) : _client_fd(client_fd), _server_fd(server_fd)
+Client::Client(int client_fd, int server_fd) :  _state(RECV_STATE), _request(), _request_parse(_request), _client_fd(client_fd), _server_fd(server_fd)
 {
 }
 
+
 Client::~Client(void)
 {
+}
+
+void Client::clear(void)
+{
+	_request.clear();
+	_response.clear();
+	_request_parse.clear();
+	_state = RECV_STATE;
 }
 
 int Client::getClientFd(void) const
@@ -19,6 +27,31 @@ int Client::getServerFd(void) const
 	return _server_fd;
 }
 
+bool Client::getKeepAlive(void) const
+{
+	return _response.getKeepAlive();
+}
+
+ClientState Client::getState(void) const
+{
+	return _state;
+}
+
+HTTPRequestParseState Client::getHTTPRequestParseState(void) const
+{
+	return _request_parse.getHTTPRequestParseState();
+}
+
+const std::string &Client::getResponseMessage(void) const
+{
+	return _response.getResponseMessage();
+}
+
+HTTPResponse &Client::getResponse(void)
+{
+	return _response;
+}
+
 void Client::setClientFd(int client_fd)
 {
 	_client_fd = client_fd;
@@ -29,15 +62,19 @@ void Client::setServerFd(int server_fd)
 	_server_fd = server_fd;
 }
 
-
-int Client::recvProcess(HTTPRequest &request)
+void Client::setState(ClientState state)
 {
+	_state = state;
+}
+
+
+int Client::recvProcess()
+{
+
 	char buffer[_buffer_size];
-	HTTPRequestParse request_parse(request);
+	std::cout << "client_fd: " << _client_fd << std::endl;
 	ssize_t n = recv(_client_fd, buffer, sizeof(buffer) - 1, 0);
-	if (n < 0)
-	{
-		log_print("recv", __LINE__, __FILE__, errno);
+	if (n <= 0) {
 		return -1;
 	}
 	buffer[n] = '\0';
@@ -45,16 +82,19 @@ int Client::recvProcess(HTTPRequest &request)
 		std::cout << "########## [ DEBUG ] request message ##########" << std::endl << buffer << std::endl
 		<< "###############################################" << std::endl;
 	#endif
-	request_parse.parse(buffer);
+	_request_parse.parse(buffer);
+	if (_request_parse.getHTTPRequestParseState() == FINISH_STATE) {
+		setState(SEND_STATE);
+	}
 	return 0;
 }
 
-void Client::responseProcess(HTTPRequest &request, HTTPResponse &response)
+void Client::responseProcess()
 {
-	std::string keep_alive = request.getHeader("Connection");
-	if (keep_alive.compare("keep-alive") == 0)
-		response.setKeepAlive(false);
-	response.selectResponse(request);
+	std::string keep_alive = _request.getHeader("Connection");
+	if (!keep_alive.empty() && keep_alive.compare("close") == 0)
+		_response.setKeepAlive(false);
+	_response.selectResponse(_request);
 }
 
 int Client::sendResponse(std::string &responseMessage)
@@ -65,33 +105,11 @@ int Client::sendResponse(std::string &responseMessage)
 		log_print("send", __LINE__, __FILE__, errno);
 		return -1;
 	}
-	return 0;
-}
-
-int Client::clientProcess()
-{
-	HTTPRequest request;
-	HTTPResponse response;
-	HTTPRequestParse request_parse(request);
-	std::string responseMessage;
-
-	try {
-		if (recvProcess(request) < 0)
-			return -1;
-		responseProcess(request, response);
-	} catch (ServerException &e) {
-		response.setStatusCode(e.getStatusCode());
-		response.makeResponseMessage();
-	}
-	responseMessage = response.getResponseMessage();
-	#if DEBUG
-		std::cout << "########## [ DEBUG ] response message ##########" << std::endl << responseMessage << std::endl
-			<< "################################################" << std::endl;
-	#endif
-	if (sendResponse(responseMessage) < 0)
-		return -1;
-	return 0;
 	# if DEBUG
-		std::cout << "==================================================" << std::endl;
-	# endif
+		std::cout << "########## [ DEBUG ] send start ##########" << std::endl;
+		std::cout << responseMessage << std::endl;
+		std::cout << "########## [ DEBUG ] send   end ##########" << std::endl;
+	#endif
+	setState(CLOSE_STATE);
+	return 0;
 }

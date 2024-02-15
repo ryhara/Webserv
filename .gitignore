@@ -10,3 +10,4 @@ post_*
 *.dummy
 __pycache__
 *.pyc
+test.cpp
