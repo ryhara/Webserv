@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include "Webserv.hpp"
 
 class Location
 {
