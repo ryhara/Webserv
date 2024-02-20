@@ -69,7 +69,11 @@ void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)
 	std::vector<std::string> file_list;
 	// TODO : configで設定されたautoindexのpathを取得する
 	// TODO : autoindexのデフォルトのindex.htmlがあればmakeGetResponseBodyと同様な処理
-	std::string path = "./www/autoindex/";
+	std::string path = "./www" + uri;
+	if (path[path.size() - 1] != '/') {
+		handleNormalRequest(request);
+		return ;
+	}
 	dir = opendir(path.c_str());
 	if (dir == NULL) {
 		throw NotFoundError();
@@ -96,9 +100,9 @@ void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)
 			std::string time(time_buf);
 			size_t file_size = s_stat.st_size;
 			if (isDirectory(s_stat)) {
-				ss <<  "<a href=\"" << "/autoindex/" << *it << "/" << "\">" << *it << "/</a>  " << std::left << std::setw(20) << "  " << time <<  "  -<br>";
+				ss <<  "<a href=\"" << uri << *it << "/" << "\">" << *it << "/</a>  " << std::left << std::setw(20) << "  " << time <<  "  -<br>";
 			} else if (isFile(s_stat)) {
-				ss << "<a href=\"" << "/autoindex/" << *it << "\">" << *it << "</a>" << std::left << std::setw(20) <<  "  " <<  time <<  "  " << ft_to_string(file_size) << "<br>";
+				ss << "<a href=\"" << uri << *it << "\">" << *it << "</a>" << std::left << std::setw(20) <<  "  " <<  time <<  "  " << ft_to_string(file_size) << "<br>";
 			}
 		} else
 			throw NotFoundError();
