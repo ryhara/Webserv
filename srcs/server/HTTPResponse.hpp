@@ -7,6 +7,7 @@
 #include <map>
 #include <ctime>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <cstdio>
 
 #include "Webserv.hpp"
@@ -64,7 +65,6 @@ class HTTPResponse
 		void handleCGIRequest(HTTPRequest &request);
 		void handleAutoIndexRequest(HTTPRequest &request);
 		void handleRedirectRequest(HTTPRequest &request);
-		void handleErrorResponse(HTTPRequest &request);
 
 		void makeFileBody(const std::string &path);
 		void makeGetResponseBody(HTTPRequest &request);

@@ -20,6 +20,7 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 		#ifdef DEBUG
 			std::cout << "########## [ DEBUG ] AUTOINDEX ##########" << std::endl;
 		#endif
+			// TODO : on/offの設定を確認する, offの場合はhandleNormalRequestを呼ぶ
 			handleAutoIndexRequest(request);
 			break;
 		case REDIRECT:
@@ -56,17 +57,59 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 
 void HTTPResponse::handleCGIRequest(HTTPRequest &request)
 {
-	// TODO : CGIの処理
 	std::cout << request.getUri() << std::endl;
 }
 
+// TODO : 関数分割
 void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)
 {
-	// TODO : autoindexの処理
-	std::cout << request.getUri() << std::endl;
+	DIR *dir;
+	struct dirent *dp;
+	std::string uri = request.getUri();
+	std::vector<std::string> file_list;
+	// TODO : configで設定されたautoindexのpathを取得する
+	// TODO : autoindexのデフォルトのindex.htmlがあればmakeGetResponseBodyと同様な処理
+	std::string path = "./www/autoindex/";
+	dir = opendir(path.c_str());
+	if (dir == NULL) {
+		throw NotFoundError();
+	} else {
+		while ((dp = readdir(dir)) != NULL) {
+			std::string file_name = dp->d_name;
+			if (file_name.compare(".") == 0) {
+				continue;
+			} else {
+				file_list.push_back(file_name);
+			}
+		}
+	}
+	std::stringstream ss;
+	// TODO : 文字幅揃える
+	ss << "<html><head><title>Index of " + path + "</title></head><style> .file-list {font-family: monospace;}</style><body><h1>Index of " + path + "</h1><hr><pre class=\"file-list\">";
+	// TODO : pathはconfigで設定されたautoindexのpathを取得する
+	for (std::vector<std::string>::iterator it = file_list.begin(); it != file_list.end(); it++) {
+		struct stat s_stat;
+		std::string file_path = path + *it;
+		if (isFileExist(file_path, &s_stat)) {
+			char time_buf[DATE_BUF_SIZE] = {0};
+			std::strftime(time_buf, sizeof(time_buf), "%d-%m-%Y %H:%M", std::localtime(&s_stat.st_mtime));
+			std::string time(time_buf);
+			size_t file_size = s_stat.st_size;
+			if (isDirectory(s_stat)) {
+				ss <<  "<a href=\"" << "/autoindex/" << *it << "/" << "\">" << *it << "/</a>  " << std::left << std::setw(20) << "  " << time <<  "  -<br>";
+			} else if (isFile(s_stat)) {
+				ss << "<a href=\"" << "/autoindex/" << *it << "\">" << *it << "</a>" << std::left << std::setw(20) <<  "  " <<  time <<  "  " << ft_to_string(file_size) << "<br>";
+			}
+		} else
+			throw NotFoundError();
+	}
+	ss << "</pre><hr></body></html>\r\n" ;
+	std::string html = ss.str();
+	closedir(dir);
+	setBody(html);
+	makeResponseMessage();
 }
 
-// TODO : curlは成功、ブラウザはEAGAINでexitする
 void HTTPResponse::handleRedirectRequest(HTTPRequest &request)
 {
 	std::string uri = request.getUri();
@@ -82,12 +125,10 @@ void HTTPResponse::handleRedirectRequest(HTTPRequest &request)
 	// path = redirect_path + "/" + path;
 	path = redirect_path;
 	setHeader("Location", path);
-	setStatusCode(STATUS_301);
+	if (request.getMethod().compare("GET") == 0) {
+		setStatusCode(STATUS_301);
+	} else {
+		setStatusCode(STATUS_308);
+	}
 	makeResponseMessage();
-}
-
-void HTTPResponse::handleErrorResponse(HTTPRequest &request)
-{
-	// TODO : errorの処理
-	std::cout << request.getUri() << std::endl;
 }

@@ -88,3 +88,15 @@ class HTTPVersionNotSupportedError : public ServerException
 			return (_status_message.c_str());
 		}
 };
+
+class NotFoundError : public ServerException
+{
+	public:
+		~NotFoundError() throw() {}
+		NotFoundError(void) : ServerException(STATUS_404, "Not Found") {}
+		NotFoundError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
+		virtual const char *what() const throw()
+		{
+			return (_status_message.c_str());
+		}
+};
