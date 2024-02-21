@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <vector>
 #include <map>
 #include <ctime>
 #include <sys/stat.h>
