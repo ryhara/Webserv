@@ -8,6 +8,13 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 		#ifdef DEBUG
 			std::cout << "########## [ DEBUG ] NORMAL ##########" << std::endl;
 		#endif
+			/*
+			TODO :AUTOINDEX消してNORMALに統合
+			if (autoindexがonの場合)
+				handleAutoIndexRequest(request);
+			else
+				handleNormalRequest(request);
+			*/
 			handleNormalRequest(request);
 			break;
 		case CGI:
@@ -118,6 +125,10 @@ void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)
 	// TODO : autoindexのデフォルトのindex.htmlがあればmakeGetResponseBodyと同様な処理
 	std::string path = "./www" + uri;
 	if (path[path.size() - 1] != '/') {
+		handleNormalRequest(request);
+		return ;
+	} else if (isFileExist(path + "index.html", request.getStat())) {
+		// TODO : index.htmlではなくデフォルトの値があれば
 		handleNormalRequest(request);
 		return ;
 	}
