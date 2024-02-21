@@ -99,10 +99,15 @@ void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)
 			std::strftime(time_buf, sizeof(time_buf), "%d-%m-%Y %H:%M", std::localtime(&s_stat.st_mtime));
 			std::string time(time_buf);
 			size_t file_size = s_stat.st_size;
+			std::string file_name = *it;
 			if (isDirectory(s_stat)) {
-				ss <<  "<a href=\"" << uri << *it << "/" << "\">" << *it << "/</a>  " << std::left << std::setw(20) << "  " << time <<  "  -<br>";
+				if (file_name.compare("..") == 0) {
+					ss << "<a href=\"../\">" << ".." << "/</a>" << CRLF;
+					continue;
+				}
+				ss <<  "<a href=\"" << uri << file_name << "/\">" << file_name << "/</a>" << std::setw(50 - file_name.size() + 1) << time << std::setw(20) << "-" << CRLF;
 			} else if (isFile(s_stat)) {
-				ss << "<a href=\"" << uri << *it << "\">" << *it << "</a>" << std::left << std::setw(20) <<  "  " <<  time <<  "  " << ft_to_string(file_size) << "<br>";
+				ss << "<a href=\"" << uri << file_name << "\">" << file_name << "</a>" << std::setw(50 - file_name.size()) << time << std::setw(20) << ft_to_string(file_size) << CRLF;
 			}
 		} else
 			throw NotFoundError();
