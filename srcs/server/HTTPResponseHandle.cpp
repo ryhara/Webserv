@@ -67,6 +67,51 @@ void HTTPResponse::handleCGIRequest(HTTPRequest &request)
 	std::cout << request.getUri() << std::endl;
 }
 
+void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)
+{
+	std::stringstream ss;
+	std::string uri = request.getUri();
+	std::vector<std::string> file_list;
+	// TODO : configで設定されたautoindexのpathを取得する
+	// TODO : autoindexのデフォルトのindex.htmlがあればmakeGetResponseBodyと同様な処理
+	std::string path = "./www" + uri;
+	if (path[path.size() - 1] != '/') {
+		handleNormalRequest(request);
+		return ;
+	} else if (isFileExist(path + "index.html", request.getStat())) {
+		// TODO : index.htmlではなくデフォルトの値があれば
+		handleNormalRequest(request);
+		return ;
+	}
+	readDirectory(file_list, path);
+	// TODO : pathはconfigで設定されたautoindexのpathを取得する
+	makeAutoindexBody(file_list, uri, path, ss);
+	makeResponseMessage();
+}
+
+void HTTPResponse::handleRedirectRequest(HTTPRequest &request)
+{
+	std::string uri = request.getUri();
+	std::string location = request.getLocation();
+	std::string path = "";
+	// TODO : configで設定されたredirectのpathを取得する
+	std::string redirect_path = "http://google.com";
+	// リダイレクトの後ろのパスも設定する場合
+	// size_t found = uri.find(location);
+	// if (found != std::string::npos) {
+	// 	path = uri.substr(found + location.size(), uri.size());
+	// }
+	// path = redirect_path + "/" + path;
+	path = redirect_path;
+	setHeader("Location", path);
+	if (request.getMethod().compare("GET") == 0) {
+		setStatusCode(STATUS_301);
+	} else {
+		setStatusCode(STATUS_308);
+	}
+	makeResponseMessage();
+}
+
 void HTTPResponse::makeAutoindexBody(std::vector<std::string> file_list, std::string uri, std::string path, std::stringstream &ss)
 {
 	ss << "<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><hr><pre style=\"font-family: Courier, Consolas, 'Courier New', monospace;\">";
@@ -114,49 +159,4 @@ void HTTPResponse::readDirectory(std::vector<std::string> &file_list, const std:
 		}
 	}
 	closedir(dir);
-}
-
-void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)
-{
-	std::stringstream ss;
-	std::string uri = request.getUri();
-	std::vector<std::string> file_list;
-	// TODO : configで設定されたautoindexのpathを取得する
-	// TODO : autoindexのデフォルトのindex.htmlがあればmakeGetResponseBodyと同様な処理
-	std::string path = "./www" + uri;
-	if (path[path.size() - 1] != '/') {
-		handleNormalRequest(request);
-		return ;
-	} else if (isFileExist(path + "index.html", request.getStat())) {
-		// TODO : index.htmlではなくデフォルトの値があれば
-		handleNormalRequest(request);
-		return ;
-	}
-	readDirectory(file_list, path);
-	// TODO : pathはconfigで設定されたautoindexのpathを取得する
-	makeAutoindexBody(file_list, uri, path, ss);
-	makeResponseMessage();
-}
-
-void HTTPResponse::handleRedirectRequest(HTTPRequest &request)
-{
-	std::string uri = request.getUri();
-	std::string location = request.getLocation();
-	std::string path = "";
-	// TODO : configで設定されたredirectのpathを取得する
-	std::string redirect_path = "http://google.com";
-	// リダイレクトの後ろのパスも設定する場合
-	// size_t found = uri.find(location);
-	// if (found != std::string::npos) {
-	// 	path = uri.substr(found + location.size(), uri.size());
-	// }
-	// path = redirect_path + "/" + path;
-	path = redirect_path;
-	setHeader("Location", path);
-	if (request.getMethod().compare("GET") == 0) {
-		setStatusCode(STATUS_301);
-	} else {
-		setStatusCode(STATUS_308);
-	}
-	makeResponseMessage();
 }
