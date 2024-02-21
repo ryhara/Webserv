@@ -4,39 +4,40 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 {
 	enum response_mode mode = request.getMode();
 	switch (mode) {
-	case NORMAL:
-	#ifdef DEBUG
-		std::cout << "########## [ DEBUG ] NORMAL ##########" << std::endl;
-	#endif
-		handleNormalRequest(request);
-		break;
-	case CGI:
-	#ifdef DEBUG
-		std::cout << "########## [ DEBUG ] CGI ##########" << std::endl;
-	#endif
-		handleCGIRequest(request);
-		break;
-	case AUTOINDEX:
-	#ifdef DEBUG
-		std::cout << "########## [ DEBUG ] AUTOINDEX ##########" << std::endl;
-	#endif
-		handleAutoIndexRequest(request);
-		break;
-	case REDIRECT:
-	#ifdef DEBUG
-		std::cout << "########## [ DEBUG ] REDIRECT ##########" << std::endl;
-	#endif
-		handleRedirectRequest(request);
-		break;
-	default:
-		throw InternalServerError();
-		break;
+		case NORMAL:
+		#ifdef DEBUG
+			std::cout << "########## [ DEBUG ] NORMAL ##########" << std::endl;
+		#endif
+			handleNormalRequest(request);
+			break;
+		case CGI:
+		#ifdef DEBUG
+			std::cout << "########## [ DEBUG ] CGI ##########" << std::endl;
+		#endif
+			handleCGIRequest(request);
+			break;
+		case AUTOINDEX:
+		#ifdef DEBUG
+			std::cout << "########## [ DEBUG ] AUTOINDEX ##########" << std::endl;
+		#endif
+			handleAutoIndexRequest(request);
+			break;
+		case REDIRECT:
+		#ifdef DEBUG
+			std::cout << "########## [ DEBUG ] REDIRECT ##########" << std::endl;
+		#endif
+			handleRedirectRequest(request);
+			break;
+		default:
+			throw InternalServerError();
+			break;
 	}
 }
 
 void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 {
 	// TODO : GETは必須、POSTとDELETEは任意で, configで許可されていない場合405 Method Not Allowed
+	// Method Not Allowedの場合は[Allow: GET, POST, DELETE]のようにAllowヘッダをつける
 	std::string method = request.getMethod();
 	if (method.compare("GET") == 0) {
 		makeGetResponseBody(request);

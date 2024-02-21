@@ -17,12 +17,12 @@ class ServerException : public std::exception
 		virtual const char* what() const throw() = 0;
 };
 
-class HTTPRequestParseError : public ServerException
+class BadRequestError : public ServerException
 {
 	public:
-		~HTTPRequestParseError() throw() {}
-		HTTPRequestParseError(void) : ServerException(STATUS_400, "Bad Request") {}
-		HTTPRequestParseError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
+		~BadRequestError() throw() {}
+		BadRequestError(void) : ServerException(STATUS_400, "Bad Request") {}
+		BadRequestError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
 		virtual const char *what() const throw()
 		{
 			return (_status_message.c_str());
@@ -71,6 +71,18 @@ class NotImplementedError : public ServerException
 		~NotImplementedError() throw() {}
 		NotImplementedError(void) : ServerException(STATUS_501, "Not Implemented") {}
 		NotImplementedError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
+		virtual const char *what() const throw()
+		{
+			return (_status_message.c_str());
+		}
+};
+
+class HTTPVersionNotSupportedError : public ServerException
+{
+	public:
+		~HTTPVersionNotSupportedError() throw() {}
+		HTTPVersionNotSupportedError(void) : ServerException(STATUS_505, "HTTP Version Not Supported") {}
+		HTTPVersionNotSupportedError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
 		virtual const char *what() const throw()
 		{
 			return (_status_message.c_str());

@@ -95,6 +95,11 @@ void			HTTPRequest::setBody(const std::string &body)
 	this->_body = body;
 }
 
+void			HTTPRequest::addBody(const std::string &body)
+{
+	this->_body += body;
+}
+
 void			HTTPRequest::setLocation(const std::string &location)
 {
 	this->_location = location;

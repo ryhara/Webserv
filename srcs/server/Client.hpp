@@ -10,24 +10,42 @@
 
 # define BUFFER_SIZE			8192
 
+enum ClientState
+{
+	RECV_STATE,
+	SEND_STATE,
+	CLOSE_STATE,
+};
+
 class Client
 {
 	private :
 		DISALLOW_COPY_AND_ASSIGN(Client);
+		ClientState _state;
+		HTTPRequest _request;
+		HTTPRequestParse _request_parse;
+		HTTPResponse _response;
 		int _client_fd;
 		int _server_fd;
 		static const size_t _buffer_size = BUFFER_SIZE;
+
 	public :
 		Client(int client_fd, int server_fd);
 		~Client(void);
-
+		HTTPRequestParseState getHTTPRequestParseState(void) const;
 		int getClientFd(void) const;
 		int getServerFd(void) const;
+		bool getKeepAlive(void) const;
+		HTTPResponse &getResponse(void);
+
+		const std::string &getResponseMessage(void) const;
+		ClientState getState(void) const;
 		void setClientFd(int client_fd);
 		void setServerFd(int server_fd);
+		void setState(ClientState state);
 
-		int clientProcess();
-		int recvProcess(HTTPRequest &request);
-		void responseProcess(HTTPRequest &request, HTTPResponse &response);
+		void clear(void);
+		int recvProcess();
+		void responseProcess();
 		int sendResponse(std::string &responseMessage);
 };

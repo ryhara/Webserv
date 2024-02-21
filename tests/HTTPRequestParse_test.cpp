@@ -13,8 +13,8 @@ TEST(HTTPRequestParseTest, readRequestLineTest) {
 
 	HTTPRequest request;
 	HTTPRequestParse parse(request);
-	std::string line = "GET / HTTP/1.1";
-	parse.readRequestLine(line);
+	std::stringstream ss("GET / HTTP/1.1\r\n");
+	parse.readRequestLine(ss);
 	EXPECT_EQ(request.getMethod(), "GET");
 	EXPECT_EQ(request.getUri(), "/");
 	EXPECT_EQ(request.getVersion(), "HTTP/1.1");
@@ -27,6 +27,7 @@ TEST(HTTPRequestParseTest, readHeadersTest) {
 	HTTPRequest request;
 	HTTPRequestParse parse(request);
 	std::stringstream ss(example1);
+	parse.readHeaders(ss);
 	parse.readHeaders(ss);
 	EXPECT_EQ(request.getHeaders()["Host"], "localhost:4242");
 	EXPECT_EQ(request.getHeaders()["Connection"], "keep-alive");

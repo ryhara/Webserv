@@ -14,6 +14,7 @@ std::string HTTPResponse::getTimeStampForPost(void) const
 	return ret;
 }
 
+// TODO Location: /path/to/uploaded/file出来れば対応
 void HTTPResponse::makePostResponseBody(HTTPRequest &request)
 {
 	std::string body = request.getBody();

@@ -10,10 +10,14 @@ Server::Server(void)
 Server::~Server(void)
 {
 	_server_fds.clear();
-	_client_fds.clear();
 	FD_ZERO(&_readfds);
 	if (_res)
 		freeaddrinfo(_res);
+}
+
+void	Server::setServers(std::map<int, std::vector<ServerConfig> > &servers)
+{
+	_servers = servers;
 }
 
 Config &Server::getConfig(void) const
@@ -41,6 +45,7 @@ void Server::initServerAddr(std::string &port)
 	_hints.ai_family = AF_INET;
 	_hints.ai_socktype = SOCK_STREAM;
 	_hints.ai_flags = AI_PASSIVE;
+	// TODO : 第一引数調べる
 	if (getaddrinfo(NULL, port_str, &_hints, &_res) != 0)
 		log_exit("getaddrinfo", __LINE__, __FILE__, errno);
 }
@@ -101,57 +106,20 @@ int Server::acceptSocket(int &server_fd)
 	return client_fd;
 }
 
-// TODO : Clientクラスへ以降、頃合いを見て削除
-void Server::clientProcess(int client_fd)
-{
-	HTTPRequest request;
-	HTTPResponse response;
-	HTTPRequestParse request_parse(request);
-	std::string responseMessage;
-	ssize_t n = recv(client_fd, _buffer, sizeof(_buffer) - 1, 0);
-	if (n < 0)
-	{
-		close(client_fd);
-		closeServerFds();
-		log_exit("recv", __LINE__, __FILE__, errno);
-	}
-	_buffer[n] = '\0';
-	#if DEBUG
-		std::cout << "#### [ DEBUG ] request message ####" << std::endl << _buffer << std::endl << "##########" << std::endl;
-	#endif
-	try {
-		request_parse.parse(_buffer);
-		response.selectResponse(request);
-	} catch (ServerException &e) {
-		response.setStatusCode(e.getStatusCode());
-		response.makeResponseMessage();
-	}
-	responseMessage = response.getResponseMessage();
-	#if DEBUG
-		std::cout << "##### [ DEBUG ] response message ####" << std::endl << responseMessage << std::endl << "##########" << std::endl;
-	#endif
-	ssize_t send_n = send(client_fd, responseMessage.c_str(), responseMessage.size(), 0);
-	if (send_n < 0)
-	{
-		close(client_fd);
-		closeServerFds();
-		log_exit("send", __LINE__, __FILE__, errno);
-	}
-	# if DEBUG
-		std::cout << "==================================================" << std::endl;
-	# endif
-}
-
 void Server::initFds(void)
 {
 	FD_ZERO(&_readfds);
+	FD_ZERO(&_writefds);
 	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
 	{
 		FD_SET(it->second, &_readfds);
 	}
-	for (std::vector<int>::iterator it = _client_fds.begin(); it != _client_fds.end(); ++it)
+	for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
-		FD_SET(*it, &_readfds);
+		if (it->second->getState() == RECV_STATE)
+			FD_SET(it->first, &_readfds);
+		if (it->second->getState() == SEND_STATE)
+			FD_SET(it->first, &_writefds);
 	}
 }
 
@@ -170,17 +138,46 @@ void Server::serverEvent(void)
 				log_exit("accept", __LINE__, __FILE__, errno);
 			}
 			setNonBlockingFd(client_fd);
-			_client_fds.push_back(client_fd);
+			Client *client = new Client(client_fd, it->second);
+			_clients.insert(std::make_pair(client_fd, client));
 			break;
 		}
 	}
 }
 
+void Server::executeRecvProcess(std::map<int, Client*>::iterator &it)
+{
+	Client *client = it->second;
+	if (client->recvProcess() < 0)
+		deleteClient(it);
+}
+
+void Server::executeSendProcess(std::map<int, Client*>::iterator &it)
+{
+	Client *client = it->second;
+	client->responseProcess();
+	std::string responseMessage = client->getResponseMessage();
+	if (client->sendResponse(responseMessage) < 0)
+		deleteClient(it);
+}
+
+void Server::deleteClient(std::map<int, Client*>::iterator &it)
+{
+	close(it->first);
+	delete it->second;
+	_clients.erase(it);
+}
+
 void Server::mainLoop(void)
 {
+	std::string responseMessage = "";
+	struct timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
 	while (1) {
 		initFds();
-		int result = select(FD_SETSIZE, &_readfds, NULL, NULL, NULL);
+		// TODO : max_fdを設定する
+		int result = select(FD_SETSIZE, &_readfds, &_writefds, NULL, &timeout);
 		if (result < 0) {
 			closeServerFds();
 			log_exit("select", __LINE__, __FILE__, errno);
@@ -188,20 +185,37 @@ void Server::mainLoop(void)
 			// timeout
 		} else {
 			serverEvent();
-			for (std::vector<int>::iterator it = _client_fds.begin(); it != _client_fds.end(); ++it)
+			for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 			{
-				if (FD_ISSET(*it, &_readfds))
-				{
-					FD_CLR(*it, &_readfds);
-					Client client(*it, _server_fd);
-					// TODO : recvとsendを分けて、実行、RECV_STATE→SEND_STATE→CLOSE_STATEで管理
-					if (client.clientProcess() < 0)
-					{
-						closeServerFds();
-						log_exit("clientProcess", __LINE__, __FILE__, errno);
+				try {
+					if (FD_ISSET(it->first, &_readfds)) {
+						FD_CLR(it->first, &_readfds);
+						if (it->second->getState() == RECV_STATE) {
+							executeRecvProcess(it);
+							break;
+						}
+					} else if (FD_ISSET(it->first, &_writefds)) {
+						FD_CLR(it->first, &_writefds);
+						if (it->second->getState() == SEND_STATE) {
+							executeSendProcess(it);
+						}
+						if (it->second->getKeepAlive() == false)
+							deleteClient(it);
+						else
+							it->second->clear();
+						break;
 					}
-					close(*it);
-					_client_fds.erase(it);
+				} catch (ServerException &e) {
+					Client *client = it->second;
+					client->getResponse().setStatusCode(e.getStatusCode());
+					client->getResponse().makeResponseMessage();
+					responseMessage = client->getResponseMessage();
+					client->sendResponse(responseMessage);
+					client->setState(RECV_STATE);
+					if (client->getKeepAlive() == false)
+						deleteClient(it);
+					else
+						client->clear();
 					break;
 				}
 			}
