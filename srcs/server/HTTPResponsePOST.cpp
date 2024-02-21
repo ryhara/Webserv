@@ -23,7 +23,7 @@ void HTTPResponse::makePostResponseBody(HTTPRequest &request)
 	std::ofstream ofs;
 
 	// TODO : configから保存先を取得する
-	ofs.open(uploadPath + header + timestamp);
+	ofs.open((uploadPath + header + timestamp).c_str());//コンパイルを通すために書き換えました
 	if (!ofs.is_open())
 	{
 		_statusCode = STATUS_500;
