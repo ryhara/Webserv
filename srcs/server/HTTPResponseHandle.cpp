@@ -69,7 +69,7 @@ void HTTPResponse::handleCGIRequest(HTTPRequest &request)
 
 void HTTPResponse::makeAutoindexBody(std::vector<std::string> file_list, std::string uri, std::string path, std::stringstream &ss)
 {
-	ss << "<html><head><title>Index of " + path + "</title></head><style> .file-list {font-family: monospace;}</style><body><h1>Index of " + path + "</h1><hr><pre class=\"file-list\">";
+	ss << "<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><hr><pre style=\"font-family: Courier, Consolas, 'Courier New', monospace;\">";
 	for (std::vector<std::string>::iterator it = file_list.begin(); it != file_list.end(); it++) {
 		struct stat s_stat;
 		std::string file_path = path + *it;
@@ -84,7 +84,7 @@ void HTTPResponse::makeAutoindexBody(std::vector<std::string> file_list, std::st
 					ss << "<a href=\"../\">" << ".." << "/</a>" << CRLF;
 					continue;
 				}
-				ss <<  "<a href=\"" << uri << file_name << "/\">" << file_name << "/</a>" << std::setw(50 - file_name.size() + 1) << time << std::setw(20) << "-" << CRLF;
+				ss <<  "<a href=\"" << uri << file_name << "/\">" << file_name << "/</a>" << std::setw(50 - file_name.size() - 1) << time << std::setw(20) << "-" << CRLF;
 			} else if (isFile(s_stat)) {
 				ss << "<a href=\"" << uri << file_name << "\">" << file_name << "</a>" << std::setw(50 - file_name.size()) << time << std::setw(20) << ft_to_string(file_size) << CRLF;
 			}
