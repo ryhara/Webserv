@@ -1,6 +1,6 @@
 #include "HTTPRequest.hpp"
 
-HTTPRequest::HTTPRequest(void) : _method(""), _uri(""), _version(""), _headers(), _body(""), _location("")
+HTTPRequest::HTTPRequest(void) : _method(""), _uri(""), _version(""), _headers(), _body(""), _location(""), _host("localhost"), _port("80")
 {
 }
 
@@ -17,6 +17,8 @@ void HTTPRequest::clear(void)
 	this->_headers.clear();
 	this->_body = "";
 	this->_location = "";
+	this->_host = "localhost";
+	this->_port = "80";
 }
 
 // getter
@@ -69,6 +71,21 @@ enum response_mode HTTPRequest::getMode(void) const
 	return (this->_mode);
 }
 
+std::string		&HTTPRequest::getHost(void) const
+{
+	return (const_cast<std::string &>(this->_host));
+}
+
+std::string		&HTTPRequest::getPort(void) const
+{
+	return (const_cast<std::string &>(this->_port));
+}
+
+ServerConfig	&HTTPRequest::getServerConfig(void)
+{
+	return (this->_config);
+}
+
 // setter
 void			HTTPRequest::setMethod(const std::string &method)
 {
@@ -113,6 +130,21 @@ void 			HTTPRequest::setStat(const struct stat &stat)
 void			HTTPRequest::setMode(const enum response_mode mode)
 {
 	this->_mode = mode;
+}
+
+void			HTTPRequest::setHost(const std::string &host)
+{
+	this->_host = host;
+}
+
+void			HTTPRequest::setPort(const std::string &port)
+{
+	this->_port = port;
+}
+
+void			HTTPRequest::setServerConfig(ServerConfig &config)
+{
+	this->_config = config;
 }
 
 void HTTPRequest::print(void)

@@ -26,6 +26,16 @@ class Location
 		~Location();
 
 		size_t		addInfo(std::vector<std::vector<std::string> > &parseLines, size_t startIndex);
-		void	getLocation() const;
-		std::string get_path() const;
+		void	printLocation() const;
+		std::string getLocation() const;
+		std::string getAlias() const;
+		std::string getUploadPath() const;
+		std::string getRedirPath() const;
+		std::vector<std::string> getCgiExtension() const;
+		bool getGetMethod() const;
+		bool getPostMethod() const;
+		bool getDeleteMethod() const;
+		std::string getIndex() const;
+		bool getAutoindex() const;
+
 };

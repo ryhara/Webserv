@@ -14,7 +14,7 @@ void printServerInfo(std::map<int, std::vector<ServerConfig> > &servers)
 		std::cout << "port : " << it->first << std::endl;
 		for (size_t i = 0; i < it->second.size(); i++)
 		{
-			// it->second[i].getServerConfig();
+			it->second[i].printServerConfig();
 			std::cout << "server_name: " << it->second[i].getServerName() << std::endl;
 		}
 	}

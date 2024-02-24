@@ -52,6 +52,11 @@ HTTPResponse &Client::getResponse(void)
 	return _response;
 }
 
+HTTPRequest &Client::getRequest(void)
+{
+	return _request;
+}
+
 void Client::setClientFd(int client_fd)
 {
 	_client_fd = client_fd;

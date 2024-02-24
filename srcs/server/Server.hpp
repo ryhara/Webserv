@@ -17,6 +17,7 @@
 #include "Webserv.hpp"
 #include "HTTPRequestParse.hpp"
 #include "HTTPResponse.hpp"
+#include "ServerError.hpp"
 #include "Client.hpp"
 #include "utils.hpp"
 #include "Config.hpp"

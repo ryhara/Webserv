@@ -1,6 +1,6 @@
 #include "Location.hpp"
 
-Location::Location(/* args */) : location("/"), get_method(true), post_method(false), delete_method(false), autoindex(false), alias(""), index(""), upload_path("")
+Location::Location(/* args */) : location("/"), get_method(true), post_method(false), delete_method(false), autoindex(false), alias("./www"), index("index.html"), upload_path("./uploads/"), redir_path("http://google.com")
 {
 }
 
@@ -8,7 +8,7 @@ Location::~Location()
 {
 }
 
-Location::Location(std::string location) : get_method(true), post_method(false), delete_method(false), autoindex(false)
+Location::Location(std::string location) : get_method(true), post_method(false), delete_method(false), autoindex(false) , alias("./www"), index("index.html"), upload_path("./uploads/"), redir_path("http://google.com")
 {
 	this->location = location;
 }
@@ -153,12 +153,57 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 	std::exit (1);
 }
 
-std::string Location::get_path() const
+std::string Location::getLocation() const
 {
 	return this->location;
 }
 
-void Location::getLocation() const
+std::string Location::getIndex() const
+{
+	return this->index;
+}
+
+std::string Location::getAlias() const
+{
+	return this->alias;
+}
+
+std::string Location::getUploadPath() const
+{
+	return this->upload_path;
+}
+
+std::string Location::getRedirPath() const
+{
+	return this->redir_path;
+}
+
+std::vector<std::string> Location::getCgiExtension() const
+{
+	return this->cgi_extension;
+}
+
+bool Location::getGetMethod() const
+{
+	return this->get_method;
+}
+
+bool Location::getPostMethod() const
+{
+	return this->post_method;
+}
+
+bool Location::getDeleteMethod() const
+{
+	return this->delete_method;
+}
+
+bool Location::getAutoindex() const
+{
+	return this->autoindex;
+}
+
+void Location::printLocation() const
 {
 	std::cout << "-----------location: " << this->location << "--------------" << std::endl;
 	std::cout << "alias: " << this->alias << std::endl;
