@@ -67,55 +67,6 @@ void HTTPResponse::handleCGIRequest(HTTPRequest &request)
 	std::cout << request.getUri() << std::endl;
 }
 
-void HTTPResponse::makeAutoindexBody(std::vector<std::string> file_list, std::string uri, std::string path, std::stringstream &ss)
-{
-	ss << "<html><head><title>Index of " + path + "</title></head><style> .file-list {font-family: monospace;}</style><body><h1>Index of " + path + "</h1><hr><pre class=\"file-list\">";
-	for (std::vector<std::string>::iterator it = file_list.begin(); it != file_list.end(); it++) {
-		struct stat s_stat;
-		std::string file_path = path + *it;
-		if (isFileExist(file_path, &s_stat)) {
-			char time_buf[DATE_BUF_SIZE] = {0};
-			std::strftime(time_buf, sizeof(time_buf), "%d-%m-%Y %H:%M", std::localtime(&s_stat.st_mtime));
-			std::string time(time_buf);
-			size_t file_size = s_stat.st_size;
-			std::string file_name = *it;
-			if (isDirectory(s_stat)) {
-				if (file_name.compare("..") == 0) {
-					ss << "<a href=\"../\">" << ".." << "/</a>" << CRLF;
-					continue;
-				}
-				ss <<  "<a href=\"" << uri << file_name << "/\">" << file_name << "/</a>" << std::setw(50 - file_name.size() + 1) << time << std::setw(20) << "-" << CRLF;
-			} else if (isFile(s_stat)) {
-				ss << "<a href=\"" << uri << file_name << "\">" << file_name << "</a>" << std::setw(50 - file_name.size()) << time << std::setw(20) << ft_to_string(file_size) << CRLF;
-			}
-		} else
-			throw NotFoundError();
-	}
-	ss << "</pre><hr></body></html>\r\n" ;
-	std::string html = ss.str();
-	setBody(html);
-}
-
-void HTTPResponse::readDirectory(std::vector<std::string> &file_list, const std::string &path)
-{
-	DIR *dir;
-	struct dirent *dp;
-	dir = opendir(path.c_str());
-	if (dir == NULL) {
-		throw NotFoundError();
-	} else {
-		while ((dp = readdir(dir)) != NULL) {
-			std::string file_name = dp->d_name;
-			if (file_name.compare(".") == 0) {
-				continue;
-			} else {
-				file_list.push_back(file_name);
-			}
-		}
-	}
-	closedir(dir);
-}
-
 void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)
 {
 	std::stringstream ss;
@@ -159,4 +110,53 @@ void HTTPResponse::handleRedirectRequest(HTTPRequest &request)
 		setStatusCode(STATUS_308);
 	}
 	makeResponseMessage();
+}
+
+void HTTPResponse::makeAutoindexBody(std::vector<std::string> file_list, std::string uri, std::string path, std::stringstream &ss)
+{
+	ss << "<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><hr><pre style=\"font-family: Courier, Consolas, 'Courier New', monospace;\">";
+	for (std::vector<std::string>::iterator it = file_list.begin(); it != file_list.end(); it++) {
+		struct stat s_stat;
+		std::string file_path = path + *it;
+		if (isFileExist(file_path, &s_stat)) {
+			char time_buf[DATE_BUF_SIZE] = {0};
+			std::strftime(time_buf, sizeof(time_buf), "%d-%m-%Y %H:%M", std::localtime(&s_stat.st_mtime));
+			std::string time(time_buf);
+			size_t file_size = s_stat.st_size;
+			std::string file_name = *it;
+			if (isDirectory(s_stat)) {
+				if (file_name.compare("..") == 0) {
+					ss << "<a href=\"../\">" << ".." << "/</a>" << CRLF;
+					continue;
+				}
+				ss <<  "<a href=\"" << uri << file_name << "/\">" << file_name << "/</a>" << std::setw(50 - file_name.size() - 1) << time << std::setw(20) << "-" << CRLF;
+			} else if (isFile(s_stat)) {
+				ss << "<a href=\"" << uri << file_name << "\">" << file_name << "</a>" << std::setw(50 - file_name.size()) << time << std::setw(20) << ft_to_string(file_size) << CRLF;
+			}
+		} else
+			throw NotFoundError();
+	}
+	ss << "</pre><hr></body></html>\r\n" ;
+	std::string html = ss.str();
+	setBody(html);
+}
+
+void HTTPResponse::readDirectory(std::vector<std::string> &file_list, const std::string &path)
+{
+	DIR *dir;
+	struct dirent *dp;
+	dir = opendir(path.c_str());
+	if (dir == NULL) {
+		throw NotFoundError();
+	} else {
+		while ((dp = readdir(dir)) != NULL) {
+			std::string file_name = dp->d_name;
+			if (file_name.compare(".") == 0) {
+				continue;
+			} else {
+				file_list.push_back(file_name);
+			}
+		}
+	}
+	closedir(dir);
 }

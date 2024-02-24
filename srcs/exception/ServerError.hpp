@@ -1,4 +1,5 @@
 #include <exception>
+#include <string>
 
 #include "HTTPStatusCode.hpp"
 
