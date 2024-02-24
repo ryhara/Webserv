@@ -1,6 +1,6 @@
 #include "Location.hpp"
 
-Location::Location(/* args */) : location("/"), get_method(true), post_method(false), delete_method(false), autoindex(false), alias("./www"/), index("index.html"), upload_path("./uploads/"), redir_path("http://google.com")
+Location::Location(/* args */) : location("/"), get_method(true), post_method(false), delete_method(false), autoindex(false), alias("./www/"), index("index.html"), upload_path("./uploads/"), redir_path("http://google.com")
 {
 }
 
