@@ -39,7 +39,6 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 {
 	std::string method = request.getMethod();
 	Location location = request.getServerConfig().getLocation(request.getLocation());
-	location.printLocation();
 	if (method.compare("GET") == 0) {
 		if (location.getGetMethod() == false)
 			throw MethodNotAllowedError();
