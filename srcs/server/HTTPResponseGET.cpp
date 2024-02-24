@@ -18,7 +18,6 @@ void HTTPResponse::makeGetResponseBody(HTTPRequest &request)
 	} else if (isFile(*request.getStat())) {
 		makeFileBody(path);
 	} else if (isDirectory(*request.getStat()) && path[path.size() - 1] == '/') {
-		std::cout << "directory" << std::endl;
 		makeFileBody(std::string(path + location.getIndex()));
 	} else {
 		_statusCode = STATUS_404;

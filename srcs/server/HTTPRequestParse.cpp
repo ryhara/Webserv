@@ -91,24 +91,24 @@ void HTTPRequestParse::parse(char *buffer)
 		switch (_state)
 		{
 			case REQUEST_LINE_STATE:
-				#if DEBUG
-					std::cout << "#### [ DEBUG ] REQUEST_LINE_STATE ####" << std::endl;
-				#endif
+				// #if DEBUG
+				// 	std::cout << "#### [ DEBUG ] REQUEST_LINE_STATE ####" << std::endl;
+				// #endif
 				_requiredParse = readRequestLine(bufferStream);
 				break;
 			case HEADERS_STATE:
-				#if DEBUG
-					std::cout << "#### [ DEBUG ] HEADERS_STATE ####" << std::endl;
-				#endif
+				// #if DEBUG
+				// 	std::cout << "#### [ DEBUG ] HEADERS_STATE ####" << std::endl;
+				// #endif
 				_requiredParse=  readHeaders(bufferStream);
 				break;
 			case BODY_STATE:
 				_requiredParse = readBody(bufferStream);
 				break;
 			case FINISH_STATE:
-				#if DEBUG
-					std::cout << "#### [ DEBUG ] FINISH_STATE ####" << std::endl;
-				#endif
+				// #if DEBUG
+				// 	std::cout << "#### [ DEBUG ] FINISH_STATE ####" << std::endl;
+				// #endif
 				if (_request.getHeader("Host").empty())
 					throw BadRequestError();
 				if (_contentLength > 0 && _request.getBody().size() != _contentLength)
@@ -222,7 +222,7 @@ void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 	{
 		if (!isSize) {
 			if (line.empty()) {
-				std::cout << "File" << __FILE__ << "Line" << __LINE__ << std::endl;
+				// std::cout << "File" << __FILE__ << "Line" << __LINE__ << std::endl;
 				return ;
 			}
 			if (!isHex(line)) {
@@ -231,7 +231,7 @@ void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 			}
 			std::stringstream ss(line);
 			ss >> std::hex >> size;
-			std::cout << "size: " << size << std::endl;
+			// std::cout << "size: " << size << std::endl;
 			if (size == 0)  {
 				ss.clear();
 				ss.str("");
@@ -241,7 +241,7 @@ void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 			isSize = true;
 		}
 		else if (isSize) {
-			std::cout << "line: " << line << std::endl;
+			// std::cout << "line: " << line << std::endl;
 			if (line.size() != size) {
 				isSize = false;
 				throw BadRequestError();
@@ -272,14 +272,14 @@ bool HTTPRequestParse::readBody(std::stringstream &ss)
 {
 	if (this->_isChunked)
 	{
-		#if DEBUG
-			std::cout << "#### [ DEBUG ] CHUNKED_STATE ####" << std::endl;
-		#endif
+		// #if DEBUG
+		// 	std::cout << "#### [ DEBUG ] CHUNKED_STATE ####" << std::endl;
+		// #endif
 		parseChunkedBody(ss);
 	} else {
-			#if DEBUG
-				std::cout << "#### [ DEBUG ] BODY_STATE ####" << std::endl;
-			#endif
+		// #if DEBUG
+		// 	std::cout << "#### [ DEBUG ] BODY_STATE ####" << std::endl;
+		// #endif
 		parseNormalBody(ss);
 	}
 	if (getHTTPRequestParseState() == FINISH_STATE)
