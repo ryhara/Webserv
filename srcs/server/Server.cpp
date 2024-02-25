@@ -45,7 +45,6 @@ void Server::initServerAddr(std::string &port)
 	_hints.ai_family = AF_INET;
 	_hints.ai_socktype = SOCK_STREAM;
 	_hints.ai_flags = AI_PASSIVE;
-	// TODO : 第一引数調べる
 	if (getaddrinfo(NULL, port_str, &_hints, &_res) != 0)
 		log_exit("getaddrinfo", __LINE__, __FILE__, errno);
 }
@@ -155,6 +154,19 @@ void Server::executeRecvProcess(std::map<int, Client*>::iterator &it)
 void Server::executeSendProcess(std::map<int, Client*>::iterator &it)
 {
 	Client *client = it->second;
+	std::string port = client->getRequest().getPort();
+	std::string host = client->getRequest().getHost();
+	int config_index = 0;
+	for (int i = 0;i < static_cast<int>(_servers[ft_stoi(port)].size()); i++)
+	{
+		if (_servers[ft_stoi(port)][config_index].getServerName() == host) {
+			config_index = i;
+			break;
+		}
+	}
+	client->getRequest().setServerConfig(_servers[ft_stoi(port)][config_index]);
+	if (_servers[ft_stoi(port)][config_index].getMaxBodySize() < client->getRequest().getBody().size())
+		throw HTTPRequestPayloadTooLargeError();
 	client->responseProcess();
 	std::string responseMessage = client->getResponseMessage();
 	if (client->sendResponse(responseMessage) < 0)
@@ -226,20 +238,17 @@ void Server::mainLoop(void)
 void Server::start(void)
 {
 	std::cout << "================= Server start =================" << std::endl;
-	std::vector<std::string> list;
-	list.push_back("4242");
-	list.push_back("4243");
-	// TODO : MAX_CLIENTSを超えた分はエラーを返す. CONFIG段階でエラーにしとく
-	if (list.size() > FD_SETSIZE / 2)
+	if (_servers.size() > FD_SETSIZE / 2)
 	{
 		log_exit("server start", __LINE__, __FILE__, errno);
 	}
-	// TODO : configのサーバーの数だけループする。
-	for (int i = 0; i < 2; ++i) {
-		std::string current_server_port = list[i];
-		initServerAddr(list[i]);
-		createSocket(current_server_port);
-		int current_server_fd = _server_fds[list[i]];
+	for (std::map<int, std::vector<ServerConfig> >::iterator it = _servers.begin(); it != _servers.end(); ++it)
+	{
+		std::vector<ServerConfig> server_configs = it->second;
+		std::string current_port = ft_to_string(static_cast<int>(it->first));
+		initServerAddr(current_port);
+		createSocket(current_port);
+		int current_server_fd = _server_fds[current_port];
 		bindSocket(current_server_fd);
 		listenSocket(current_server_fd);
 	}

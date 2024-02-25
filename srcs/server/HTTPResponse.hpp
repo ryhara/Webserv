@@ -2,11 +2,14 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <fstream>
+#include <vector>
 #include <map>
 #include <ctime>
 #include <sys/stat.h>
+#include <dirent.h>
 #include <cstdio>
 
 #include "Webserv.hpp"
@@ -64,7 +67,6 @@ class HTTPResponse
 		void handleCGIRequest(HTTPRequest &request);
 		void handleAutoIndexRequest(HTTPRequest &request);
 		void handleRedirectRequest(HTTPRequest &request);
-		void handleErrorResponse(HTTPRequest &request);
 
 		void makeFileBody(const std::string &path);
 		void makeGetResponseBody(HTTPRequest &request);
@@ -72,6 +74,8 @@ class HTTPResponse
 		void makeDeleteResponseBody(HTTPRequest &request);
 		void makeResponseMessage();
 
+		void makeAutoindexBody(std::vector<std::string> file_list, std::string alias, std::string location, std::stringstream &ss);
+		void readDirectory(std::vector<std::string> &file_list, const std::string &path);
 		std::string getDateTimestamp(void) const;
 		std::string getTimeStampForPost(void) const;
 		bool isFileExist(const std::string &path, struct stat *stat);

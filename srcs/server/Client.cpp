@@ -52,6 +52,11 @@ HTTPResponse &Client::getResponse(void)
 	return _response;
 }
 
+HTTPRequest &Client::getRequest(void)
+{
+	return _request;
+}
+
 void Client::setClientFd(int client_fd)
 {
 	_client_fd = client_fd;
@@ -72,9 +77,9 @@ int Client::recvProcess()
 {
 
 	char buffer[_buffer_size];
-	#if DEBUG
-		std::cout << "########## [ DEBUG ] client fd : " << _client_fd << " ##########" << std::endl;
-	#endif
+	// #if DEBUG
+	// 	std::cout << "########## [ DEBUG ] client fd : " << _client_fd << " ##########" << std::endl;
+	// #endif
 	ssize_t n = recv(_client_fd, buffer, sizeof(buffer) - 1, 0);
 	if (n <= 0) {
 		return -1;
@@ -108,8 +113,7 @@ int Client::sendResponse(std::string &responseMessage)
 		return -1;
 	}
 	# if DEBUG
-		std::cout << "########## [ DEBUG ] send start ##########" << std::endl;
-		std::cout << responseMessage << std::endl;
+		// std::cout << responseMessage << std::endl;
 		std::cout << "########## [ DEBUG ] send   end ##########" << std::endl;
 	#endif
 	setState(CLOSE_STATE);
