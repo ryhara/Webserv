@@ -37,6 +37,7 @@ class Client
 		int getServerFd(void) const;
 		bool getKeepAlive(void) const;
 		HTTPResponse &getResponse(void);
+		HTTPRequest &getRequest(void);
 
 		const std::string &getResponseMessage(void) const;
 		ClientState getState(void) const;

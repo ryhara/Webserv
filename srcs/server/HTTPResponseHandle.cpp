@@ -5,30 +5,23 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 	enum response_mode mode = request.getMode();
 	switch (mode) {
 		case NORMAL:
-		#ifdef DEBUG
-			std::cout << "########## [ DEBUG ] NORMAL ##########" << std::endl;
-		#endif
-			/*
-			TODO :AUTOINDEX消してNORMALに統合
-			if (autoindexがonの場合)
+			if (request.getServerConfig().getLocation(request.getLocation()).getAutoindex() == true) {
+				#ifdef DEBUG
+					std::cout << "########## [ DEBUG ] AUTOINDEX ##########" << std::endl;
+				#endif
 				handleAutoIndexRequest(request);
-			else
+			} else {
+				#ifdef DEBUG
+					std::cout << "########## [ DEBUG ] NORMAL ##########" << std::endl;
+				#endif
 				handleNormalRequest(request);
-			*/
-			handleNormalRequest(request);
+			}
 			break;
 		case CGI:
 		#ifdef DEBUG
 			std::cout << "########## [ DEBUG ] CGI ##########" << std::endl;
 		#endif
 			handleCGIRequest(request);
-			break;
-		case AUTOINDEX:
-		#ifdef DEBUG
-			std::cout << "########## [ DEBUG ] AUTOINDEX ##########" << std::endl;
-		#endif
-			// TODO : on/offの設定を確認する, offの場合はhandleNormalRequestを呼ぶ
-			handleAutoIndexRequest(request);
 			break;
 		case REDIRECT:
 		#ifdef DEBUG
@@ -44,16 +37,21 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 
 void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 {
-	// TODO : GETは必須、POSTとDELETEは任意で, configで許可されていない場合405 Method Not Allowed
-	// Method Not Allowedの場合は[Allow: GET, POST, DELETE]のようにAllowヘッダをつける
 	std::string method = request.getMethod();
+	Location location = request.getServerConfig().getLocation(request.getLocation());
 	if (method.compare("GET") == 0) {
+		if (location.getGetMethod() == false)
+			throw MethodNotAllowedError();
 		makeGetResponseBody(request);
 		makeResponseMessage();
 	} else if (method.compare("POST") == 0) {
+		if (location.getPostMethod() == false)
+			throw MethodNotAllowedError();
 		makePostResponseBody(request);
 		makeResponseMessage();
 	} else if (method.compare("DELETE") == 0) {
+		if (location.getDeleteMethod() == false)
+			throw MethodNotAllowedError();
 		makeDeleteResponseBody(request);
 		makeResponseMessage();
 	}
@@ -72,34 +70,31 @@ void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)
 	std::stringstream ss;
 	std::string uri = request.getUri();
 	std::vector<std::string> file_list;
-	// TODO : configで設定されたautoindexのpathを取得する
-	// TODO : autoindexのデフォルトのindex.htmlがあればmakeGetResponseBodyと同様な処理
-	std::string path = "./www" + uri;
+	Location location = request.getServerConfig().getLocation(request.getLocation());
+	std::string new_uri = uri.substr(location.getLocation().size(), uri.size());
+	std::string path = location.getAlias() + new_uri;
 	if (path[path.size() - 1] != '/') {
 		handleNormalRequest(request);
 		return ;
-	} else if (isFileExist(path + "index.html", request.getStat())) {
-		// TODO : index.htmlではなくデフォルトの値があれば
+	} else if (isFileExist(path + location.getIndex(), request.getStat())) {
 		handleNormalRequest(request);
 		return ;
 	}
 	readDirectory(file_list, path);
-	// TODO : pathはconfigで設定されたautoindexのpathを取得する
-	makeAutoindexBody(file_list, uri, path, ss);
+	makeAutoindexBody(file_list, location.getAlias(), location.getLocation(), ss);
 	makeResponseMessage();
 }
 
 void HTTPResponse::handleRedirectRequest(HTTPRequest &request)
 {
 	std::string uri = request.getUri();
-	std::string location = request.getLocation();
 	std::string path = "";
-	// TODO : configで設定されたredirectのpathを取得する
-	std::string redirect_path = "http://google.com";
+	Location location = request.getServerConfig().getLocation(request.getLocation());
+	std::string redirect_path = request.getServerConfig().getLocation(request.getLocation()).getRedirPath();
 	// リダイレクトの後ろのパスも設定する場合
-	// size_t found = uri.find(location);
+	// size_t found = uri.find(location.getLocation());
 	// if (found != std::string::npos) {
-	// 	path = uri.substr(found + location.size(), uri.size());
+	// 	path = uri.substr(found + location.getLocation().size(), uri.size());
 	// }
 	// path = redirect_path + "/" + path;
 	path = redirect_path;
@@ -112,29 +107,30 @@ void HTTPResponse::handleRedirectRequest(HTTPRequest &request)
 	makeResponseMessage();
 }
 
-void HTTPResponse::makeAutoindexBody(std::vector<std::string> file_list, std::string uri, std::string path, std::stringstream &ss)
+void HTTPResponse::makeAutoindexBody(std::vector<std::string> file_list, std::string alias, std::string location, std::stringstream &ss)
 {
-	ss << "<html><head><title>Index of " + path + "</title></head><body><h1>Index of " + path + "</h1><hr><pre style=\"font-family: Courier, Consolas, 'Courier New', monospace;\">";
+	ss << "<html><head><title>Index of " + location + "</title></head><body><h1>Index of " + location + "</h1><hr><pre style=\"font-family: Courier, Consolas, 'Courier New', monospace;\">";
 	for (std::vector<std::string>::iterator it = file_list.begin(); it != file_list.end(); it++) {
 		struct stat s_stat;
-		std::string file_path = path + *it;
+		std::string file_name = *it;
+		std::string file_path = alias + file_name;
 		if (isFileExist(file_path, &s_stat)) {
 			char time_buf[DATE_BUF_SIZE] = {0};
 			std::strftime(time_buf, sizeof(time_buf), "%d-%m-%Y %H:%M", std::localtime(&s_stat.st_mtime));
 			std::string time(time_buf);
 			size_t file_size = s_stat.st_size;
-			std::string file_name = *it;
 			if (isDirectory(s_stat)) {
 				if (file_name.compare("..") == 0) {
 					ss << "<a href=\"../\">" << ".." << "/</a>" << CRLF;
 					continue;
 				}
-				ss <<  "<a href=\"" << uri << file_name << "/\">" << file_name << "/</a>" << std::setw(50 - file_name.size() - 1) << time << std::setw(20) << "-" << CRLF;
+				ss <<  "<a href=\"" << location << file_name << "/\">" << file_name << "/</a>" << std::setw(50 - file_name.size() - 1) << time << std::setw(20) << "-" << CRLF;
 			} else if (isFile(s_stat)) {
-				ss << "<a href=\"" << uri << file_name << "\">" << file_name << "</a>" << std::setw(50 - file_name.size()) << time << std::setw(20) << ft_to_string(file_size) << CRLF;
+				ss << "<a href=\"" << location << file_name << "\">" << file_name << "</a>" << std::setw(50 - file_name.size()) << time << std::setw(20) << ft_to_string(file_size) << CRLF;
 			}
-		} else
+		} else {
 			throw NotFoundError();
+		}
 	}
 	ss << "</pre><hr></body></html>\r\n" ;
 	std::string html = ss.str();

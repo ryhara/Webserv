@@ -14,16 +14,14 @@ std::string HTTPResponse::getTimeStampForPost(void) const
 	return ret;
 }
 
-// TODO Location: /path/to/uploaded/file出来れば対応
 void HTTPResponse::makePostResponseBody(HTTPRequest &request)
 {
 	std::string body = request.getBody();
 	std::string timestamp = getTimeStampForPost();
-	std::string uploadPath = "./uploads/";
+	std::string uploadPath = request.getServerConfig().getLocation(request.getLocation()).getUploadPath();
 	std::string header = "post_";
 	std::ofstream ofs;
 
-	// TODO : configから保存先を取得する
 	ofs.open(uploadPath + header + timestamp);
 	if (!ofs.is_open())
 	{

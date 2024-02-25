@@ -91,24 +91,24 @@ void HTTPRequestParse::parse(char *buffer)
 		switch (_state)
 		{
 			case REQUEST_LINE_STATE:
-				#if DEBUG
-					std::cout << "#### [ DEBUG ] REQUEST_LINE_STATE ####" << std::endl;
-				#endif
+				// #if DEBUG
+				// 	std::cout << "#### [ DEBUG ] REQUEST_LINE_STATE ####" << std::endl;
+				// #endif
 				_requiredParse = readRequestLine(bufferStream);
 				break;
 			case HEADERS_STATE:
-				#if DEBUG
-					std::cout << "#### [ DEBUG ] HEADERS_STATE ####" << std::endl;
-				#endif
+				// #if DEBUG
+				// 	std::cout << "#### [ DEBUG ] HEADERS_STATE ####" << std::endl;
+				// #endif
 				_requiredParse=  readHeaders(bufferStream);
 				break;
 			case BODY_STATE:
 				_requiredParse = readBody(bufferStream);
 				break;
 			case FINISH_STATE:
-				#if DEBUG
-					std::cout << "#### [ DEBUG ] FINISH_STATE ####" << std::endl;
-				#endif
+				// #if DEBUG
+				// 	std::cout << "#### [ DEBUG ] FINISH_STATE ####" << std::endl;
+				// #endif
 				if (_request.getHeader("Host").empty())
 					throw BadRequestError();
 				if (_contentLength > 0 && _request.getBody().size() != _contentLength)
@@ -139,9 +139,8 @@ bool HTTPRequestParse::readRequestLine(std::stringstream &ss)
 		throw BadRequestError();
 	if (request_line.size() != 3)
 		throw BadRequestError();
-	// TODO : configの値で　methodが対応してない場合にエラー
 	if (request_line[0].compare("GET") != 0 && request_line[0].compare("POST") != 0 && request_line[0].compare("DELETE") != 0)
-		throw MethodNotAllowedError();
+		throw NotImplementedError();
 	if (request_line[2].compare(HTTP_VERSION) != 0)
 		throw HTTPVersionNotSupportedError();
 	if (request_line[1].find("..") != std::string::npos)
@@ -179,7 +178,24 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 		if (header[0].compare("Content-Length") == 0) {
 			this->_contentLength = ft_stoi(header[1]);
 		}
-		pair.second = header[1];
+		if (header[0].compare("Host") == 0) {
+			std::vector<std::string> host = split(header[1], ':');
+			if (host.size() == 2) {
+				this->_request.setHost(host[0]);
+				this->_request.setPort(host[1]);
+			} else if (host.size() == 1) {
+				this->_request.setHost(host[0]);
+				this->_request.setPort("80");
+			} else {
+				throw BadRequestError();
+			}
+			if (host[1].compare("80") == 0)
+				pair.second = host[0];
+			else
+				pair.second = header[1];
+		} else {
+			pair.second = header[1];
+		}
 		this->_request.setHeaders(pair);
 		if (!_request.getHeader("Transfer-Encoding").empty() && !_request.getHeader("Content-Length").empty())
 			throw BadRequestError();
@@ -206,7 +222,7 @@ void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 	{
 		if (!isSize) {
 			if (line.empty()) {
-				std::cout << "File" << __FILE__ << "Line" << __LINE__ << std::endl;
+				// std::cout << "File" << __FILE__ << "Line" << __LINE__ << std::endl;
 				return ;
 			}
 			if (!isHex(line)) {
@@ -215,7 +231,7 @@ void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 			}
 			std::stringstream ss(line);
 			ss >> std::hex >> size;
-			std::cout << "size: " << size << std::endl;
+			// std::cout << "size: " << size << std::endl;
 			if (size == 0)  {
 				ss.clear();
 				ss.str("");
@@ -225,16 +241,12 @@ void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 			isSize = true;
 		}
 		else if (isSize) {
-			std::cout << "line: " << line << std::endl;
+			// std::cout << "line: " << line << std::endl;
 			if (line.size() != size) {
 				isSize = false;
 				throw BadRequestError();
 			}
 			_request.addBody(line);
-			if (_request.getBody().size() > MAX_BODY_SIZE) {
-				isSize = false;
-				throw HTTPRequestPayloadTooLargeError();
-			}
 			isSize = false;
 		}
 	}
@@ -250,26 +262,24 @@ void HTTPRequestParse::parseNormalBody(std::stringstream &ss)
 			return ;
 		_request.addBody(line);
 	}
-	if (_request.getBody().size() > _contentLength || _request.getBody().size() > MAX_BODY_SIZE)
+	if (_request.getBody().size() > _contentLength)
 		throw HTTPRequestPayloadTooLargeError();
 	if (_request.getBody().size() == _contentLength)
 		setHTTPRequestParseState(FINISH_STATE);
 }
 
-// TODO : chunkedやpostの場合の対応
-
 bool HTTPRequestParse::readBody(std::stringstream &ss)
 {
 	if (this->_isChunked)
 	{
-		#if DEBUG
-			std::cout << "#### [ DEBUG ] CHUNKED_STATE ####" << std::endl;
-		#endif
+		// #if DEBUG
+		// 	std::cout << "#### [ DEBUG ] CHUNKED_STATE ####" << std::endl;
+		// #endif
 		parseChunkedBody(ss);
 	} else {
-			#if DEBUG
-				std::cout << "#### [ DEBUG ] BODY_STATE ####" << std::endl;
-			#endif
+		// #if DEBUG
+		// 	std::cout << "#### [ DEBUG ] BODY_STATE ####" << std::endl;
+		// #endif
 		parseNormalBody(ss);
 	}
 	if (getHTTPRequestParseState() == FINISH_STATE)
@@ -301,8 +311,6 @@ void HTTPRequestParse::searchRequestMode(void)
 	std::string location = this->_request.getLocation();
 	if (location.compare("/cgi/") == 0) {
 		this->_request.setMode(CGI);
-	} else if (location.compare("/autoindex/") == 0) {
-		this->_request.setMode(AUTOINDEX);
 	} else if (location.compare("/redirect/") == 0) {
 		this->_request.setMode(REDIRECT);
 	} else {

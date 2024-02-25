@@ -1,11 +1,34 @@
 #include "ServerConfig.hpp"
 
-ServerConfig::ServerConfig() : port(0), server_name(""), max_body_size(0), error_page("")
+ServerConfig::ServerConfig() : port(80), server_name("default"), max_body_size(2048), error_page("./www/error_page/404.html")
 {
 }
 
 ServerConfig::~ServerConfig()
 {
+}
+
+Location &ServerConfig::getLocation(const std::string &path)
+{
+	std::map<std::string, Location>::iterator it = this->location.begin();
+	for (; it != this->location.end(); it++)
+	{
+		if (path.compare(it->first) == 0)
+		{
+			return it->second;
+		}
+	}
+	return location.begin()->second;
+}
+
+std::string ServerConfig::getErrorPage() const
+{
+	return this->error_page;
+}
+
+size_t ServerConfig::getMaxBodySize() const
+{
+	return this->max_body_size;
 }
 
 bool isNumber(const std::string &str)
@@ -18,7 +41,7 @@ bool isNumber(const std::string &str)
 	return true;
 }
 
-ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) : port(0), server_name(""), max_body_size(0), error_page("")
+ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) : port(80), server_name("default"), max_body_size(2048), error_page("./www/error_page/404.html")
 {
 	std::vector<std::string> parseLine;
 	size_t i = 0;
@@ -113,10 +136,10 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 				std::cout << "ServerConfig : invalid config : location not end with '{'" << std::endl;
 				std::exit (1);
 			}
-			// TODO : newしないとだめ？、フリー忘れそう
+			// TODO : newしない方法探す
 			Location *location = new Location(parseLine[1]);
 			i = location->addInfo(parseLines, i + 1);
-			this->location.insert(std::make_pair(location->get_path(), *location));
+			this->location.insert(std::make_pair(location->getLocation(), *location));
 		}
 		else if (parseLine[0] == "}")
 		{
@@ -146,7 +169,7 @@ int	ServerConfig::getPort() const
 	return this->port;
 }
 
-void ServerConfig::getServerConfig()
+void ServerConfig::printServerConfig()
 {
 	std::cout << "+++++++++++++ServerConfig+++++++++++++" << std::endl;
 	std::cout << "port: " << this->port << std::endl;
@@ -156,7 +179,7 @@ void ServerConfig::getServerConfig()
 	std::map<std::string, Location>::iterator it = this->location.begin();
 	for (; it != this->location.end(); it++)
 	{
-		it->second.getLocation();
+		it->second.printLocation();
 	}
 	std::cout << "++++++++++++++++++++++++++++++++++++++" << std::endl;
 }

@@ -74,7 +74,7 @@ class HTTPResponse
 		void makeDeleteResponseBody(HTTPRequest &request);
 		void makeResponseMessage();
 
-		void makeAutoindexBody(std::vector<std::string> file_list, std::string uri, std::string path, std::stringstream &ss);
+		void makeAutoindexBody(std::vector<std::string> file_list, std::string alias, std::string location, std::stringstream &ss);
 		void readDirectory(std::vector<std::string> &file_list, const std::string &path);
 		std::string getDateTimestamp(void) const;
 		std::string getTimeStampForPost(void) const;
