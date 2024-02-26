@@ -1,6 +1,6 @@
 #include "Location.hpp"
 
-Location::Location(/* args */) : location("/"), get_method(true), post_method(false), delete_method(false), autoindex(false), alias("./www/"), index("index.html"), upload_path("./uploads/"), redir_path("http://google.com")
+Location::Location(/* args */) : location("/"), get_method(true), post_method(false), delete_method(false), autoindex(false), alias("./www/"), index("index.html"), upload_path("./uploads/"), redirect_path("http://google.com")
 {
 	this->cgi_extension.push_back(".php");
 }
@@ -9,7 +9,7 @@ Location::~Location()
 {
 }
 
-Location::Location(std::string location) : get_method(true), post_method(false), delete_method(false), autoindex(false) , alias("./www/"), index("index.html"), upload_path("./uploads/"), redir_path("http://google.com")
+Location::Location(std::string location) : get_method(true), post_method(false), delete_method(false), autoindex(false) , alias("./www/"), index("index.html"), upload_path("./uploads/"), redirect_path("http://google.com")
 {
 	this->location = location;
 	this->cgi_extension.push_back(".php");
@@ -50,7 +50,7 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 			else if (parseLine[1] == "off")
 				this->autoindex = false;
 			else
-				log_exit("Location: invalid config : autoindex on, off 以外の入力", __LINE__, __FILE__, errno);
+				log_exit("Location: invalid config : autoindex not on, off ", __LINE__, __FILE__, errno);
 		}
 		else if (parseLine[0] == "upload_path")
 		{
@@ -60,13 +60,13 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 				log_exit("Location: invalid config : upload_path not end with ';'", __LINE__, __FILE__, errno);
 			this->upload_path = parseLine[1];
 		}
-		else if (parseLine[0] == "redir_path")
+		else if (parseLine[0] == "redirect_path")
 		{
 			if (parseLine.size() != 3)
-				log_exit("Location: invalid config : redir_path less or more arguments", __LINE__, __FILE__, errno);
+				log_exit("Location: invalid config : redirect_path less or more arguments", __LINE__, __FILE__, errno);
 			if (parseLine[2] != ";")
-				log_exit("Location: invalid config : redir_path not end with ';'", __LINE__, __FILE__, errno);
-			this->redir_path = parseLine[1];
+				log_exit("Location: invalid config : redirect_path not end with ';'", __LINE__, __FILE__, errno);
+			this->redirect_path = parseLine[1];
 		}
 		else if (parseLine[0] == "cgi_extension")
 		{
@@ -93,11 +93,11 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 				else if (parseLine[i] == "DELETE")
 					this->delete_method = true;
 				else
-					log_exit("Location: invalid config : method GET, POST, DELETE 以外の入力", __LINE__, __FILE__, errno);
+					log_exit("Location: invalid config : method not GET, POST, DELETE", __LINE__, __FILE__, errno);
 			}
 		}
 		else
-			log_exit("Location: invalid config : 不適切な要素", __LINE__, __FILE__, errno);
+			log_exit("Location: invalid config : invalid elements", __LINE__, __FILE__, errno);
 		startIndex++;
 	}
 	log_exit("Location: invalid config : location not end with '}'", __LINE__, __FILE__, errno);
@@ -126,7 +126,7 @@ std::string Location::getUploadPath() const
 
 std::string Location::getRedirPath() const
 {
-	return this->redir_path;
+	return this->redirect_path;
 }
 
 std::vector<std::string> Location::getCgiExtension() const
@@ -165,7 +165,7 @@ void Location::printLocation() const
 	for (size_t i = 0; i < this->cgi_extension.size(); i++)
 		std::cout << this->cgi_extension[i] << " ";
 	std::cout << std::endl;
-	std::cout << "redir_path: " << this->redir_path << std::endl;
+	std::cout << "redirect_path: " << this->redirect_path << std::endl;
 	std::cout << "get_method: " << this->get_method << std::endl;
 	std::cout << "post_method: " << this->post_method << std::endl;
 	std::cout << "delete_method: " << this->delete_method << std::endl << std::endl;

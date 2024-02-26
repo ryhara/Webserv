@@ -106,7 +106,7 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 			break;
 		}
 		else
-			log_exit("ServerConfig : invalid config : 不適切な要素", __LINE__, __FILE__, errno);
+			log_exit("ServerConfig : invalid config : invalid elements", __LINE__, __FILE__, errno);
 	}
 	parseLines.erase(parseLines.begin(), parseLines.begin() + i + 1);
 }
