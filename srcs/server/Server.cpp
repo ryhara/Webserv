@@ -159,7 +159,7 @@ void Server::executeSendProcess(std::map<int, Client*>::iterator &it)
 	int config_index = 0;
 	for (int i = 0;i < static_cast<int>(_servers[ft_stoi(port)].size()); i++)
 	{
-		if (_servers[ft_stoi(port)][config_index].getServerName() == host) {
+		if (_servers[ft_stoi(port)][i].getServerName() == host) {
 			config_index = i;
 			break;
 		}
