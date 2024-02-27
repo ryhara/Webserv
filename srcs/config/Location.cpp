@@ -7,6 +7,7 @@ Location::Location(/* args */) : location("/"), get_method(true), post_method(fa
 
 Location::~Location()
 {
+	cgi_extension.clear();
 }
 
 Location::Location(std::string location) : get_method(true), post_method(false), delete_method(false), autoindex(false) , alias("./www/"), index("index.html"), upload_path("./uploads/"), redirect_path("http://google.com")

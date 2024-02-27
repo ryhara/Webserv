@@ -4,6 +4,7 @@ Config::Config() {
 }
 
 Config::~Config() {
+	_servers.clear();
 }
 
 void Config::addServer(ServerConfig &server)

@@ -6,6 +6,7 @@ ServerConfig::ServerConfig() : port(80), server_name("default"), max_body_size(2
 
 ServerConfig::~ServerConfig()
 {
+	location.clear();
 }
 
 Location &ServerConfig::getLocation(const std::string &path)
