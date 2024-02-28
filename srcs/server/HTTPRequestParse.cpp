@@ -143,7 +143,7 @@ bool HTTPRequestParse::readRequestLine(std::stringstream &ss)
 		throw NotImplementedError();
 	if (request_line[2].compare(HTTP_VERSION) != 0)
 		throw HTTPVersionNotSupportedError();
-	if (request_line[1].find("..") != std::string::npos)
+	if (request_line[1][0] != '/' || request_line[1].find("/../") != std::string::npos)
 		throw BadRequestError();
 	this->_request.setMethod(request_line[0]);
 	this->_request.setUri(request_line[1]);
