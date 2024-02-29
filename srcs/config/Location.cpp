@@ -30,6 +30,10 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 				log_exit("Location: invalid config : alias less or more arguments", __LINE__, __FILE__, errno);
 			if (parseLine[2] != ";")
 				log_exit("Location: invalid config : alias not end with ';'", __LINE__, __FILE__, errno);
+			if (parseLine[1][0] != '.' || parseLine[1][1] != '/' || parseLine[1][parseLine[1].size() - 1] != '/')
+				log_exit("Location: invalid config : alias path not start with './' or end with '/'", __LINE__, __FILE__, errno);
+			if (parseLine[1].find("../") != std::string::npos)
+				log_exit("Location: invalid config : alias path not include '../'", __LINE__, __FILE__, errno);
 			this->alias = parseLine[1];
 		}
 		else if (parseLine[0] == "index")
