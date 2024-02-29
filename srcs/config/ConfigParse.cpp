@@ -9,6 +9,7 @@ ConfigParse::ConfigParse(Config &config) : _config(config) {
 ConfigParse::~ConfigParse(void) {
 	_parseLine.clear();
 	_parseLines.clear();
+	// delete &_config;
 }
 
 Config &ConfigParse::getConfig(void) const {
