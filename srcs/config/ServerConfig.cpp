@@ -6,6 +6,7 @@ ServerConfig::ServerConfig() : port(80), server_name("default"), max_body_size(2
 
 ServerConfig::~ServerConfig()
 {
+	location.clear();
 }
 
 Location &ServerConfig::getLocation(const std::string &path)
@@ -51,110 +52,63 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 		if (parseLine[0] == "listen")
 		{
 			if (parseLine.size() != 3)
-			{
-				std::cout << "ServerConfig : invalid config : listen less or more arguments" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : listen less or more arguments", __LINE__, __FILE__, errno);
 			if (!isNumber(parseLine[1]))
-			{
-				std::cout << "ServerConfig : invalid config : port is not numeric" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : port is not numeric", __LINE__, __FILE__, errno);
 			if (parseLine[2] != ";")
-			{
-				std::cout << "ServerConfig : invalid config : listen not end with ';'" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : listen not end with ';'", __LINE__, __FILE__, errno);
 			this->port = ft_stoi(parseLine[1]);
 			if (this->port < 1 || this->port > 65535)
-			{
-				std::cout << "ServerConfig : invalid config : port is not in range 1-65535" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : port is not in range 1-65535", __LINE__, __FILE__, errno);
 		}
 		else if (parseLine[0] == "server_name")
 		{
 			if (parseLine.size() != 3)
-			{
-				std::cout << "ServerConfig : invalid config : server_name less or more arguments" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : server_name less or more arguments", __LINE__, __FILE__, errno);
 			if (parseLine[2] != ";")
-			{
-				std::cout << "ServerConfig : invalid config : server_name not end with ';'" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : server_name not end with ';'", __LINE__, __FILE__, errno);
 			this->server_name = parseLine[1];
 		}
 		else if (parseLine[0] == "max_body_size")
 		{
 			if (parseLine.size() != 3)
-			{
-				std::cout << "ServerConfig : invalid config : max_body_size less or more arguments" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : max_body_size less or more arguments", __LINE__, __FILE__, errno);
 			if (!isNumber(parseLine[1]))
-			{
-				std::cout << "ServerConfig : invalid config : max_body_size is not numeric" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : max_body_size is not numeric", __LINE__, __FILE__, errno);
 			if (parseLine[2] != ";")
-			{
-				std::cout << "ServerConfig : invalid config : max_body_size not end with ';'" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : max_body_size not end with ';'", __LINE__, __FILE__, errno);
 			this->max_body_size = ft_stoi(parseLine[1]);
 		}
 		else if (parseLine[0] == "error_page")
 		{
 			if (parseLine.size() != 3)
-			{
-				std::cout << "ServerConfig : invalid config : error_page less or more arguments" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : error_page less or more arguments", __LINE__, __FILE__, errno);
 			if (parseLine[2] != ";")
-			{
-				std::cout << "ServerConfig : invalid config : error_page not end with ';'" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : error_page not end with ';'", __LINE__, __FILE__, errno);
 			this->error_page = parseLine[1];
 		}
 		else if (parseLine[0] == "location")
 		{
 			if (parseLine.size() != 3)
-			{
-				std::cout << "ServerConfig : invalid config : location less or more arguments" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : location less or more arguments", __LINE__, __FILE__, errno);
 			if (parseLine[1][0] != '/' || parseLine[1][parseLine[1].size() - 1] != '/')
-			{
-				std::cout << "ServerConfig : invalid config : location path not start or end with '/'" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : location path not start or end with '/'", __LINE__, __FILE__, errno);
 			if (parseLine[2] != "{")
-			{
-				std::cout << "ServerConfig : invalid config : location not end with '{'" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : location not end with '{'", __LINE__, __FILE__, errno);
 			// TODO : newしない方法探す
-			Location *location = new Location(parseLine[1]);
-			i = location->addInfo(parseLines, i + 1);
-			this->location.insert(std::make_pair(location->getLocation(), *location));
+			// Location *location = new Location(parseLine[1]);
+			Location location(parseLine[1]);
+			i = location.addInfo(parseLines, i + 1);
+			this->location.insert(std::make_pair(location.getLocation(), location));
 		}
 		else if (parseLine[0] == "}")
 		{
 			if (parseLine.size() != 1)
-			{
-				std::cout << "ServerConfig : invalid config : argment before '}'" << std::endl;
-				std::exit (1);
-			}
+				log_exit("ServerConfig : invalid config : argment before '}'", __LINE__, __FILE__, errno);
 			break;
 		}
 		else
-		{
-			std::cout << "ServerConfig : invalid config : 不適切な要素" << std::endl;
-			std::exit (1);
-		}
+			log_exit("ServerConfig : invalid config : invalid elements", __LINE__, __FILE__, errno);
 	}
 	parseLines.erase(parseLines.begin(), parseLines.begin() + i + 1);
 }

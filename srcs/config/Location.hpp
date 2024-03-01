@@ -5,6 +5,7 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include "Webserv.hpp"
 
 class Location
 {
@@ -17,7 +18,7 @@ class Location
 		std::string alias;
 		std::string	index;
 		std::string upload_path;
-		std::string redir_path;
+		std::string redirect_path;
 		std::vector<std::string> cgi_extension;
 
 	public:
