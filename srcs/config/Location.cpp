@@ -1,8 +1,7 @@
 #include "Location.hpp"
 
-Location::Location(/* args */) : location("/"), get_method(true), post_method(false), delete_method(false), autoindex(false), alias("./www/"), index("index.html"), upload_path("./uploads/"), redirect_path("http://google.com")
+Location::Location(/* args */) : location("/"), get_method(true), post_method(false), delete_method(false), autoindex(false), alias("./www/"), index("index.html"), upload_path("./uploads/"), redirect_path("")
 {
-	this->cgi_extension.push_back(".php");
 }
 
 Location::~Location()
@@ -10,10 +9,9 @@ Location::~Location()
 	cgi_extension.clear();
 }
 
-Location::Location(std::string location) : get_method(true), post_method(false), delete_method(false), autoindex(false) , alias("./www/"), index("index.html"), upload_path("./uploads/"), redirect_path("http://google.com")
+Location::Location(std::string location) : get_method(true), post_method(false), delete_method(false), autoindex(false) , alias("./www/"), index("index.html"), upload_path("./uploads/"), redirect_path("")
 {
 	this->location = location;
-	this->cgi_extension.push_back(".php");
 }
 size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, size_t startIndex)
 {
@@ -30,10 +28,8 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 				log_exit("Location: invalid config : alias less or more arguments", __LINE__, __FILE__, errno);
 			if (parseLine[2] != ";")
 				log_exit("Location: invalid config : alias not end with ';'", __LINE__, __FILE__, errno);
-			if (parseLine[1][0] != '.' || parseLine[1][1] != '/' || parseLine[1][parseLine[1].size() - 1] != '/')
-				log_exit("Location: invalid config : alias path not start with './' or end with '/'", __LINE__, __FILE__, errno);
-			if (parseLine[1].find("../") != std::string::npos)
-				log_exit("Location: invalid config : alias path not include '../'", __LINE__, __FILE__, errno);
+			if (parseLine[1].find("/../") != std::string::npos || std::strncmp(parseLine[1].c_str(), "../", 3) == 0)
+				log_exit("Location: invalid config : alias path include '/../' or start with '../'", __LINE__, __FILE__, errno);
 			this->alias = parseLine[1];
 		}
 		else if (parseLine[0] == "index")
@@ -42,6 +38,8 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 				log_exit("Location: invalid config : index less or more arguments", __LINE__, __FILE__, errno);
 			if (parseLine[2] != ";")
 				log_exit("Location: invalid config : index not end with ';'", __LINE__, __FILE__, errno);
+			if (parseLine[1][parseLine[1].size() - 1] == '/')
+				log_exit("Location: invalid config : index must not end with '/'", __LINE__, __FILE__, errno);
 			this->index = parseLine[1];
 		}
 		else if (parseLine[0] == "autoindex")

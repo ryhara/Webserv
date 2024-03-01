@@ -81,5 +81,6 @@ class HTTPResponse
 		bool isFileExist(const std::string &path, struct stat *stat);
 		bool isDirectory(struct stat &stat);
 		bool isFile(struct stat &stat);
+		bool isCGI(std::vector<std::string> &cgi_extension, std::string extension);
 
 };

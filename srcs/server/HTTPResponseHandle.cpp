@@ -1,7 +1,31 @@
 #include "HTTPResponse.hpp"
 
+
+bool HTTPResponse::isCGI(std::vector<std::string> &cgi_extension, std::string extension)
+{
+	for (std::vector<std::string>::iterator it = cgi_extension.begin(); it != cgi_extension.end(); it++) {
+		if (extension.compare(*it) == 0) {
+			return (true);
+		}
+	}
+	return (false);
+}
+
 void HTTPResponse::selectResponse(HTTPRequest &request)
 {
+	Location location = request.getServerConfig().getLocation(request.getLocation());
+	std::vector<std::string> cgi_extension = location.getCgiExtension();
+	std::string uri = request.getUri();
+	std::string extension = "";
+	if (uri.find_last_of(".") != std::string::npos)
+		extension = uri.substr(uri.find_last_of("."));
+	if (location.getRedirPath().empty() == false) {
+		request.setMode(REDIRECT);
+	} else if (extension.empty() == false && isCGI(cgi_extension, extension)) {
+		request.setMode(CGI);
+	} else {
+		request.setMode(NORMAL);
+	}
 	enum response_mode mode = request.getMode();
 	switch (mode) {
 		case NORMAL:

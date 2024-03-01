@@ -149,7 +149,6 @@ bool HTTPRequestParse::readRequestLine(std::stringstream &ss)
 	this->_request.setUri(request_line[1]);
 	this->_request.setVersion(request_line[2]);
 	searchLocation();
-	searchRequestMode();
 	if (!_request.getMethod().empty())
 		setHTTPRequestParseState(HEADERS_STATE);
 	return (true);
@@ -304,16 +303,4 @@ void HTTPRequestParse::searchLocation(void)
 	std::string location = uri_split[0];
 	location = "/" + location + "/";
 	this->_request.setLocation(location);
-}
-
-void HTTPRequestParse::searchRequestMode(void)
-{
-	std::string location = this->_request.getLocation();
-	if (location.compare("/cgi/") == 0) {
-		this->_request.setMode(CGI);
-	} else if (location.compare("/redirect/") == 0) {
-		this->_request.setMode(REDIRECT);
-	} else {
-		this->_request.setMode(NORMAL);
-	}
 }
