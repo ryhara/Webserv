@@ -77,6 +77,10 @@ invalid_test :
 	@chmod +x ./tests/invalid_conf_test.sh
 	./tests/invalid_conf_test.sh ./config/invalid
 
+python_test :
+	@chmod +x ./tests/python_test.sh
+	./tests/python_test.sh ./tests/python/
+
 use_cfunc :
 	./tests/check_cfunctions.sh $(NAME)
 
@@ -90,6 +94,6 @@ debug : re
 leak :
 	while true; do leaks -q $(NAME); sleep 1; done
 
-.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean
+.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean python_test
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)

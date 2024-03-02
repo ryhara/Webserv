@@ -1,17 +1,8 @@
 import requests
 
 url_list = [
-	'http://localhost:4242',
-	'http://localhost:4242',
-]
-
-headers_list = [
-	{
-		'Conection': 'keep-alive',
-	},
-	{
-		'Connection': 'close',
-	},
+	'http://localhost:4242/autoindex/',
+	'http://localhost:4242/autoindex/subdir/',
 ]
 
 

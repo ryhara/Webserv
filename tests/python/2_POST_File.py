@@ -3,8 +3,9 @@ import requests
 url = 'http://localhost:4242'
 
 # POST
-data = {'key1': 'value1'}
-response = requests.post(url, data=data)
+with open('hoge.dummy', 'rb') as f:
+	file_data = f.read()
+response = requests.post(url, data=file_data)
 
 # request
 print("--------------------------------------------------------------")
@@ -21,3 +22,4 @@ print("Headers:")
 for key, value in response.headers.items():
 	print(key, ":", value)
 print(response.text)
+print("==============================================================")

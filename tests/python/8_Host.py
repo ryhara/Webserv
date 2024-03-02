@@ -3,21 +3,32 @@ import requests
 url_list = [
 	'http://localhost:4242',
 	'http://localhost:4242',
+	'http://localhost:4242',
+	'http://localhost:4243',
+	'http://localhost:4243',
 ]
 
 headers_list = [
 	{
-		'Conection': 'keep-alive',
+		'Host': 'abcdefg:4242'
 	},
 	{
-		'Connection': 'close',
+		'Host': 'webserv:4242'
+	},
+	{
+		'Host': 'webserv2:4242',
+	},
+	{
+		'Host': 'webserv3:4243',
+	},
+	{
+		'Host': 'webserv',
 	},
 ]
 
-
-for url in url_list:
+for url, headers in zip(url_list, headers_list):
 	# GET
-	response = requests.get(url)
+	response = requests.get(url, headers=headers)
 	# request
 	print("--------------------------------------------------------------")
 	print("URL:", response.request.url)
