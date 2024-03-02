@@ -81,7 +81,7 @@ use_cfunc :
 	./tests/check_cfunctions.sh $(NAME)
 
 dummy :
-	base64 -i /dev/urandom | head -c 1048576 > hoge.dummy
+	base64 -i /dev/urandom | head -c 10000 > hoge.dummy
 
 debug : CXXFLAGS += -D DEBUG -fsanitize=address
 debug : re

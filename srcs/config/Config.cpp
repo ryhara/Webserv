@@ -1,10 +1,10 @@
 #include "Config.hpp"
 
-// TODO : config 初期化, configのデータの持たせ方は調べながら考える
 Config::Config() {
 }
 
 Config::~Config() {
+	_servers.clear();
 }
 
 void Config::addServer(ServerConfig &server)
@@ -15,10 +15,7 @@ void Config::addServer(ServerConfig &server)
 		for (size_t i = 0; i < it->second.size(); i++)
 		{
 			if (it->second[i].getServerName() == server.getServerName())
-			{
-				std::cout << "Config : invalid config : server name is duplicated" << std::endl;
-				std::exit (1);
-			}
+				log_exit("Config : invalid config : server name is duplicated", __LINE__, __FILE__, errno);
 		}
 	}
 	it = this->_servers.find(server.getPort());

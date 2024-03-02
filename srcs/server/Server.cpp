@@ -32,8 +32,7 @@ void Server::setPortAndServerFd(std::string &port, int server_fd)
 
 void Server::closeServerFds(void)
 {
-	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
-	{
+	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it) {
 		close(it->second);
 	}
 }
@@ -45,7 +44,6 @@ void Server::initServerAddr(std::string &port)
 	_hints.ai_family = AF_INET;
 	_hints.ai_socktype = SOCK_STREAM;
 	_hints.ai_flags = AI_PASSIVE;
-	// TODO : 第一引数調べる
 	if (getaddrinfo(NULL, port_str, &_hints, &_res) != 0)
 		log_exit("getaddrinfo", __LINE__, __FILE__, errno);
 }
@@ -60,8 +58,7 @@ void Server::createSocket(std::string &port)
 		closeServerFds();
 		log_exit("socket", __LINE__, __FILE__, errno);
 	}
-	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&option_value, sizeof(option_value)) < 0)
-	{
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, (const char *)&option_value, sizeof(option_value)) < 0) {
 		close(server_fd);
 		closeServerFds();
 		log_exit("setsockopt", __LINE__, __FILE__, errno);
@@ -72,8 +69,7 @@ void Server::createSocket(std::string &port)
 
 void Server::bindSocket(int &server_fd)
 {
-	if (bind(server_fd, _res->ai_addr, _res->ai_addrlen) < 0)
-	{
+	if (bind(server_fd, _res->ai_addr, _res->ai_addrlen) < 0) {
 		closeServerFds();
 		freeaddrinfo(_res);
 		_res = NULL;
@@ -85,8 +81,7 @@ void Server::bindSocket(int &server_fd)
 
 void Server::listenSocket(int &server_fd)
 {
-	if (listen(server_fd, QUEUE_LENGTH) < 0)
-	{
+	if (listen(server_fd, QUEUE_LENGTH) < 0) {
 		closeServerFds();
 		log_exit("listen", __LINE__, __FILE__, errno);
 	}
@@ -110,12 +105,10 @@ void Server::initFds(void)
 {
 	FD_ZERO(&_readfds);
 	FD_ZERO(&_writefds);
-	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
-	{
+	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it) {
 		FD_SET(it->second, &_readfds);
 	}
-	for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-	{
+	for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		if (it->second->getState() == RECV_STATE)
 			FD_SET(it->first, &_readfds);
 		if (it->second->getState() == SEND_STATE)
@@ -127,15 +120,13 @@ void Server::initFds(void)
 
 void Server::serverEvent(void)
 {
-	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it)
-	{
-		if (FD_ISSET(it->second, &_readfds))
-		{
+	for (std::map<std::string, int>::iterator it = _server_fds.begin(); it != _server_fds.end(); ++it) {
+		if (FD_ISSET(it->second, &_readfds)) {
 			FD_CLR(it->second, &_readfds);
 			_server_fd = it->second;
 			int client_fd = acceptSocket(it->second);
-			if (client_fd < 0)
-			{
+			if (client_fd < 0) {
+				deleteAllClients();
 				closeServerFds();
 				log_exit("accept", __LINE__, __FILE__, errno);
 			}
@@ -157,6 +148,27 @@ void Server::executeRecvProcess(std::map<int, Client*>::iterator &it)
 void Server::executeSendProcess(std::map<int, Client*>::iterator &it)
 {
 	Client *client = it->second;
+	std::string port = client->getRequest().getPort();
+	std::string host = client->getRequest().getHost();
+	struct sockaddr_in addr;
+	socklen_t len = sizeof(addr);
+	if (getsockname(it->first, (struct sockaddr *)&addr, &len) == -1) {
+		deleteAllClients();
+		closeServerFds();
+		log_exit("getsockname", __LINE__, __FILE__, errno);
+	}
+	if (ft_stoi(port) != ntohs(addr.sin_port))
+		throw BadRequestError();
+	int config_index = 0;
+	for (int i = 0;i < static_cast<int>(_servers[ft_stoi(port)].size()); i++) {
+		if (_servers[ft_stoi(port)][i].getServerName() == host) {
+			config_index = i;
+			break;
+		}
+	}
+	client->getRequest().setServerConfig(_servers[ft_stoi(port)][config_index]);
+	if (_servers[ft_stoi(port)][config_index].getMaxBodySize() < client->getRequest().getBody().size())
+		throw HTTPRequestPayloadTooLargeError();
 	client->responseProcess();
 	std::string responseMessage = client->getResponseMessage();
 	if (client->sendResponse(responseMessage) < 0)
@@ -167,14 +179,25 @@ void Server::deleteClient(std::map<int, Client*>::iterator &it)
 {
 	close(it->first);
 	delete it->second;
+	it->second = NULL;
 	_clients.erase(it);
+}
+
+void Server::deleteAllClients(void)
+{
+	for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+		close(it->first);
+		delete it->second;
+		it->second = NULL;
+	}
+	_clients.clear();
 }
 
 void Server::mainLoop(void)
 {
 	std::string responseMessage = "";
 	struct timeval timeout;
-	timeout.tv_sec = 0;
+	timeout.tv_sec = 30;
 	timeout.tv_usec = 0;
 	while (1) {
 		initFds();
@@ -185,6 +208,10 @@ void Server::mainLoop(void)
 			log_exit("select", __LINE__, __FILE__, errno);
 		} else if (result == 0) {
 			// timeout
+			#ifdef DEBUG
+				std::cout << "[ DEBUG ] timeout" << std::endl;
+			#endif
+			deleteAllClients();
 		} else {
 			serverEvent();
 			for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
@@ -227,21 +254,20 @@ void Server::mainLoop(void)
 
 void Server::start(void)
 {
-	std::cout << "================= Server start =================" << std::endl;
-	std::vector<std::string> list;
-	list.push_back("4242");
-	list.push_back("4243");
-	// TODO : MAX_CLIENTSを超えた分はエラーを返す. CONFIG段階でエラーにしとく
-	if (list.size() > FD_SETSIZE / 2)
+	#ifdef DEBUG
+		std::cout << "================= Server start =================" << std::endl;
+	#endif
+	if (_servers.size() > FD_SETSIZE / 2)
 	{
 		log_exit("server start", __LINE__, __FILE__, errno);
 	}
-	// TODO : configのサーバーの数だけループする。
-	for (int i = 0; i < 2; ++i) {
-		std::string current_server_port = list[i];
-		initServerAddr(list[i]);
-		createSocket(current_server_port);
-		int current_server_fd = _server_fds[list[i]];
+	for (std::map<int, std::vector<ServerConfig> >::iterator it = _servers.begin(); it != _servers.end(); ++it)
+	{
+		std::vector<ServerConfig> server_configs = it->second;
+		std::string current_port = ft_to_string(static_cast<int>(it->first));
+		initServerAddr(current_port);
+		createSocket(current_port);
+		int current_server_fd = _server_fds[current_port];
 		bindSocket(current_server_fd);
 		listenSocket(current_server_fd);
 	}

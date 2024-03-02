@@ -1,9 +1,15 @@
 #include "ConfigParse.hpp"
 
+ConfigParse::ConfigParse() : _config(*new Config()) {
+}
+
 ConfigParse::ConfigParse(Config &config) : _config(config) {
 }
 
 ConfigParse::~ConfigParse(void) {
+	_parseLine.clear();
+	_parseLines.clear();
+	// delete &_config;
 }
 
 Config &ConfigParse::getConfig(void) const {
@@ -16,10 +22,7 @@ void ConfigParse::parse(const std::string &filename) {
 	// std::string new_file  = filename;
 	std::ifstream ifs(filename.c_str());
 	if (!ifs)
-	{
-		std::cout << "cannot open file" << std::endl;
-		std::exit (1);
-	}
+		log_exit("ConfigParse : invalid config : cannot open file", __LINE__, __FILE__, errno);
 	while (std::getline(ifs, buf))
 	{
 		size_t start = 0, end = 0, strlen = buf.length();
@@ -55,43 +58,25 @@ void ConfigParse::parse(const std::string &filename) {
 	//validate
 	std::string endWord;
 	if (_parseLines.empty())
-	{
-		std::cout << "ConfigParse : invalid config : empty file" << std::endl;
-		std::exit (1);
-	}
+		log_exit("ConfigParse : invalid config : empty file", __LINE__, __FILE__, errno);
 	endWord = _parseLines.back().back();
 	if (endWord != "}")
-	{
-		std::cout << "ConfigParse : invalid config : file not end with '}'" << std::endl;
-		std::exit (1);
-	}
+		log_exit("ConfigParse : invalid config : file not end with '}'", __LINE__, __FILE__, errno);
 	if (_parseLines.back().size() != 1)
-	{
-		std::cout << " size not 1   ConfigParse : invalid config : argment before '}'" << std::endl;
-		std::exit (1);
-	}
+		log_exit("ConfigParse : invalid config : argment before '}'", __LINE__, __FILE__, errno);
 	for (size_t i = 0; i < _parseLines.size(); i++)
 	{
 		endWord = _parseLines[i].back();
 		if (endWord != "{" && endWord != ";" && endWord != "}")
-		{
-			std::cout << "ConfigParse : invalid config : not end with '{' or '}' or ';'" << std::endl;
-			std::exit (1);
-		}
+			log_exit("ConfigParse : invalid config : not end with '{' or '}' or ';'", __LINE__, __FILE__, errno);
 		if (endWord == "}" && _parseLines[i].size() != 1)
-		{
-			std::cout << "ConfigParse : invalid config : argment before '}'" << std::endl;
-			std::exit (1);
-		}
+			log_exit("ConfigParse : invalid config : argment before '}'", __LINE__, __FILE__, errno);
 	}
 	//parse
 	while (!_parseLines.empty())
 	{
 		if (_parseLines[0].size() != 2 || _parseLines[0][0] != "server" || _parseLines[0][1] != "{")
-		{
-			std::cout << "ConfigParse : invalid config : not start with 'server {'" << std::endl;
-			std::exit (1);
-		}
+			log_exit("ConfigParse : invalid config : not start with 'server {'", __LINE__, __FILE__, errno);
 		_parseLines.erase(_parseLines.begin());
 		ServerConfig server(_parseLines);
 		this->_config.addServer(server);

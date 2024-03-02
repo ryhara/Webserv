@@ -10,9 +10,6 @@
 #include "utils.hpp"
 #include "Webserv.hpp"
 
-// TODO : config の設定を読み込む
-#define MAX_BODY_SIZE 8192
-
 class HTTPRequest;
 
 enum HTTPRequestParseState

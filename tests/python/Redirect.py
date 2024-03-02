@@ -1,28 +1,21 @@
 import requests
 
-url = 'http://localhost:4242'
-headers = {'Transfer-Encoding': 'chunked'}
+# GET
+url = 'http://localhost:4242/redirect/'
+response = requests.get(url)
 
-def generate_data():
-    yield 'hello'
-    yield 'world'
-    yield 'abcdefghijklmnopqrstuvwxyz'
-    yield '1234567890'
-
-response = requests.post(url, headers=headers, data=generate_data())
 # request
-print("--------------------")
+print("--------------------------------------------------------------")
 print("URL:", response.request.url)
 print("Method:", response.request.method)
 print("Headers:")
 for key, value in response.request.headers.items():
 	print(key, ":", value)
 print("Body:", response.request.body)
-print("--------------------")
+print("--------------------------------------------------------------")
 # response
 print("Status Code:", response.status_code)
 print("Headers:")
 for key, value in response.headers.items():
 	print(key, ":", value)
 print(response.text)
-
