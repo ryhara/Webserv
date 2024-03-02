@@ -15,7 +15,7 @@
 #include "Webserv.hpp"
 #include "HTTPStatusCode.hpp"
 #include "HTTPRequest.hpp"
-#include "../cgi/Cgi.hpp"
+#include "CGI.hpp"
 
 #define DATE_BUF_SIZE 128
 #define DATE_FORMAT "%a, %d %b %Y %H:%M:%S GMT"

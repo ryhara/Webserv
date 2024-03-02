@@ -1,4 +1,4 @@
-#include "Cgi.hpp"
+#include "CGI.hpp"
 
 Cgi::Cgi()
 {
@@ -44,7 +44,7 @@ char	**Cgi::init_filename()
 {
 	char **filename;
 	std::string file = "test.sh";
-	
+
 	filename = new char *[2];
 	filename[0] = const_cast<char *>(file.c_str());
 	filename[1] = NULL;
@@ -75,7 +75,7 @@ std::string    Cgi::input_pipe(int fd)
 
 //ファイル名を受け取るようにするか
 //envを取得できるようにし複数のgiファイルの対応をできるようにするか
-std::string	Cgi::runCGI(HTTPRequest &request) 
+std::string	Cgi::runCGI(HTTPRequest &request)
 {
 	int pipefd[2];
 	pid_t pid;
@@ -137,7 +137,7 @@ std::vector<std::string> Cgi::parse_split_char(std::string uri_argv, char del)
 		if (!tmp.empty())
 			result.push_back(tmp);
 	}
-	std::cout << "split : " << result[0] << " "<< result[1] << std::endl; 
+	std::cout << "split : " << result[0] << " "<< result[1] << std::endl;
 	return (result);
 }
 

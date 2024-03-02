@@ -8,7 +8,7 @@ SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp Clien
 
 UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp ft_to_string.cpp isHex.cpp ft_stoi.cpp
 
-CGI = Cgi.cpp
+CGI = CGI.cpp
 
 SRCDIR = ./srcs
 CONFIGDIR = ./srcs/config

@@ -3,16 +3,18 @@
 #define CGI_HPP
 
 #include "Webserv.hpp"
-#include "../server/HTTPRequest.hpp"//原因説
+#include "HTTPRequest.hpp"
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/wait.h>
+#include <sys/types.h>
+#include <signal.h>
 #include "QueryParse.hpp"
 #include <string>
 #include <iostream>
-// #include <sstream>
+#include <sstream>
 
-// extern char **environ;
+extern char **environ;
 
 class Cgi
 {
