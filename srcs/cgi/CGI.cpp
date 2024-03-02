@@ -2,8 +2,7 @@
 
 CGI::CGI()
 {
-	_inFd = 0;
-	_outFd = 1;
+	setMode(CGI_START);
 }
 
 CGI::~CGI()
@@ -35,7 +34,7 @@ void CGI::setOutFd(int outFd)
 	this -> _outFd = outFd;
 }
 
-void CGI::cgiMode(enum cgi_mode mode)
+void CGI::setMode(enum cgi_mode mode)
 {
 	this -> _mode = mode;
 }
@@ -44,12 +43,11 @@ void	CGI::wait_parent(pid_t pid)
 {
 	int status;
 
-	// sleep(1);
-	// if (waitpid(pid, &status, WNOHANG) < 0)
-	if (waitpid(pid, &status, 0) < 0)
+	ft_sleep(5);
+	if (waitpid(pid, &status, WNOHANG) <= 0)
 	{
 		kill(pid, SIGKILL);
-		std::exit(1);
+		throw ServerException(STATUS_504, "Gateway Timeout");
 	}
 }
 
@@ -113,15 +111,18 @@ std::string	CGI::runCGI(HTTPRequest &request)
 	}
 	if (pipe(pipeFd) < 0)
 		std::exit(1);
+	setNonBlockingFd(pipeFd[0]);
+	setNonBlockingFd(pipeFd[1]);
 	this -> _inFd = pipeFd[0];
 	this -> _outFd = pipeFd[1];
-	//ここで一旦切ってfdを返す。selectのところで追加できるようにする。
+	//TODO :
 	pid = fork();
 	if (pid < 0)
 		log_exit("fork", __LINE__, __FILE__, errno);
 	else if (pid == 0)
 	{
-		if (close(pipeFd[0]) < 0 ||dup2(pipeFd[1], 1) < 0 || close (pipeFd[1]) < 0)
+		// if (close(pipeFd[0]) < 0 || dup2(pipeFd[1], 1) < 0 || close (pipeFd[1]) < 0)
+		if (close(pipeFd[0]) < 0 || dup2(pipeFd[1], 1) < 0)
 			log_exit("dup2", __LINE__, __FILE__, errno);
 		if (access(path.c_str(), X_OK) < 0)
 			throw ForbiddenError();
@@ -135,6 +136,7 @@ std::string	CGI::runCGI(HTTPRequest &request)
         wait_parent(pid);
 		delete [] argv;
     }
+	setMode(CGI_READ);
 	return (input_pipe(pipeFd[0]));
 }
 

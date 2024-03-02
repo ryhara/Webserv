@@ -88,10 +88,14 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 
 void HTTPResponse::handleCGIRequest(HTTPRequest &request)
 {
+	//この中では実行のみを行う
 	std::string new_body;
 	new_body = _cgi.runCGI(request);
 	setBody(new_body);
 	makeResponseMessage();
+	// clientのstateをCGI_READに変更
+	// Server側でcgiReadが呼ばれる→終わり際にCGI_WRITEに変更
+	// Server側でbodyを作成して送信
 }
 
 void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)

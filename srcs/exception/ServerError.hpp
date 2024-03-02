@@ -16,7 +16,7 @@ class ServerException : public std::exception
 		{
 			return (_status_code);
 		}
-		virtual const char* what() const throw() = 0;
+		virtual const char* what() const throw() { return (_status_message.c_str()); };
 };
 
 class BadRequestError : public ServerException
@@ -109,6 +109,18 @@ class ForbiddenError : public ServerException
 		~ForbiddenError() throw() {}
 		ForbiddenError(void) : ServerException(STATUS_403, "Forbidden") {}
 		ForbiddenError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
+		virtual const char *what() const throw()
+		{
+			return (_status_message.c_str());
+		}
+};
+
+class GatewayTimeoutError : public ServerException
+{
+	public:
+		~GatewayTimeoutError() throw() {}
+		GatewayTimeoutError(void) : ServerException(STATUS_504, "Gateway Timeout") {}
+		GatewayTimeoutError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
 		virtual const char *what() const throw()
 		{
 			return (_status_message.c_str());
