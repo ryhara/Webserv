@@ -17,8 +17,10 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 	std::vector<std::string> cgi_extension = location.getCgiExtension();
 	std::string uri = request.getUri();
 	std::string extension = "";
-	if (uri.find_last_of(".") != std::string::npos)
+	if (uri.find_last_of(".") != std::string::npos) {
 		extension = uri.substr(uri.find_last_of("."));
+		extension = extension.substr(0, extension.find("?"));
+	}
 	if (location.getRedirPath().empty() == false) {
 		request.setMode(REDIRECT);
 	} else if (extension.empty() == false && isCGI(cgi_extension, extension)) {
