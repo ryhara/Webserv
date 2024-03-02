@@ -127,7 +127,7 @@ std::string	CGI::runCGI(HTTPRequest &request)
 	setNonBlockingFd(pipeFd[1]);
 	this -> _inFd = pipeFd[0];
 	this -> _outFd = pipeFd[1];
-	//TODO :
+
 	pid = fork();
 	if (pid < 0)
 		log_exit("fork", __LINE__, __FILE__, errno);
@@ -151,6 +151,7 @@ std::string	CGI::runCGI(HTTPRequest &request)
 
     }
 	setMode(CGI_READ);
+		// TODO : こっから先をreadCGI();とする
 	return (input_pipe(pipeFd[0]));
 }
 
@@ -192,7 +193,7 @@ void	CGI::setCgiEnv(std::string pathinfo, std::string query)
 
 	new_pathinfo += pathinfo;
 	new_query += query;
-	_cgiEnv = new char*[3];	
+	_cgiEnv = new char*[3];
 	_cgiEnv[0] = new char[new_pathinfo.size() + 1];
 	std::strcpy(_cgiEnv[0], new_pathinfo.c_str());
 	_cgiEnv[1] = new char[new_query.size() + 1];

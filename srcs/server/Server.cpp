@@ -175,6 +175,7 @@ void Server::executeSendProcess(std::map<int, Client*>::iterator &it)
 	if (_servers[ft_stoi(port)][config_index].getMaxBodySize() < client->getRequest().getBody().size())
 		throw HTTPRequestPayloadTooLargeError();
 	client->responseProcess();
+	// TODO : CGIのモードをチェックして抜ける
 	std::string responseMessage = client->getResponseMessage();
 	if (client->sendResponse(responseMessage) < 0)
 		deleteClient(it);
@@ -229,9 +230,12 @@ void Server::mainLoop(void)
 						if (client->getState() == RECV_STATE) {
 							executeRecvProcess(it);
 							break;
-						} else if (client->getState() == CGI_READ_STATE) {
+						} else if (client->getCGI().getMode() == CGI_READ) {
 							FD_CLR(client->getCGI().getInFd(), &_readfds);
 							// client->getCGI().readCGI();
+							// client->setState(CGI_WRITE_STATE);
+							// ボディの作り方はhandleCGIのものと同じ
+							// client->getCGI().makeResponseMessage();
 							break;
 						}
 					} else if (FD_ISSET(fd, &_writefds)) {
@@ -240,7 +244,6 @@ void Server::mainLoop(void)
 							executeSendProcess(it);
 						} else if (client->getState() == CGI_WRITE_STATE) {
 							FD_CLR(fd, &_writefds);
-							// client->getCGI().makeResponseMessage();
 							// std::string responseMessage = client->getResponseMessage();
 							// if (client->sendResponse(responseMessage) < 0)
 							// 	deleteClient(it);
