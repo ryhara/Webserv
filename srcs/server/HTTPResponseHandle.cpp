@@ -22,7 +22,7 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 	if (location.getRedirPath().empty() == false) {
 		request.setMode(REDIRECT);
 	} else if (extension.empty() == false && isCGI(cgi_extension, extension)) {
-		request.setMode(CGI);
+		request.setMode(CGI_MODE);
 	} else {
 		request.setMode(NORMAL);
 	}
@@ -41,7 +41,7 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 				handleNormalRequest(request);
 			}
 			break;
-		case CGI:
+		case CGI_MODE:
 		#ifdef DEBUG
 			std::cout << "########## [ DEBUG ] CGI ##########" << std::endl;
 		#endif
@@ -86,13 +86,10 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 
 void HTTPResponse::handleCGIRequest(HTTPRequest &request)
 {
-	// TODO : CGIの処理
-	std::cout << "getUri : "<<request.getUri() << std::endl;
 	std::string new_body;
-	new_body = cgi.runCGI(request);
+	new_body = _cgi.runCGI(request);
 	setBody(new_body);
 	makeResponseMessage();
-	std::cout << request.getUri() << std::endl;
 }
 
 void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)

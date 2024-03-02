@@ -111,11 +111,13 @@ void Server::initFds(void)
 	for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
 		if (it->second->getState() == RECV_STATE)
 			FD_SET(it->first, &_readfds);
-		if (it->second->getState() == SEND_STATE)
+		else if (it->second->getState() == SEND_STATE)
 			FD_SET(it->first, &_writefds);
+		// TODO : CGI
+		// else if (it->second->getRequest().getMode() == CGI_MODE)
+
 	}
-	FD_SET(1, &_writefds);
-	
+
 }
 
 void Server::serverEvent(void)

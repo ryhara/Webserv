@@ -33,9 +33,9 @@ class HTTPResponse
 		std::string _body;
 		std::map<HTTPStatusCode, std::string> _statusMessageMap;
 		std::string _responseMessage;
+		CGI _cgi;
 		DISALLOW_COPY_AND_ASSIGN(HTTPResponse);
 	public :
-		Cgi cgi;
 		HTTPResponse();
 		~HTTPResponse();
 
@@ -61,6 +61,7 @@ class HTTPResponse
 		const std::string &getBody() const;
 		const std::string &getStatusMessageFromMap(const HTTPStatusCode &statusCode) const;
 		const std::string &getResponseMessage() const;
+		const CGI &getCGI() const;
 
 		void clear(void);
 

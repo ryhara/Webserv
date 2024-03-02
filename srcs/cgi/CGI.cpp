@@ -1,38 +1,52 @@
 #include "CGI.hpp"
 
-Cgi::Cgi()
+CGI::CGI()
 {
-	infd = 0;
-	outfd = 1;
-	std::cout << "Cgi constructor called" << std::endl;
+	_inFd = 0;
+	_outFd = 1;
 }
 
-int	Cgi::GetInfd()
+CGI::~CGI()
 {
-	return (infd);
 }
 
-int Cgi::GetOutfd()
+int	CGI::getInFd()
 {
-	return (outfd);
+	return (_inFd);
 }
 
-void Cgi::setInfd(int infd)
+int CGI::getOutFd()
 {
-	this -> infd = infd;
+	return (_outFd);
 }
 
-void Cgi::setOutfd(int outfd)
+enum cgi_mode CGI::getMode()
 {
-	this -> outfd = outfd;
+	return (_mode);
 }
 
-void	Cgi::wait_parent(pid_t pid)
+void CGI::setInFd(int inFd)
+{
+	this -> _inFd = inFd;
+}
+
+void CGI::setOutFd(int outFd)
+{
+	this -> _outFd = outFd;
+}
+
+void CGI::cgiMode(enum cgi_mode mode)
+{
+	this -> _mode = mode;
+}
+
+void	CGI::wait_parent(pid_t pid)
 {
 	int status;
 
-	sleep(1);
-	if (waitpid(pid, &status, WNOHANG) < 0)
+	// sleep(1);
+	// if (waitpid(pid, &status, WNOHANG) < 0)
+	if (waitpid(pid, &status, 0) < 0)
 	{
 		kill(pid, SIGKILL);
 		std::exit(1);
@@ -40,19 +54,18 @@ void	Cgi::wait_parent(pid_t pid)
 }
 
 //filenameの作り方
-char	**Cgi::init_filename()
+char	**CGI::init_argv(std::string filename)
 {
-	char **filename;
-	std::string file = "test.sh";
+	char **argv;
 
-	filename = new char *[2];
-	filename[0] = const_cast<char *>(file.c_str());
-	filename[1] = NULL;
-	return (filename);
+	argv = new char *[2];
+	argv[0] = const_cast<char *>(filename.c_str());
+	argv[1] = NULL;
+	return (argv);
 }
 
 //ファイルの読み込みについて
-std::string    Cgi::input_pipe(int fd)
+std::string    CGI::input_pipe(int fd)
 {
     int buf_size=1024;
     char buf[buf_size];
@@ -60,10 +73,9 @@ std::string    Cgi::input_pipe(int fd)
 	std::string new_body = "\0";
     while (1)
     {
-		// write(2, "a\n", 2);
         input_size = read(fd, buf, buf_size -1);
         if (input_size < 0)
-            std::exit(1);
+			log_exit("read", __LINE__, __FILE__, errno);
 		if (input_size == 0)
 			break ;
 		buf[input_size] = '\0';
@@ -75,58 +87,58 @@ std::string    Cgi::input_pipe(int fd)
 
 //ファイル名を受け取るようにするか
 //envを取得できるようにし複数のgiファイルの対応をできるようにするか
-std::string	Cgi::runCGI(HTTPRequest &request)
+std::string	CGI::runCGI(HTTPRequest &request)
 {
-	int pipefd[2];
+	int pipeFd[2];
 	pid_t pid;
-	char **filename = init_filename();
 	std::string uri = request.getUri();
-	std::string argv;
+	std::string query;
 
-	// std::cout << "getbody : "<<request.getBody() << std::endl;
-    std::string path = "./www";//uriに入ってない？？
+	Location location = request.getServerConfig().getLocation(request.getLocation());
+	std::string alias = location.getAlias();
+	std::string new_uri = uri.substr(location.getLocation().size(), uri.size());
+	std::string path = alias + new_uri;
+	char **argv = init_argv(path);
+
+	// TODO : PATH_INFOにnew_uriを入れる
+	// TODO : ?をとる
 	size_t found = uri.find("?");
 	if (found != std::string::npos)
 	{
-		argv = uri.substr(found + 1, uri.length());
+		query = uri.substr(found + 1, uri.length());
 		uri = uri.substr(0, found);
 		std::cout << "before parse : " << uri << std::endl;
-		std::cout << "before parse argv  : " << argv << std::endl;
-		parse_split_char(argv, '&');
+		std::cout << "before parse argv  : " << query << std::endl;
+		parse_split_char(query, '&');
 	}
-    path += uri;
-	// std::cout << path << std::endl;
-	// std::cout << filename[0] << "\0" << filename[1] << std::endl;
-	if (pipe(pipefd) < 0)
+	if (pipe(pipeFd) < 0)
 		std::exit(1);
-	this -> infd = pipefd[0];
-	this -> outfd = pipefd[1];
+	this -> _inFd = pipeFd[0];
+	this -> _outFd = pipeFd[1];
 	//ここで一旦切ってfdを返す。selectのところで追加できるようにする。
 	pid = fork();
-	// if (pid < 0)
-	// 	std::exit(1);
-	if (pid == 0)
+	if (pid < 0)
+		log_exit("fork", __LINE__, __FILE__, errno);
+	else if (pid == 0)
 	{
-		if (close(pipefd[0]) < 0 ||dup2(pipefd[1], 1) < 0 || close (pipefd[1]) < 0)
-			std::exit(1);
+		if (close(pipeFd[0]) < 0 ||dup2(pipeFd[1], 1) < 0 || close (pipeFd[1]) < 0)
+			log_exit("dup2", __LINE__, __FILE__, errno);
 		if (access(path.c_str(), X_OK) < 0)
-			std::exit(1);
-		if (execve(path.c_str(), filename, environ) < 0)
-            std::exit(1);
+			throw ForbiddenError();
+		if (execve(path.c_str(), argv, environ) < 0)
+            log_exit("execve", __LINE__, __FILE__, errno);
 	}
 	else
     {
-        if (close(pipefd[1]) < 0)
-            std::exit(1);
-		// std::cerr << "error" << std::endl;
+        if (close(pipeFd[1]) < 0)
+			log_exit("close", __LINE__, __FILE__, errno);
         wait_parent(pid);
-		delete [] filename;
-		// write(1, "test\n", 5);
+		delete [] argv;
     }
-	return (input_pipe(pipefd[0]));
+	return (input_pipe(pipeFd[0]));
 }
 
-std::vector<std::string> Cgi::parse_split_char(std::string uri_argv, char del)
+std::vector<std::string> CGI::parse_split_char(std::string uri_argv, char del)
 {
 	std::vector<std::string> result;
 	std::stringstream ss(uri_argv);
@@ -141,7 +153,7 @@ std::vector<std::string> Cgi::parse_split_char(std::string uri_argv, char del)
 	return (result);
 }
 
-// std::vector<std::string> Cgi::parse_split_char(std::string uri_argv, std::string del)
+// std::vector<std::string> CGI::parse_split_char(std::string uri_argv, std::string del)
 // {
 // 	std::vector<std::string> result;
 // 	std::string::size_type pos = 0;
