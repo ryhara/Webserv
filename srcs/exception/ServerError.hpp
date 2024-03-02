@@ -102,3 +102,15 @@ class NotFoundError : public ServerException
 			return (_status_message.c_str());
 		}
 };
+
+class ForbiddenError : public ServerException
+{
+	public:
+		~ForbiddenError() throw() {}
+		ForbiddenError(void) : ServerException(STATUS_403, "Forbidden") {}
+		ForbiddenError(HTTPStatusCode status_code, std::string status_message) : ServerException(status_code, status_message) {}
+		virtual const char *what() const throw()
+		{
+			return (_status_message.c_str());
+		}
+};

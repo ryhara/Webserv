@@ -90,6 +90,10 @@ debug : re
 leak :
 	while true; do leaks -q $(NAME); sleep 1; done
 
-.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean
+chmod :
+	chmod +x ./tests/*
+	chmod +x ./www/cgi/*
+
+.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean chmod
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)

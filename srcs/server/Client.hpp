@@ -7,6 +7,7 @@
 #include "HTTPRequestParse.hpp"
 #include "HTTPResponse.hpp"
 #include "Webserv.hpp"
+#include "CGI.hpp"
 
 # define BUFFER_SIZE			8192
 
@@ -22,6 +23,7 @@ class Client
 	private :
 		DISALLOW_COPY_AND_ASSIGN(Client);
 		ClientState _state;
+		CGI _cgi;
 		HTTPRequest _request;
 		HTTPRequestParse _request_parse;
 		HTTPResponse _response;
@@ -38,6 +40,7 @@ class Client
 		bool getKeepAlive(void) const;
 		HTTPResponse &getResponse(void);
 		HTTPRequest &getRequest(void);
+		CGI &getCGI(void);
 
 		const std::string &getResponseMessage(void) const;
 		ClientState getState(void) const;

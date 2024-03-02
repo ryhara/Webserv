@@ -75,6 +75,11 @@ const std::string &HTTPResponse::getResponseMessage() const
 	return this->_responseMessage;
 }
 
+const CGI &HTTPResponse::getCGI() const
+{
+	return this->_cgi;
+}
+
 // setter
 void HTTPResponse::setVersion(const std::string &version)
 {
