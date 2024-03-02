@@ -56,7 +56,7 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 			handleRedirectRequest(request);
 			break;
 		default:
-			throw InternalServerError();
+			throw ServerException(STATUS_500, "Internal Server Error");
 			break;
 	}
 }
@@ -67,22 +67,22 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 	Location location = request.getServerConfig().getLocation(request.getLocation());
 	if (method.compare("GET") == 0) {
 		if (location.getGetMethod() == false)
-			throw MethodNotAllowedError();
+			throw ServerException(STATUS_405, "Method Not Allowed");
 		makeGetResponseBody(request);
 		makeResponseMessage();
 	} else if (method.compare("POST") == 0) {
 		if (location.getPostMethod() == false)
-			throw MethodNotAllowedError();
+			throw ServerException(STATUS_405, "Method Not Allowed");
 		makePostResponseBody(request);
 		makeResponseMessage();
 	} else if (method.compare("DELETE") == 0) {
 		if (location.getDeleteMethod() == false)
-			throw MethodNotAllowedError();
+			throw ServerException(STATUS_405, "Method Not Allowed");
 		makeDeleteResponseBody(request);
 		makeResponseMessage();
 	}
 	else {
-		throw NotImplementedError();
+		throw ServerException(STATUS_501, "Not Implemented");
 	}
 }
 
@@ -155,7 +155,7 @@ void HTTPResponse::makeAutoindexBody(std::vector<std::string> file_list, std::st
 				ss << "<a href=\"" << location << file_name << "\">" << file_name << "</a>" << std::setw(50 - file_name.size()) << time << std::setw(20) << ft_to_string(file_size) << CRLF;
 			}
 		} else {
-			throw NotFoundError();
+			throw ServerException(STATUS_404, "Not Found");
 		}
 	}
 	ss << "</pre><hr></body></html>\r\n" ;
@@ -169,7 +169,7 @@ void HTTPResponse::readDirectory(std::vector<std::string> &file_list, const std:
 	struct dirent *dp;
 	dir = opendir(path.c_str());
 	if (dir == NULL) {
-		throw NotFoundError();
+		throw ServerException(STATUS_404, "Not Found");
 	} else {
 		while ((dp = readdir(dir)) != NULL) {
 			std::string file_name = dp->d_name;
