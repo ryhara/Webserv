@@ -96,19 +96,21 @@ std::string	CGI::runCGI(HTTPRequest &request)
 	std::string alias = location.getAlias();
 	std::string new_uri = uri.substr(location.getLocation().size(), uri.size());
 	std::string path = alias + new_uri;
-	char **argv = init_argv(path);
+	setArgv(init_argv(path));
+	std::string pathinfo;
 
 	// TODO : PATH_INFOにnew_uriを入れる
 	// TODO : ?をとる
-	size_t found = uri.find("?");
+
+	size_t found = new_uri.find("?");
 	if (found != std::string::npos)
 	{
-		query = uri.substr(found + 1, uri.length());
-		uri = uri.substr(0, found);
-		std::cout << "before parse : " << uri << std::endl;
-		std::cout << "before parse argv  : " << query << std::endl;
-		parse_split_char(query, '&');
+		query = new_uri.substr(found + 1, uri.length());
+		pathinfo = new_uri.substr(0, found);
+		// std::cout << "before parse : " << uri << std::endl;
+		// std::cout << "before parse argv  : " << query << std::endl;
 	}
+	setCgiEnv(pathinfo, query);
 	if (pipe(pipeFd) < 0)
 		std::exit(1);
 	setNonBlockingFd(pipeFd[0]);
@@ -126,7 +128,7 @@ std::string	CGI::runCGI(HTTPRequest &request)
 			log_exit("dup2", __LINE__, __FILE__, errno);
 		if (access(path.c_str(), X_OK) < 0)
 			throw ForbiddenError();
-		if (execve(path.c_str(), argv, environ) < 0)
+		if (execve(path.c_str(), _argv ,_cgiEnv) < 0)
             log_exit("execve", __LINE__, __FILE__, errno);
 	}
 	else
@@ -134,7 +136,9 @@ std::string	CGI::runCGI(HTTPRequest &request)
         if (close(pipeFd[1]) < 0)
 			log_exit("close", __LINE__, __FILE__, errno);
         wait_parent(pid);
-		delete [] argv;
+		delete [] _argv;
+		delete [] _cgiEnv;
+
     }
 	setMode(CGI_READ);
 	return (input_pipe(pipeFd[0]));
@@ -170,3 +174,22 @@ std::vector<std::string> CGI::parse_split_char(std::string uri_argv, char del)
 // 		result.push_back(uri_argv.substr(0.pos));
 // 	}
 // }
+
+void	CGI::setCgiEnv(std::string pathinfo, std::string query)
+{
+	std::string new_pathinfo = "PATH_INFO=";
+	std::string new_query = "QUERY_STRING=";
+
+	new_pathinfo += pathinfo;
+	new_query += query;
+	_cgiEnv = new char*[3];
+	_cgiEnv[0] = const_cast<char *>(new_pathinfo.c_str());
+	_cgiEnv[1] = const_cast<char *>(new_query.c_str());
+	_cgiEnv[2] = NULL;
+}
+
+
+void CGI::setArgv(char **argv)
+{
+	_argv = argv;
+}

@@ -29,6 +29,8 @@ class CGI
 		int	_inFd;
 		int _outFd;
 		enum cgi_mode _mode;
+		char **_argv;
+		char **_cgiEnv;
 	public:
 		CGI(/* args */);
 		~CGI();
@@ -41,6 +43,8 @@ class CGI
 		void setInFd(int inFd);
 		void setOutFd(int outFd);
 		void setMode(enum cgi_mode mode);
+		void setCgiEnv(std::string pathinfo, std::string query);
+		void setArgv(char **argv);
 };
 
 #endif
