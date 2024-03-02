@@ -60,6 +60,7 @@ class Server
 		void	executeRecvProcess(std::map<int, Client*>::iterator &it);
 		void	executeSendProcess(std::map<int, Client*>::iterator &it);
 		void	deleteClient(std::map<int, Client*>::iterator &it);
+		void	deleteAllClients(void);
 		void	mainLoop(void);
 		int		acceptSocket(int &server_fd);
 		void	clientProcess(int client_fd);
