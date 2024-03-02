@@ -156,7 +156,7 @@ void Server::executeSendProcess(std::map<int, Client*>::iterator &it)
 		log_exit("getsockname", __LINE__, __FILE__, errno);
 	}
 	if (ft_stoi(port) != ntohs(addr.sin_port))
-		throw BadRequestError();
+		throw ServerException(STATUS_400, "Bad Request");
 	int config_index = 0;
 	for (int i = 0;i < static_cast<int>(_servers[ft_stoi(port)].size()); i++) {
 		if (_servers[ft_stoi(port)][i].getServerName() == host) {
@@ -166,7 +166,7 @@ void Server::executeSendProcess(std::map<int, Client*>::iterator &it)
 	}
 	client->getRequest().setServerConfig(_servers[ft_stoi(port)][config_index]);
 	if (_servers[ft_stoi(port)][config_index].getMaxBodySize() < client->getRequest().getBody().size())
-		throw HTTPRequestPayloadTooLargeError();
+		throw ServerException(STATUS_413, "Request Entity Too Large");
 	client->responseProcess();
 	std::string responseMessage = client->getResponseMessage();
 	if (client->sendResponse(responseMessage) < 0)

@@ -110,9 +110,9 @@ void HTTPRequestParse::parse(char *buffer)
 				// 	std::cout << "#### [ DEBUG ] FINISH_STATE ####" << std::endl;
 				// #endif
 				if (_request.getHeader("Host").empty())
-					throw BadRequestError();
+					throw ServerException(STATUS_400, "Bad Request");
 				if (_contentLength > 0 && _request.getBody().size() != _contentLength)
-					throw BadRequestError();
+					throw ServerException(STATUS_400, "Bad Request");
 				_requiredParse = false;
 				break;
 		}
@@ -136,15 +136,15 @@ bool HTTPRequestParse::readRequestLine(std::stringstream &ss)
 	}
 	std::vector<std::string> request_line = split(line, ' ');
 	if (countSpace(line) != 2)
-		throw BadRequestError();
+		throw ServerException(STATUS_400, "Bad Request");
 	if (request_line.size() != 3)
-		throw BadRequestError();
+		throw ServerException(STATUS_400, "Bad Request");
 	if (request_line[0].compare("GET") != 0 && request_line[0].compare("POST") != 0 && request_line[0].compare("DELETE") != 0)
-		throw NotImplementedError();
+		throw ServerException(STATUS_501, "Not Implemented");
 	if (request_line[2].compare(HTTP_VERSION) != 0)
-		throw HTTPVersionNotSupportedError();
+		throw ServerException(STATUS_505, "HTTP Version Not Supported");
 	if (request_line[1][0] != '/' || request_line[1].find("/../") != std::string::npos)
-		throw BadRequestError();
+		throw ServerException(STATUS_400, "Bad Request");
 	this->_request.setMethod(request_line[0]);
 	this->_request.setUri(request_line[1]);
 	this->_request.setVersion(request_line[2]);
@@ -170,7 +170,7 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 		}
 		std::vector<std::string> header = split(line, std::string(": "));
 		if (header.size() != 2)
-			throw BadRequestError();
+			throw ServerException(STATUS_400, "Bad Request");
 		pair.first = header[0];
 		if (header[0].compare("Transfer-Encoding") == 0 && header[1].compare("chunked") == 0)
 			this->_isChunked = true;
@@ -186,7 +186,7 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 				this->_request.setHost(host[0]);
 				this->_request.setPort("80");
 			} else {
-				throw BadRequestError();
+				throw ServerException(STATUS_400, "Bad Request");
 			}
 			if (host[1].compare("80") == 0)
 				pair.second = host[0];
@@ -197,7 +197,7 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 		}
 		this->_request.setHeaders(pair);
 		if (!_request.getHeader("Transfer-Encoding").empty() && !_request.getHeader("Content-Length").empty())
-			throw BadRequestError();
+			throw ServerException(STATUS_400, "Bad Request");
 		return (true);
 	} else {
 		if (_contentLength > 0 || _isChunked) {
@@ -226,7 +226,7 @@ void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 			}
 			if (!isHex(line)) {
 				isSize = false;
-				throw BadRequestError();
+				throw ServerException(STATUS_400, "Bad Request");
 			}
 			std::stringstream ss(line);
 			ss >> std::hex >> size;
@@ -243,7 +243,7 @@ void HTTPRequestParse::parseChunkedBody(std::stringstream &ss)
 			// std::cout << "line: " << line << std::endl;
 			if (line.size() != size) {
 				isSize = false;
-				throw BadRequestError();
+				throw ServerException(STATUS_400, "Bad Request");
 			}
 			_request.addBody(line);
 			isSize = false;
@@ -262,7 +262,7 @@ void HTTPRequestParse::parseNormalBody(std::stringstream &ss)
 		_request.addBody(line);
 	}
 	if (_request.getBody().size() > _contentLength)
-		throw HTTPRequestPayloadTooLargeError();
+		throw ServerException(STATUS_413, "Request Entity Too Large");
 	if (_request.getBody().size() == _contentLength)
 		setHTTPRequestParseState(FINISH_STATE);
 }
