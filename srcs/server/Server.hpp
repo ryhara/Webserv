@@ -24,7 +24,7 @@
 
 # define SERVER_PORT			4242
 # define SERVER_PORT_STR		"4242"
-# define QUEUE_LENGTH			5
+# define QUEUE_LENGTH			20
 # define BUFFER_SIZE			8192
 
 // TODO : vectorやmapのメモリを開放する

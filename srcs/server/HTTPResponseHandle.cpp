@@ -80,14 +80,27 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 			throw ServerException(STATUS_405, "Method Not Allowed");
 		makeDeleteResponseBody(request);
 		makeResponseMessage();
-	}
-	else {
+	} else {
 		throw ServerException(STATUS_501, "Not Implemented");
 	}
 }
 
 void HTTPResponse::handleCGIRequest(HTTPRequest &request)
 {
+	Location location = request.getServerConfig().getLocation(request.getLocation());
+	if (request.getMethod().compare("DELETE") == 0) {
+		throw ServerException(STATUS_405, "Method Not Allowed");
+	} else if (request.getMethod().compare("POST") == 0) {
+		if (location.getPostMethod() == false)
+			throw ServerException(STATUS_405, "Method Not Allowed");
+		std::cout << "POST" << std::endl;
+	} else if (request.getMethod().compare("GET") == 0) {
+		if (location.getGetMethod() == false)
+			throw ServerException(STATUS_405, "Method Not Allowed");
+		std::cout << "GET" << std::endl;
+	} else {
+		throw ServerException(STATUS_501, "Not Implemented");
+	}
 	std::cout << request.getUri() << std::endl;
 }
 
