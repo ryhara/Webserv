@@ -57,6 +57,11 @@ void HTTPResponse::handleNormalRequest(HTTPRequest &request)
 void HTTPResponse::handleCGIRequest(HTTPRequest &request)
 {
 	// TODO : CGIの処理
+	std::cout << "getUri : "<<request.getUri() << std::endl;
+	std::string new_body;
+	new_body = cgi.runCGI(request);
+	setBody(new_body);
+	makeResponseMessage();
 	std::cout << request.getUri() << std::endl;
 }
 

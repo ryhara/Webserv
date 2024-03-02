@@ -121,6 +121,8 @@ void Server::initFds(void)
 		if (it->second->getState() == SEND_STATE)
 			FD_SET(it->first, &_writefds);
 	}
+	FD_SET(1, &_writefds);
+	
 }
 
 void Server::serverEvent(void)

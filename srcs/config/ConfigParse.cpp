@@ -13,7 +13,8 @@ Config &ConfigParse::getConfig(void) const {
 void ConfigParse::parse(const std::string &filename) {
 	std::string word, buf;
 	std::cout << "Config file: " << filename << std::endl << std::endl;
-	std::ifstream ifs(filename);
+	// std::string new_file  = filename;
+	std::ifstream ifs(filename.c_str());
 	if (!ifs)
 	{
 		std::cout << "cannot open file" << std::endl;

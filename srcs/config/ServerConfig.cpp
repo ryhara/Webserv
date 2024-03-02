@@ -80,7 +80,7 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 				std::cout << "ServerConfig : invalid config : max_body_size not end with ';'" << std::endl;
 				std::exit (1);
 			}
-			this->max_body_size = std::stoi(parseLine[1]);
+			this->max_body_size = ft_stoi(parseLine[1]);
 		}
 		else if (parseLine[0] == "error_page")
 		{
