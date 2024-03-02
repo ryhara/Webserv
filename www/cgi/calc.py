@@ -2,6 +2,9 @@
 
 import os
 
+# print(len(os.environ))
+# for key in os.environ.keys():
+#     print(f'{key}={os.environ[key]}')
 query_string = os.environ['QUERY_STRING']
 
 query_list = query_string.split('&')
@@ -9,24 +12,20 @@ a = query_list[0].split('=')[1]
 op = query_list[1].split('=')[1]
 b = query_list[2].split('=')[1]
 
-
-selected_plus = ''
-selected_sub = ''
-selected_mul = ''
-selected_div = ''
+result = 0
 
 if op == '+':
     result = int(a) + int(b)
-    selected_plus = 'selected'
+    op = "&plus;"
 elif op == '-':
     result = int(a) - int(b)
-    selected_sub = 'selected'
+    op = "&minus;"
 elif op == '*':
     result = int(a) * int(b)
-    selected_mul = 'selected'
+    op = "&times;"
 elif op == '/':
     result = int(a) / int(b)
-    selected_div = 'selected'
+    op = "&divide;"
 
 print('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Webserv</title><link rel="icon" href="data:,"></head>')
 print('<body><h1>Welcome to Webserv!</h1><p>It works! from /www/cgi.html</p><div>')

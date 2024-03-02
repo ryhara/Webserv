@@ -90,27 +90,37 @@ std::string	CGI::runCGI(HTTPRequest &request)
 	int pipeFd[2];
 	pid_t pid;
 	std::string uri = request.getUri();
-	std::string query;
+	std::string query = "\0";
 
 	Location location = request.getServerConfig().getLocation(request.getLocation());
 	std::string alias = location.getAlias();
 	std::string new_uri = uri.substr(location.getLocation().size(), uri.size());
 	std::string path = alias + new_uri;
 	setArgv(init_argv(path));
-	std::string pathinfo;
+	std::string pathinfo = "\0";
 
 	// TODO : PATH_INFOにnew_uriを入れる
 	// TODO : ?をとる
-
-	size_t found = new_uri.find("?");
-	if (found != std::string::npos)
+	if (request.getMethod() == "GET")
 	{
-		query = new_uri.substr(found + 1, uri.length());
-		pathinfo = new_uri.substr(0, found);
-		// std::cout << "before parse : " << uri << std::endl;
-		// std::cout << "before parse argv  : " << query << std::endl;
+		pathinfo = new_uri;
+		size_t found = new_uri.find("?");
+		if (found != std::string::npos)
+		{
+			query = new_uri.substr(found + 1, new_uri.length());
+			pathinfo = new_uri.substr(0, found);
+			path = alias + pathinfo;
+			// std::cout << "before parse : " << uri << std::endl;
+			// std::cout << "before parse argv  : " << query << std::endl;
+		}
+		setCgiEnv(pathinfo, query);
+		// std::cout<< _cgiEnv[0] << std::endl;
+		// std::cout<< _cgiEnv[1] << std::endl;
 	}
-	setCgiEnv(pathinfo, query);
+	else
+	{
+		setCgiEnv(new_uri, request.getBody());
+	}
 	if (pipe(pipeFd) < 0)
 		std::exit(1);
 	setNonBlockingFd(pipeFd[0]);
@@ -137,7 +147,7 @@ std::string	CGI::runCGI(HTTPRequest &request)
 			log_exit("close", __LINE__, __FILE__, errno);
         wait_parent(pid);
 		delete [] _argv;
-		delete [] _cgiEnv;
+		// delete [] _cgiEnv;
 
     }
 	setMode(CGI_READ);
@@ -155,7 +165,7 @@ std::vector<std::string> CGI::parse_split_char(std::string uri_argv, char del)
 		if (!tmp.empty())
 			result.push_back(tmp);
 	}
-	std::cout << "split : " << result[0] << " "<< result[1] << std::endl;
+	// std::cout << "split : " << result[0] << " "<< result[1] << std::endl;
 	return (result);
 }
 
@@ -182,9 +192,11 @@ void	CGI::setCgiEnv(std::string pathinfo, std::string query)
 
 	new_pathinfo += pathinfo;
 	new_query += query;
-	_cgiEnv = new char*[3];
-	_cgiEnv[0] = const_cast<char *>(new_pathinfo.c_str());
-	_cgiEnv[1] = const_cast<char *>(new_query.c_str());
+	_cgiEnv = new char*[3];	
+	_cgiEnv[0] = new char[new_pathinfo.size() + 1];
+	std::strcpy(_cgiEnv[0], new_pathinfo.c_str());
+	_cgiEnv[1] = new char[new_query.size() + 1];
+	std::strcpy(_cgiEnv[1], new_query.c_str());
 	_cgiEnv[2] = NULL;
 }
 
