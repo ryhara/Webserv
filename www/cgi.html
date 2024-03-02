@@ -9,9 +9,15 @@
 		<h1>Welcome to Webserv!</h1>
 		<p>It works! from /www/cgi.html</p>
 		<div>
-			<form action="スクリプトのURL" method="POST" accept-charset="UTF-8">
-				<input type="text" name="value1">
-				<input type="text" name="value2">
+			<form action="/cgi/calc.py" method="POST" accept-charset="UTF-8">
+				<input type="text" name="value1" required>
+				<select name="operator" required>
+					<option value="add">+</option>
+					<option value="sub">-</option>
+					<option value="mul">*</option>
+					<option value="div">/</option>
+				</select>
+				<input type="text" name="value2" required>
 				<button type="submit">submit</button>
 			</form>
 		</div>
