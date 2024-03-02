@@ -57,6 +57,11 @@ HTTPRequest &Client::getRequest(void)
 	return _request;
 }
 
+CGI &Client::getCGI(void)
+{
+	return _cgi;
+}
+
 void Client::setClientFd(int client_fd)
 {
 	_client_fd = client_fd;

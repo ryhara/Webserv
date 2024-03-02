@@ -109,15 +109,18 @@ void Server::initFds(void)
 		FD_SET(it->second, &_readfds);
 	}
 	for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it) {
-		if (it->second->getState() == RECV_STATE)
+		Client *client = it->second;
+		if (client->getState() == RECV_STATE)
 			FD_SET(it->first, &_readfds);
-		else if (it->second->getState() == SEND_STATE)
+		else if (client->getState() == SEND_STATE)
 			FD_SET(it->first, &_writefds);
-		// TODO : CGI
-		// else if (it->second->getRequest().getMode() == CGI_MODE)
-
+		else if (client->getRequest().getMode() == CGI_MODE) {
+			if (client->getCGI().getMode() == CGI_READ) {
+				std::cout << "CGI_READ " << client->getCGI().getInFd() << std::endl;
+				FD_SET(client->getCGI().getInFd(), &_readfds);
+			}
+		}
 	}
-
 }
 
 void Server::serverEvent(void)
@@ -202,8 +205,8 @@ void Server::mainLoop(void)
 	timeout.tv_sec = 30;
 	timeout.tv_usec = 0;
 	while (1) {
+		// ft_usleep(100);
 		initFds();
-		// TODO : max_fdを設定する
 		int result = select(FD_SETSIZE, &_readfds, &_writefds, NULL, &timeout);
 		if (result < 0) {
 			closeServerFds();
@@ -218,22 +221,34 @@ void Server::mainLoop(void)
 			serverEvent();
 			for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 			{
+				int fd = it->first;
+				Client *client = it->second;
 				try {
-					if (FD_ISSET(it->first, &_readfds)) {
-						FD_CLR(it->first, &_readfds);
-						if (it->second->getState() == RECV_STATE) {
+					if (FD_ISSET(fd, &_readfds)) {
+						FD_CLR(fd, &_readfds);
+						if (client->getState() == RECV_STATE) {
 							executeRecvProcess(it);
 							break;
+						} else if (client->getState() == CGI_READ_STATE) {
+							FD_CLR(client->getCGI().getInFd(), &_readfds);
+							// client->getCGI().readCGI();
+							break;
 						}
-					} else if (FD_ISSET(it->first, &_writefds)) {
-						FD_CLR(it->first, &_writefds);
-						if (it->second->getState() == SEND_STATE) {
+					} else if (FD_ISSET(fd, &_writefds)) {
+						FD_CLR(fd, &_writefds);
+						if (client->getState() == SEND_STATE) {
 							executeSendProcess(it);
+						} else if (client->getState() == CGI_WRITE_STATE) {
+							FD_CLR(fd, &_writefds);
+							// client->getCGI().makeResponseMessage();
+							// std::string responseMessage = client->getResponseMessage();
+							// if (client->sendResponse(responseMessage) < 0)
+							// 	deleteClient(it);
 						}
-						if (it->second->getKeepAlive() == false)
+						if (client->getKeepAlive() == false)
 							deleteClient(it);
 						else
-							it->second->clear();
+							client->clear();
 						break;
 					}
 				} catch (ServerException &e) {

@@ -19,3 +19,5 @@ void	setNonBlockingFd(int fd);
 std::string	ft_to_string(size_t number);
 int		ft_stoi(const std::string &str);
 bool	isHex(const std::string &str);
+void	ft_sleep(int sec);
+void	ft_usleep(int usec);

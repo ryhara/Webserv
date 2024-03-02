@@ -24,6 +24,7 @@ enum methods
 
 enum response_mode
 {
+	UNDEFINED,
 	NORMAL,
 	CGI_MODE,
 	AUTOINDEX,
@@ -32,8 +33,10 @@ enum response_mode
 
 enum cgi_mode
 {
+	CGI_START,
+	CGI_WRITE,
 	CGI_READ,
-	CGI_WRITE
+	CGI_END,
 };
 
 # define DISALLOW_COPY_AND_ASSIGN(ClassName) \

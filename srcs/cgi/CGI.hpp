@@ -4,7 +4,6 @@
 
 #include "Webserv.hpp"
 #include "HTTPRequest.hpp"
-#include "QueryParse.hpp"
 #include "utils.hpp"
 #include "ServerError.hpp"
 
@@ -41,7 +40,7 @@ class CGI
 		enum cgi_mode getMode();
 		void setInFd(int inFd);
 		void setOutFd(int outFd);
-		void cgiMode(enum cgi_mode mode);
+		void setMode(enum cgi_mode mode);
 };
 
 #endif
