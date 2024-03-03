@@ -195,21 +195,20 @@ void Server::mainLoop(void)
 {
 	std::string responseMessage = "";
 	struct timeval timeout;
-	timeout.tv_sec = 30;
+	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 	while (1) {
 		initFds();
-		// TODO : max_fdを設定する
 		int result = select(FD_SETSIZE, &_readfds, &_writefds, NULL, &timeout);
 		if (result < 0) {
 			closeServerFds();
 			log_exit("select", __LINE__, __FILE__, errno);
 		} else if (result == 0) {
 			// timeout
-			#ifdef DEBUG
-				std::cout << "[ DEBUG ] timeout" << std::endl;
-			#endif
-			deleteAllClients();
+			// #ifdef DEBUG
+			// 	std::cout << "[ DEBUG ] timeout" << std::endl;
+			// #endif
+			// deleteAllClients();
 		} else {
 			serverEvent();
 			for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)

@@ -27,8 +27,6 @@
 # define QUEUE_LENGTH			20
 # define BUFFER_SIZE			8192
 
-// TODO : vectorやmapのメモリを開放する
-
 # define DISALLOW_COPY_AND_ASSIGN(ClassName) \
 	ClassName(const ClassName &); \
 	ClassName &operator=(const ClassName &)
@@ -36,8 +34,7 @@
 class Server
 {
 	private:
-		// TODO : index, fdにする。index番号のConfigの値を取得したいため
-		std::map<int, std::vector<ServerConfig> > _servers;
+		std::map<int, std::vector<ServerConfig> > _servers; // port, server_config
 		std::map<std::string, int>	_server_fds; // PORT_STR, server_fd
 		int							_server_fd;
 		std::map<int, Client*>		_clients;
