@@ -109,6 +109,14 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 		else
 			log_exit("ServerConfig : invalid config : invalid elements", __LINE__, __FILE__, errno);
 	}
+	std::map<std::string, Location>::iterator it = this->location.begin();
+	for (; it != this->location.end(); it++)
+	{
+		if (it->first == "/")
+			break;
+	}
+	if (it == this->location.end())
+		log_exit("ServerConfig : invalid config : location / not found", __LINE__, __FILE__, errno);
 	parseLines.erase(parseLines.begin(), parseLines.begin() + i + 1);
 }
 
