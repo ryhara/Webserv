@@ -7,7 +7,7 @@ url_list = [
 
 headers_list = [
 	{
-		'Conection': 'keep-alive',
+		'Connection': 'keep-alive',
 	},
 	{
 		'Connection': 'close',
@@ -15,9 +15,9 @@ headers_list = [
 ]
 
 
-for url in url_list:
+for url, headers in zip(url_list, headers_list):
 	# GET
-	response = requests.get(url)
+	response = requests.get(url, headers=headers)
 	# request
 	print("--------------------------------------------------------------")
 	print("URL:", response.request.url)

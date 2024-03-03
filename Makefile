@@ -56,7 +56,9 @@ clean :
 fclean : clean
 	$(RM) $(NAME)
 
-allclean : fclean post_clean
+re : fclean all
+
+allclean : fclean post_clean log_clean
 	$(RM) a.out
 	$(RM) hoge.dummy
 	$(RM) ./tests/__pycache__
@@ -64,7 +66,8 @@ allclean : fclean post_clean
 post_clean :
 	$(RM) ./uploads/post_*
 
-re : fclean all
+log_clean :
+	$(RM) ./uploads/log*
 
 test : all
 	./$(NAME) ./config/default.conf
@@ -94,6 +97,6 @@ debug : re
 leak :
 	while true; do leaks -q $(NAME); sleep 1; done
 
-.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean python_test
+.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean python_test log_clean
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)
