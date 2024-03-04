@@ -27,7 +27,7 @@ enum response_mode
 	NORMAL,
 	CGI,
 	AUTOINDEX,
-	REDIRECT,
+	REDIRECT
 };
 
 # define DISALLOW_COPY_AND_ASSIGN(ClassName) \
