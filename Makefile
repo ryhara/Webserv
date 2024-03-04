@@ -61,7 +61,7 @@ re : fclean all
 allclean : fclean post_clean log_clean
 	$(RM) a.out
 	$(RM) hoge.dummy
-	$(RM) ./tests/__pycache__
+	$(RM) ./tests/python/__pycache__
 
 post_clean :
 	$(RM) ./uploads/post_*
