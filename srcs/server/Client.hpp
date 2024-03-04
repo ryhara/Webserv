@@ -14,7 +14,7 @@ enum ClientState
 {
 	RECV_STATE,
 	SEND_STATE,
-	CLOSE_STATE,
+	CLOSE_STATE
 };
 
 class Client
