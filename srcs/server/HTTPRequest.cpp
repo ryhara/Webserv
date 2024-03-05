@@ -1,6 +1,6 @@
 #include "HTTPRequest.hpp"
 
-HTTPRequest::HTTPRequest(void) : _method(""), _uri(""), _version(""), _headers(), _body(""), _location(""), _host("localhost"), _port("80")
+HTTPRequest::HTTPRequest(void) : _method(""), _uri(""), _version(""), _headers(), _body(""), _location(""), _host("localhost"), _port("80"),_mode(UNDEFINED)
 {
 }
 
@@ -19,6 +19,7 @@ void HTTPRequest::clear(void)
 	this->_location = "";
 	this->_host = "localhost";
 	this->_port = "80";
+	this->_mode = UNDEFINED;
 }
 
 // getter

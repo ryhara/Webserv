@@ -15,6 +15,7 @@
 #include "Webserv.hpp"
 #include "HTTPStatusCode.hpp"
 #include "HTTPRequest.hpp"
+#include "CGI.hpp"
 
 #define DATE_BUF_SIZE 128
 #define DATE_FORMAT "%a, %d %b %Y %H:%M:%S GMT"
@@ -32,6 +33,7 @@ class HTTPResponse
 		std::string _body;
 		std::map<HTTPStatusCode, std::string> _statusMessageMap;
 		std::string _responseMessage;
+		CGI _cgi;
 		DISALLOW_COPY_AND_ASSIGN(HTTPResponse);
 	public :
 		HTTPResponse();
@@ -59,6 +61,7 @@ class HTTPResponse
 		const std::string &getBody() const;
 		const std::string &getStatusMessageFromMap(const HTTPStatusCode &statusCode) const;
 		const std::string &getResponseMessage() const;
+		const CGI &getCGI() const;
 
 		void clear(void);
 

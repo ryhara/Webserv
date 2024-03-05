@@ -22,7 +22,8 @@ void HTTPResponse::makePostResponseBody(HTTPRequest &request)
 	std::string header = "post_";
 	std::ofstream ofs;
 
-	ofs.open(uploadPath + header + timestamp);
+	// TODO : configから保存先を取得する
+	ofs.open((uploadPath + header + timestamp).c_str());
 	if (!ofs.is_open())
 	{
 		_statusCode = STATUS_500;

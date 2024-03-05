@@ -6,7 +6,7 @@ CONFIG = ConfigParse.cpp Config.cpp Location.cpp ServerConfig.cpp
 SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp Client.cpp \
 	HTTPResponseGET.cpp HTTPResponsePOST.cpp  HTTPResponseDELETE.cpp HTTPResponseHandle.cpp
 
-UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp ft_to_string.cpp isHex.cpp ft_stoi.cpp
+UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp ft_to_string.cpp isHex.cpp ft_stoi.cpp ft_sleep.cpp
 
 CGI = CGI.cpp
 
@@ -97,6 +97,10 @@ debug : re
 leak :
 	while true; do leaks -q $(NAME); sleep 1; done
 
-.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean python_test log_clean
+chmod :
+	chmod +x ./tests/*
+	chmod +x ./www/cgi/*
+
+.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean chmod python_test log_clean
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)

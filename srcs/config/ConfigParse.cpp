@@ -21,7 +21,7 @@ void ConfigParse::parse(const std::string &filename) {
 	#ifdef DEBUG
 		std::cout << "Config file: " << filename << std::endl << std::endl;
 	#endif
-	std::ifstream ifs(filename);
+	std::ifstream ifs(filename.c_str());
 	if (!ifs)
 		log_exit("ConfigParse : invalid config : cannot open file", __LINE__, __FILE__, errno);
 	while (std::getline(ifs, buf))
