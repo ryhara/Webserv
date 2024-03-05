@@ -65,14 +65,13 @@ char	**CGI::init_argv(std::string filename)
 //ファイルの読み込みについて
 std::string    CGI::readCGI()
 {
-    int buf_size=1024;
 	int fd = _inFd;
-    char buf[buf_size];
+    char buf[CGI_BUFF_SIZE];
     ssize_t input_size=0;
 	std::string new_body = "\0";
     while (1)
     {
-        input_size = read(fd, buf, buf_size -1);
+        input_size = read(fd, buf, CGI_BUFF_SIZE - 1);
         if (input_size < 0)
 			log_exit("read", __LINE__, __FILE__, errno);
 		if (input_size == 0)

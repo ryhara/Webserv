@@ -36,7 +36,7 @@ enum cgi_mode
 	CGI_START,
 	CGI_WRITE,
 	CGI_READ,
-	CGI_END,
+	CGI_END
 };
 
 # define DISALLOW_COPY_AND_ASSIGN(ClassName) \

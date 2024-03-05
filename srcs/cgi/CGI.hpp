@@ -16,7 +16,7 @@
 #include <iostream>
 #include <sstream>
 
-extern char **environ;
+#define CGI_BUFF_SIZE 8192
 
 class CGI
 {
