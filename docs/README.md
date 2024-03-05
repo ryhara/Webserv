@@ -10,6 +10,8 @@ HTTPサーバーをC++で実装する課題です。
 - エラーページの設定
 - GET, POST, DELETE
 - 複数ポート
+- 複数Host
+- autoIndex
 - CGI
 - chunked
 - redirect
