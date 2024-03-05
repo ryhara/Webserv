@@ -95,7 +95,6 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 				log_exit("ServerConfig : invalid config : location path not start or end with '/'", __LINE__, __FILE__, errno);
 			if (parseLine[2] != "{")
 				log_exit("ServerConfig : invalid config : location not end with '{'", __LINE__, __FILE__, errno);
-			// TODO : newしない方法探す
 			// Location *location = new Location(parseLine[1]);
 			Location location(parseLine[1]);
 			i = location.addInfo(parseLines, i + 1);

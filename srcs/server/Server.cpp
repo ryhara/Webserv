@@ -163,7 +163,7 @@ void Server::executeSendProcess(std::map<int, Client*>::iterator &it)
 		log_exit("getsockname", __LINE__, __FILE__, errno);
 	}
 	if (ft_stoi(port) != ntohs(addr.sin_port))
-		throw BadRequestError();
+		throw ServerException(STATUS_400, "Bad Request");
 	int config_index = 0;
 	for (int i = 0;i < static_cast<int>(_servers[ft_stoi(port)].size()); i++) {
 		if (_servers[ft_stoi(port)][i].getServerName() == host) {
@@ -173,7 +173,7 @@ void Server::executeSendProcess(std::map<int, Client*>::iterator &it)
 	}
 	client->getRequest().setServerConfig(_servers[ft_stoi(port)][config_index]);
 	if (_servers[ft_stoi(port)][config_index].getMaxBodySize() < client->getRequest().getBody().size())
-		throw HTTPRequestPayloadTooLargeError();
+		throw ServerException(STATUS_413, "Request Entity Too Large");
 	client->responseProcess();
 	// TODO : CGIのモードをチェックして抜ける
 	std::string responseMessage = client->getResponseMessage();
@@ -203,7 +203,7 @@ void Server::mainLoop(void)
 {
 	std::string responseMessage = "";
 	struct timeval timeout;
-	timeout.tv_sec = 30;
+	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 	while (1) {
 		// ft_usleep(100);
@@ -214,10 +214,10 @@ void Server::mainLoop(void)
 			log_exit("select", __LINE__, __FILE__, errno);
 		} else if (result == 0) {
 			// timeout
-			#ifdef DEBUG
-				std::cout << "[ DEBUG ] timeout" << std::endl;
-			#endif
-			deleteAllClients();
+			// #ifdef DEBUG
+			// 	std::cout << "[ DEBUG ] timeout" << std::endl;
+			// #endif
+			// deleteAllClients();
 		} else {
 			serverEvent();
 			for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)

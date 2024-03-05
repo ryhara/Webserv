@@ -28,7 +28,7 @@ enum response_mode
 	NORMAL,
 	CGI_MODE,
 	AUTOINDEX,
-	REDIRECT,
+	REDIRECT
 };
 
 enum cgi_mode

@@ -4,8 +4,6 @@
 #include "ServerConfig.hpp"
 #include "Webserv.hpp"
 
-// TODO : 全クラスにおいてデストラクタやerror時のfreeやclear処理を実装する
-
 void printServerInfo(std::map<int, std::vector<ServerConfig> > &servers)
 {
 	std::map<int, std::vector<ServerConfig> >::iterator it = servers.begin();

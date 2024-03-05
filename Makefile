@@ -56,15 +56,18 @@ clean :
 fclean : clean
 	$(RM) $(NAME)
 
-allclean : fclean post_clean
+re : fclean all
+
+allclean : fclean post_clean log_clean
 	$(RM) a.out
 	$(RM) hoge.dummy
-	$(RM) ./tests/__pycache__
+	$(RM) ./tests/python/__pycache__
 
 post_clean :
 	$(RM) ./uploads/post_*
 
-re : fclean all
+log_clean :
+	$(RM) ./uploads/log*
 
 test : all
 	./$(NAME) ./config/default.conf
@@ -76,6 +79,10 @@ func_test :
 invalid_test :
 	@chmod +x ./tests/invalid_conf_test.sh
 	./tests/invalid_conf_test.sh ./config/invalid
+
+python_test :
+	@chmod +x ./tests/python_test.sh
+	./tests/python_test.sh ./tests/python/
 
 use_cfunc :
 	./tests/check_cfunctions.sh $(NAME)
@@ -94,6 +101,6 @@ chmod :
 	chmod +x ./tests/*
 	chmod +x ./www/cgi/*
 
-.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean chmod
+.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean chmod python_test log_clean
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)

@@ -70,5 +70,5 @@ enum HTTPStatusCode
 	STATUS_507 = 507, // Insufficient Storage
 	STATUS_508 = 508, // Loop Detected
 	STATUS_510 = 510, // Not Extended
-	STATUS_511 = 511, // Network Authentication Required
+	STATUS_511 = 511 // Network Authentication Required
 };

@@ -17,7 +17,7 @@ enum ClientState
 	SEND_STATE,
 	CLOSE_STATE,
 	CGI_READ_STATE,
-	CGI_WRITE_STATE,
+	CGI_WRITE_STATE
 };
 
 class Client
