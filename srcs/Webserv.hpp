@@ -31,14 +31,6 @@ enum response_mode
 	REDIRECT
 };
 
-enum cgi_mode
-{
-	CGI_START,
-	CGI_WRITE,
-	CGI_READ,
-	CGI_END
-};
-
 # define DISALLOW_COPY_AND_ASSIGN(ClassName) \
 	ClassName(const ClassName &); \
 	ClassName &operator=(const ClassName &)

@@ -16,8 +16,8 @@ enum ClientState
 	RECV_STATE,
 	SEND_STATE,
 	CLOSE_STATE,
-	CGI_READ_STATE,
-	CGI_WRITE_STATE
+	CGI_SEND_STATE,
+	CGI_READ_STATE
 };
 
 class Client
@@ -25,7 +25,6 @@ class Client
 	private :
 		DISALLOW_COPY_AND_ASSIGN(Client);
 		ClientState _state;
-		CGI _cgi;
 		HTTPRequest _request;
 		HTTPRequestParse _request_parse;
 		HTTPResponse _response;

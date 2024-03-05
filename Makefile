@@ -27,7 +27,7 @@ RM = rm -rf
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98  -MMD -MP -g
 INC = -I$(CONFIGDIR) -I$(SERVERDIR) -I$(SRCDIR) -I$(UTILSDIR) -I$(CGIDIR) -I$(EXCEPTIONDIR)
 
-all : $(OBJDIR) $(NAME)
+all : chmod $(OBJDIR) $(NAME)
 
 $(NAME): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS)

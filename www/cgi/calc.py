@@ -14,16 +14,16 @@ b = query_list[2].split('=')[1]
 
 result = 0
 
-if op == '+':
+if op == 'add':
     result = int(a) + int(b)
     op = "&plus;"
-elif op == '-':
+elif op == 'sub':
     result = int(a) - int(b)
     op = "&minus;"
-elif op == '*':
+elif op == 'mul':
     result = int(a) * int(b)
     op = "&times;"
-elif op == '/':
+elif op == 'div':
     result = int(a) / int(b)
     op = "&divide;"
 
