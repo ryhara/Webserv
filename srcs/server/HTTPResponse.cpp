@@ -75,7 +75,7 @@ const std::string &HTTPResponse::getResponseMessage() const
 	return this->_responseMessage;
 }
 
-const CGI &HTTPResponse::getCGI() const
+CGI &HTTPResponse::getCGI()
 {
 	return this->_cgi;
 }

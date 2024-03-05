@@ -61,7 +61,7 @@ class HTTPResponse
 		const std::string &getBody() const;
 		const std::string &getStatusMessageFromMap(const HTTPStatusCode &statusCode) const;
 		const std::string &getResponseMessage() const;
-		const CGI &getCGI() const;
+		CGI &getCGI();
 
 		void clear(void);
 

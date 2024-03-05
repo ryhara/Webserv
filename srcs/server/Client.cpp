@@ -59,7 +59,7 @@ HTTPRequest &Client::getRequest(void)
 
 CGI &Client::getCGI(void)
 {
-	return _cgi;
+	return _response.getCGI();
 }
 
 void Client::setClientFd(int client_fd)
