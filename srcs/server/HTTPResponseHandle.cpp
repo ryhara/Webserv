@@ -90,7 +90,8 @@ void HTTPResponse::handleCGIRequest(HTTPRequest &request)
 {
 	//この中では実行のみを行う
 	std::string new_body;
-	new_body = _cgi.runCGI(request);
+	_cgi.runCGI(request);
+	new_body = _cgi.readCGI();
 	setBody(new_body);
 	makeResponseMessage();
 	// clientのstateをCGI_READに変更

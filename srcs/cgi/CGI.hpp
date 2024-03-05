@@ -23,7 +23,6 @@ class CGI
 	private:
 		/* data */
 		DISALLOW_COPY_AND_ASSIGN(CGI);
-		std::string input_pipe(int pipeFd);
 		void wait_parent(pid_t pid);
 		char **init_argv(std::string filename);
 		int	_inFd;
@@ -34,7 +33,8 @@ class CGI
 	public:
 		CGI(/* args */);
 		~CGI();
-		std::string runCGI(HTTPRequest &request);
+		void runCGI(HTTPRequest &request);
+		std::string readCGI();
 		std::vector<std::string> parse_split_char(std::string uri_argv, char del);
 		// std::vector<std::string> parse_split_str(std::string uri_argv, std::string del);
 		int getInFd();

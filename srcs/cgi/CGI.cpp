@@ -63,9 +63,10 @@ char	**CGI::init_argv(std::string filename)
 }
 
 //ファイルの読み込みについて
-std::string    CGI::input_pipe(int fd)
+std::string    CGI::readCGI()
 {
     int buf_size=1024;
+	int fd = _inFd;
     char buf[buf_size];
     ssize_t input_size=0;
 	std::string new_body = "\0";
@@ -85,7 +86,7 @@ std::string    CGI::input_pipe(int fd)
 
 //ファイル名を受け取るようにするか
 //envを取得できるようにし複数のgiファイルの対応をできるようにするか
-std::string	CGI::runCGI(HTTPRequest &request)
+void	CGI::runCGI(HTTPRequest &request)
 {
 	int pipeFd[2];
 	pid_t pid;
@@ -152,7 +153,7 @@ std::string	CGI::runCGI(HTTPRequest &request)
     }
 	setMode(CGI_READ);
 		// TODO : こっから先をreadCGI();とする
-	return (input_pipe(pipeFd[0]));
+	// return (input_pipe(pipeFd[0]));
 }
 
 std::vector<std::string> CGI::parse_split_char(std::string uri_argv, char del)
