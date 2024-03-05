@@ -2,6 +2,7 @@ import requests
 
 url = 'http://localhost:4242'
 headers = {'Transfer-Encoding': 'chunked'}
+# headers = {}
 
 def generate_data():
     yield 'hello'

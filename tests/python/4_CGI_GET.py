@@ -9,7 +9,7 @@ url_list = [
 ]
 
 
-for url, index in url_list:
+for index, url in enumerate(url_list):
 	# GET
 	if index == 4:
 		response = requests.get(url, params="value1=1&operator=+&value2=2")

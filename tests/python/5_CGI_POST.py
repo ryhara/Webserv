@@ -6,15 +6,25 @@ url_list = [
 	'http://localhost:4242/cgi/test.rb',
 	'http://localhost:4242/cgi/loop.sh',
 	'http://localhost:4242/cgi/calc.py',
+	'http://localhost:4242/cgi/calc.py',
 ]
 
+def generate_data():
+	yield 'value1=2'
+	yield '&'
+	yield 'operator=*'
+	yield '&'
+	yield 'value2=3'
 
-for url, index in url_list:
-	# GET
+for index, url in enumerate(url_list):
+	# POST
 	if index == 4:
-		response = requests.get(url, params="value1=1&operator=+&value2=2")
+		response = requests.post(url, data="value1=1&operator=+&value2=2")
+	elif index == 5:
+		response = requests.post(url, data=generate_data())
 	else:
-		response = requests.get(url)
+		response = requests.post(url)
+
 	# request
 	print("--------------------------------------------------------------")
 	print("URL:", response.request.url)

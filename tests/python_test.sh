@@ -15,6 +15,7 @@ fi
 
 for file in "$directory"*
 do
-	echo "Testing file: $file\n" >> "$log_file"
+	echo "Testing file: $file" >> "$log_file"
+	echo "" >> "$log_file"
 	python3 "$file" >> "$log_file" 2>&1 || echo -e "\033[31mError: $file\033[0m"
 done
