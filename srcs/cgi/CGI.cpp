@@ -138,7 +138,7 @@ void	CGI::runCGI(HTTPRequest &request)
 		if (close(pipeFd[0]) < 0 || dup2(pipeFd[1], 1) < 0)
 			log_exit("dup2", __LINE__, __FILE__, errno);
 		if (access(path.c_str(), X_OK) < 0)
-			throw ForbiddenError();
+			throw ServerException(STATUS_403, "Forbidden");
 		if (execve(path.c_str(), _argv ,_cgiEnv) < 0)
             log_exit("execve", __LINE__, __FILE__, errno);
 	}
