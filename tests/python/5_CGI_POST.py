@@ -12,14 +12,14 @@ url_list = [
 def generate_data():
 	yield 'value1=2'
 	yield '&'
-	yield 'operator=*'
+	yield 'operator=mul'
 	yield '&'
 	yield 'value2=3'
 
 for index, url in enumerate(url_list):
 	# POST
 	if index == 4:
-		response = requests.post(url, data="value1=1&operator=+&value2=2")
+		response = requests.post(url, data="value1=1&operator=add&value2=2")
 	elif index == 5:
 		response = requests.post(url, data=generate_data())
 	else:

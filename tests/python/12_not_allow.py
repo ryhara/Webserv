@@ -1,20 +1,16 @@
 import requests
+import time
 
-url_list = [
-	'http://localhost:4242/cgi/test.sh',
-	'http://localhost:4242/cgi/test.py',
-	'http://localhost:4242/cgi/test.rb',
-	'http://localhost:4242/cgi/loop.py',
-	'http://localhost:4242/cgi/calc.py',
+url = 'http://localhost:4242/directory/'
+
+data_list = [
+	{'key': '1'},
 ]
 
+# POST
+for data in data_list:
+	response = requests.post(url, data=data)
 
-for index, url in enumerate(url_list):
-	# GET
-	if index == 4:
-		response = requests.get(url, params="value1=1&operator=add&value2=2")
-	else:
-		response = requests.get(url)
 	# request
 	print("--------------------------------------------------------------")
 	print("URL:", response.request.url)
@@ -31,3 +27,4 @@ for index, url in enumerate(url_list):
 		print(key, ":", value)
 	print(response.text)
 	print("==============================================================")
+	time.sleep(1)
