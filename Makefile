@@ -77,15 +77,15 @@ func_test :
 	@./a.out
 
 invalid_test :
-	@chmod +x ./tests/invalid_conf_test.sh
-	./tests/invalid_conf_test.sh ./config/invalid
+	@chmod +x ./tests/scripts/invalid_conf_test.sh
+	./tests/scripts/invalid_conf_test.sh ./config/invalid
 
 python_test :
-	@chmod +x ./tests/python_test.sh
-	./tests/python_test.sh ./tests/python/
+	@chmod +x ./tests/scripts/python_test.sh
+	./tests/scripts/python_test.sh ./tests/python/
 
 use_cfunc :
-	./tests/check_cfunctions.sh $(NAME)
+	./tests/scripts/check_cfunctions.sh $(NAME)
 
 dummy :
 	base64 -i /dev/urandom | head -c 10000 > hoge.dummy
@@ -98,7 +98,7 @@ leak :
 	while true; do leaks -q $(NAME); sleep 1; done
 
 chmod :
-	@chmod +x ./tests/*
+	@chmod +x ./tests/**/*
 	@chmod +x ./www/cgi/*
 
 .PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean chmod python_test log_clean
