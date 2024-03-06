@@ -98,8 +98,8 @@ leak :
 	while true; do leaks -q $(NAME); sleep 1; done
 
 chmod :
-	chmod +x ./tests/*
-	chmod +x ./www/cgi/*
+	@chmod +x ./tests/*
+	@chmod +x ./www/cgi/*
 
 .PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean chmod python_test log_clean
 
