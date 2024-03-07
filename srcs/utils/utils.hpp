@@ -22,3 +22,4 @@ int		ft_stoi(const std::string &str);
 bool	isHex(const std::string &str);
 void	ft_sleep(int sec);
 void	ft_usleep(int usec);
+bool	ft_isdigit(std::string str);
