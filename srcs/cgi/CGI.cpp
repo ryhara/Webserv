@@ -91,6 +91,10 @@ void	CGI::wait_parent(pid_t pid)
 		deleteArgv(); deleteEnv();
 		log_exit("waitpid", __LINE__, __FILE__, errno);
 	}
+	if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+		deleteArgv(); deleteEnv();
+		throw ServerException(STATUS_500, "Internal Server Error");
+	}
 }
 
 std::string	CGI::readCGI()
