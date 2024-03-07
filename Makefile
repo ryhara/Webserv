@@ -84,6 +84,10 @@ python_test :
 	@chmod +x ./tests/scripts/python_test.sh
 	./tests/scripts/python_test.sh ./tests/python/
 
+curl_test :
+	@chmod +x ./tests/scripts/curl_test.sh
+	./tests/scripts/curl_test.sh 4242 "-i"
+
 use_cfunc :
 	./tests/scripts/check_cfunctions.sh $(NAME)
 
@@ -101,6 +105,6 @@ chmod :
 	@chmod +x ./tests/scripts/*
 	@chmod +x ./www/cgi/*
 
-.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean chmod python_test log_clean
+.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean chmod python_test log_clean curl_test
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 directory=$1
-log_file="./uploads/log_$(date +"%Y%m%d_%H%M%S").log"
+log_file="./uploads/log_python_$(date +"%Y%m%d_%H%M%S")"
 
 if [ "$#" -ne 1 ]; then
 	echo "Usage: $0 <executable file>"
