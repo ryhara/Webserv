@@ -53,13 +53,16 @@ char	**CGI::init_argv(std::string filename)
 	char **argv;
 
 	argv = new char *[2];
-	argv[0] = const_cast<char *>(filename.c_str());
+	argv[0] = new char[filename.size() + 1];
+	std::strcpy(argv[0], filename.c_str());
 	argv[1] = NULL;
 	return (argv);
 }
 
 void CGI::deleteArgv()
 {
+	for (int i = 0; _argv[i] != NULL; i++)
+		delete [] _argv[i];
 	delete [] _argv;
 }
 
