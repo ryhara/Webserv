@@ -116,6 +116,8 @@ int Client::sendResponse(std::string &responseMessage)
 	{
 		log_print("send", __LINE__, __FILE__, errno);
 		return -1;
+	} else if (send_n == 0) {
+		return 0;
 	}
 	# if DEBUG
 		// std::cout << responseMessage << std::endl;
