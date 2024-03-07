@@ -2,7 +2,7 @@ import requests
 
 url_list = [
 	'http://localhost:4242/cgi/test.sh',
-	'http://localhost:4242/cgi/test.py',
+	'http://localhost:4242/cgi/subdir/test.py',
 	'http://localhost:4242/cgi/test.rb',
 	'http://localhost:4242/cgi/loop.py',
 	'http://localhost:4242/cgi/calc.py',
