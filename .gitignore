@@ -11,3 +11,5 @@ post_*
 __pycache__
 *.pyc
 test.cpp
+post_*
+log_*
