@@ -17,6 +17,7 @@ Config &ConfigParse::getConfig(void) const {
 }
 
 void ConfigParse::parse(const std::string &filename) {
+	int	bracket_count = 0;
 	std::string word, buf;
 	#ifdef DEBUG
 		std::cout << "Config file: " << filename << std::endl << std::endl;
@@ -36,6 +37,10 @@ void ConfigParse::parse(const std::string &filename) {
 				break;
 			else if (buf[start] == '{' || buf[start] == '}' || buf[start] == ';')
 			{
+				if (buf[start] == '{')
+					bracket_count++;
+				else if (buf[start] == '}')
+					bracket_count--;
 				word = buf[start];
 				_parseLine.push_back(word);
 				start++;
@@ -57,6 +62,8 @@ void ConfigParse::parse(const std::string &filename) {
 	}
 	ifs.close();
 	//validate
+	if (bracket_count != 0)
+		log_exit("ConfigParse : invalid config : bracket count is not match", __LINE__, __FILE__, errno);
 	std::string endWord;
 	if (_parseLines.empty())
 		log_exit("ConfigParse : invalid config : empty file", __LINE__, __FILE__, errno);
