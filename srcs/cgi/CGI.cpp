@@ -81,11 +81,16 @@ void	CGI::wait_parent(pid_t pid)
 	if (return_pid == 0)
 	{
 		kill(pid, SIGKILL);
-		if (waitpid(pid, &status, 0) < 0)
+		if (waitpid(pid, &status, 0) < 0) {
+			deleteArgv(); deleteEnv();
 			log_exit("waitpid", __LINE__, __FILE__, errno);
+		}
+		deleteArgv(); deleteEnv();
 		throw ServerException(STATUS_504, "Gateway Timeout");
-	} else if (return_pid < 0)
+	} else if (return_pid < 0) {
+		deleteArgv(); deleteEnv();
 		log_exit("waitpid", __LINE__, __FILE__, errno);
+	}
 }
 
 std::string	CGI::readCGI()
@@ -134,27 +139,40 @@ void	CGI::runCGI(HTTPRequest &request)
 	}
 	else if (request.getMethod().compare("POST") == 0)
 		setEnv(new_uri, request.getBody());
-	if (pipe(_pipeFd) < 0)
+	if (pipe(_pipeFd) < 0) {
+		deleteArgv(); deleteEnv();
 		log_exit("pipe", __LINE__, __FILE__, errno);
+	}
 	setNonBlockingFd(_pipeFd[0]);
 	setNonBlockingFd(_pipeFd[1]);
 	setInFd(_pipeFd[0]);
 	setOutFd(_pipeFd[1]);
 
 	pid = fork();
-	if (pid < 0)
+	if (pid < 0) {
+		deleteArgv(); deleteEnv();
 		log_exit("fork", __LINE__, __FILE__, errno);
+	}
 	else if (pid == 0) {
-		if (close(_pipeFd[0]) < 0 || dup2(_pipeFd[1], 1) < 0)
+		if (close(_pipeFd[0]) < 0 || dup2(_pipeFd[1], 1) < 0) {
+			deleteArgv(); deleteEnv();
 			log_exit("close or dup2", __LINE__, __FILE__, errno);
-		if (access(path.c_str(), X_OK) < 0)
+		}
+		if (access(path.c_str(), X_OK) < 0) {
+			deleteArgv(); deleteEnv();
 			throw ServerException(STATUS_403, "Forbidden");
-		if (execve(path.c_str(), _argv ,_env) < 0)
+		}
+		if (execve(path.c_str(), _argv ,_env) < 0) {
+			deleteArgv(); deleteEnv();
 			log_exit("execve", __LINE__, __FILE__, errno);
+		}
+		deleteArgv(); deleteEnv();
 	}
 	else {
-		if (close(_pipeFd[1]) < 0)
+		if (close(_pipeFd[1]) < 0) {
+			deleteArgv(); deleteEnv();
 			log_exit("close", __LINE__, __FILE__, errno);
+		}
 		wait_parent(pid);
 		deleteArgv();
 		deleteEnv();
