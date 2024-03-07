@@ -178,7 +178,7 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 			if (!ft_isdigit(header[1]))
 				throw ServerException(STATUS_400, "Bad Request");
 			int length = ft_stoi(header[1]);
-			if (length <= 0)
+			if (length < 0)
 				throw ServerException(STATUS_400, "Bad Request");
 			this->_contentLength = length;
 		}
