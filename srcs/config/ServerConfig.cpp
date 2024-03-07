@@ -58,8 +58,8 @@ ServerConfig::ServerConfig(std::vector<std::vector<std::string> > &parseLines) :
 			if (parseLine[2] != ";")
 				log_exit("ServerConfig : invalid config : listen not end with ';'", __LINE__, __FILE__, errno);
 			this->port = ft_stoi(parseLine[1]);
-			if (this->port < 1 || this->port > 65535)
-				log_exit("ServerConfig : invalid config : port is not in range 1-65535", __LINE__, __FILE__, errno);
+			if (this->port < 0 || this->port > 65535)
+				log_exit("ServerConfig : invalid config : port is not in range 0-65535", __LINE__, __FILE__, errno);
 		}
 		else if (parseLine[0] == "server_name")
 		{
