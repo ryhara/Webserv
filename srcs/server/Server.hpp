@@ -65,7 +65,10 @@ class Server
 		void	closeServerFds(void);
 		void	closeClientFds(int client_fd);
 		void 	serverEvent(void);
-
+		void	catchError(std::map<int, Client*>::iterator &it, ServerException &e);
+		void	CGIEvent(std::map<int, Client*>::iterator &it);
+		void	sendCGIResponse(std::map<int, Client*>::iterator &it);
+		void	sendEvent(std::map<int, Client*>::iterator &it);
 	public:
 		Server(void);
 		~Server(void);

@@ -30,6 +30,8 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 				log_exit("Location: invalid config : alias not end with ';'", __LINE__, __FILE__, errno);
 			if (parseLine[1].find("/../") != std::string::npos || std::strncmp(parseLine[1].c_str(), "../", 3) == 0)
 				log_exit("Location: invalid config : alias path include '/../' or start with '../'", __LINE__, __FILE__, errno);
+			if (parseLine[1][parseLine[1].size() - 1] != '/')
+				log_exit("Location: invalid config : alias must end with '/'", __LINE__, __FILE__, errno);
 			this->alias = parseLine[1];
 		}
 		else if (parseLine[0] == "index")
@@ -61,6 +63,10 @@ size_t		Location::addInfo(std::vector<std::vector<std::string> > &parseLines, si
 				log_exit("Location: invalid config : upload_path less or more arguments", __LINE__, __FILE__, errno);
 			if (parseLine[2] != ";")
 				log_exit("Location: invalid config : upload_path not end with ';'", __LINE__, __FILE__, errno);
+			if (parseLine[1].find("/../") != std::string::npos || std::strncmp(parseLine[1].c_str(), "../", 3) == 0)
+				log_exit("Location: invalid config : upload path include '/../' or start with '../'", __LINE__, __FILE__, errno);
+			if (parseLine[1][parseLine[1].size() - 1] != '/')
+				log_exit("Location: invalid config : upload path must end with '/'", __LINE__, __FILE__, errno);
 			this->upload_path = parseLine[1];
 		}
 		else if (parseLine[0] == "redirect_path")

@@ -7,6 +7,7 @@
 #include "HTTPRequestParse.hpp"
 #include "HTTPResponse.hpp"
 #include "Webserv.hpp"
+#include "CGI.hpp"
 
 # define BUFFER_SIZE			8192
 
@@ -15,6 +16,8 @@ enum ClientState
 	RECV_STATE,
 	SEND_STATE,
 	CLOSE_STATE,
+	CGI_SEND_STATE,
+	CGI_READ_STATE
 };
 
 class Client
@@ -38,6 +41,7 @@ class Client
 		bool getKeepAlive(void) const;
 		HTTPResponse &getResponse(void);
 		HTTPRequest &getRequest(void);
+		CGI &getCGI(void);
 
 		const std::string &getResponseMessage(void) const;
 		ClientState getState(void) const;

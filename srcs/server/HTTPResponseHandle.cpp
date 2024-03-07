@@ -24,7 +24,7 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 	if (location.getRedirPath().empty() == false) {
 		request.setMode(REDIRECT);
 	} else if (extension.empty() == false && isCGI(cgi_extension, extension)) {
-		request.setMode(CGI);
+		request.setMode(CGI_MODE);
 	} else {
 		request.setMode(NORMAL);
 	}
@@ -43,7 +43,7 @@ void HTTPResponse::selectResponse(HTTPRequest &request)
 				handleNormalRequest(request);
 			}
 			break;
-		case CGI:
+		case CGI_MODE:
 		#ifdef DEBUG
 			std::cout << "########## [ DEBUG ] CGI ##########" << std::endl;
 		#endif
@@ -93,15 +93,14 @@ void HTTPResponse::handleCGIRequest(HTTPRequest &request)
 	} else if (request.getMethod().compare("POST") == 0) {
 		if (location.getPostMethod() == false)
 			throw ServerException(STATUS_405, "Method Not Allowed");
-		std::cout << "POST" << std::endl;
+		_cgi.runCGI(request);
 	} else if (request.getMethod().compare("GET") == 0) {
 		if (location.getGetMethod() == false)
 			throw ServerException(STATUS_405, "Method Not Allowed");
-		std::cout << "GET" << std::endl;
+		_cgi.runCGI(request);
 	} else {
 		throw ServerException(STATUS_501, "Not Implemented");
 	}
-	std::cout << request.getUri() << std::endl;
 }
 
 void HTTPResponse::handleAutoIndexRequest(HTTPRequest &request)

@@ -24,10 +24,11 @@ enum methods
 
 enum response_mode
 {
+	UNDEFINED,
 	NORMAL,
-	CGI,
+	CGI_MODE,
 	AUTOINDEX,
-	REDIRECT,
+	REDIRECT
 };
 
 # define DISALLOW_COPY_AND_ASSIGN(ClassName) \

@@ -1,16 +1,11 @@
 import requests
+import time
 
 url = 'http://localhost:4242'
-headers = {'Transfer-Encoding': 'chunked'}
-# headers = {}
 
-def generate_data():
-    yield 'hello'
-    yield 'world'
-    yield 'abcdefghijklmnopqrstuvwxyz'
-    yield '1234567890'
+# HEAD
+response = requests.head(url)
 
-response = requests.post(url, headers=headers, data=generate_data())
 # request
 print("--------------------------------------------------------------")
 print("URL:", response.request.url)
@@ -27,3 +22,4 @@ for key, value in response.headers.items():
 	print(key, ":", value)
 print(response.text)
 print("==============================================================")
+time.sleep(1)

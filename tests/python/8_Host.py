@@ -19,10 +19,7 @@ headers_list = [
 		'Host': 'webserv2:4242',
 	},
 	{
-		'Host': 'webserv3:4243',
-	},
-	{
-		'Host': 'webserv',
+		'Host': 'webserv:4243',
 	},
 ]
 

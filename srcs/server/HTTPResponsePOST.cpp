@@ -22,7 +22,7 @@ void HTTPResponse::makePostResponseBody(HTTPRequest &request)
 	std::string header = "post_";
 	std::ofstream ofs;
 
-	ofs.open(uploadPath + header + timestamp);
+	ofs.open((uploadPath + header + timestamp).c_str());
 	if (!ofs.is_open())
 	{
 		_statusCode = STATUS_500;

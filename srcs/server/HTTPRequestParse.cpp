@@ -175,7 +175,12 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 		if (header[0].compare("Transfer-Encoding") == 0 && header[1].compare("chunked") == 0)
 			this->_isChunked = true;
 		if (header[0].compare("Content-Length") == 0) {
-			this->_contentLength = ft_stoi(header[1]);
+			if (!ft_isdigit(header[1]))
+				throw ServerException(STATUS_400, "Bad Request");
+			int length = ft_stoi(header[1]);
+			if (length <= 0)
+				throw ServerException(STATUS_400, "Bad Request");
+			this->_contentLength = length;
 		}
 		if (header[0].compare("Host") == 0) {
 			std::vector<std::string> host = split(header[1], ':');

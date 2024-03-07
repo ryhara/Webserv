@@ -17,7 +17,7 @@ enum HTTPRequestParseState
 	REQUEST_LINE_STATE,
 	HEADERS_STATE,
 	BODY_STATE,
-	FINISH_STATE,
+	FINISH_STATE
 };
 
 class HTTPRequestParse

@@ -6,7 +6,7 @@ CONFIG = ConfigParse.cpp Config.cpp Location.cpp ServerConfig.cpp
 SERVER = Server.cpp HTTPRequestParse.cpp  HTTPRequest.cpp HTTPResponse.cpp Client.cpp \
 	HTTPResponseGET.cpp HTTPResponsePOST.cpp  HTTPResponseDELETE.cpp HTTPResponseHandle.cpp
 
-UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp ft_to_string.cpp isHex.cpp ft_stoi.cpp
+UTILS = ft_memset.cpp error.cpp nonBlockingFd.cpp ft_to_string.cpp isHex.cpp ft_stoi.cpp ft_sleep.cpp ft_isdigit.cpp
 
 CGI = CGI.cpp
 
@@ -27,7 +27,7 @@ RM = rm -rf
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98  -MMD -MP -g
 INC = -I$(CONFIGDIR) -I$(SERVERDIR) -I$(SRCDIR) -I$(UTILSDIR) -I$(CGIDIR) -I$(EXCEPTIONDIR)
 
-all : $(OBJDIR) $(NAME)
+all : chmod $(OBJDIR) $(NAME)
 
 $(NAME): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS)
@@ -61,7 +61,7 @@ re : fclean all
 allclean : fclean post_clean log_clean
 	$(RM) a.out
 	$(RM) hoge.dummy
-	$(RM) ./tests/__pycache__
+	$(RM) ./tests/python/__pycache__
 
 post_clean :
 	$(RM) ./uploads/post_*
@@ -77,15 +77,15 @@ func_test :
 	@./a.out
 
 invalid_test :
-	@chmod +x ./tests/invalid_conf_test.sh
-	./tests/invalid_conf_test.sh ./config/invalid
+	@chmod +x ./tests/scripts/invalid_conf_test.sh
+	./tests/scripts/invalid_conf_test.sh ./config/invalid
 
 python_test :
-	@chmod +x ./tests/python_test.sh
-	./tests/python_test.sh ./tests/python/
+	@chmod +x ./tests/scripts/python_test.sh
+	./tests/scripts/python_test.sh ./tests/python/
 
 use_cfunc :
-	./tests/check_cfunctions.sh $(NAME)
+	./tests/scripts/check_cfunctions.sh $(NAME)
 
 dummy :
 	base64 -i /dev/urandom | head -c 10000 > hoge.dummy
@@ -97,6 +97,10 @@ debug : re
 leak :
 	while true; do leaks -q $(NAME); sleep 1; done
 
-.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean python_test log_clean
+chmod :
+	@chmod +x ./tests/scripts/*
+	@chmod +x ./www/cgi/*
+
+.PHONY : all clean fclean re test debug func_test use_cfunc leak post_clean invalid_test dummy allclean chmod python_test log_clean
 
 # g++ テストファイル 実装したファイル -pthread -lgtest_main -lgtest -std=c++14 -I(インクルードのパス)
