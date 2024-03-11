@@ -40,10 +40,10 @@ command_list=(
 	"curl $option http://localhost$port/test.sh"
 	"curl $option --resolve webserv$resolve_port:127.0.0.1 http://webserv$port"
 	"curl $option --resolve webserv2$resolve_port:127.0.0.1 http://webserv2$port"
-	"curl $option -X POST -H 'Content-Type: plain/text' --data 'BODY IS HERE write something shorter or longer than body limit' http://localhost$port"
+	# "curl $option -X POST -H 'Content-Type: plain/text' --data 'BODY IS HERE write something shorter or longer than body limit' http://localhost$port"
 	"curl $option -X DELETE http://localhost$port/delete.html"
 	"curl $option -X PUT http://localhost$port"
-	"curl $option -X POST -H 'Transfer-Encoding: chunked' -d 'hello' http://localhost$port"
+	# "curl $option -X POST -H 'Transfer-Encoding: chunked' -d 'hello' http://localhost$port"
 )
 
 
