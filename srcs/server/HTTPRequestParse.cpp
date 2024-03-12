@@ -195,7 +195,7 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 			} else {
 				throw ServerException(STATUS_400, "Bad Request");
 			}
-			if (host.size() == 1 || host[1].compare("80") == 0)
+			if (host.size() == 1)
 				pair.second = host[0];
 			else
 				pair.second = header[1];
