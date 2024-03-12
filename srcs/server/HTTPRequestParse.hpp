@@ -36,7 +36,7 @@ class HTTPRequestParse
 		void clear(void);
 
 		HTTPRequest &getRequest(void) const;
-		void parse(std::string request_str);
+		void parse(char *buffer);
 		std::vector<std::string> split(std::string str, char del);
 		std::vector<std::string> split(std::string str, std::string del);
 		int countSpace(const std::string &str);

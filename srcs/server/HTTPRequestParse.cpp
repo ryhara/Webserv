@@ -78,10 +78,10 @@ int HTTPRequestParse::countSpace(const std::string &str)
 	return (count);
 }
 
-void HTTPRequestParse::parse(std::string request_str)
+void HTTPRequestParse::parse(char *buffer)
 {
 	std::string line;
-	std::stringstream bufferStream(request_str);
+	std::stringstream bufferStream(buffer);
 
 	if (_request.getMethod().empty()) {
 		setHTTPRequestParseState(REQUEST_LINE_STATE);
