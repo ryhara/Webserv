@@ -82,10 +82,11 @@ int Client::recvProcess()
 {
 
 	char buffer[_buffer_size];
+	ft_memset(buffer, 0, _buffer_size);
 	// #if DEBUG
 	// 	std::cout << "########## [ DEBUG ] client fd : " << _client_fd << " ##########" << std::endl;
 	// #endif
-	ssize_t n = recv(_client_fd, buffer, sizeof(buffer) - 1, 0);
+	ssize_t n = recv(_client_fd, buffer, _buffer_size - 1, 0);
 	if (n <= 0) {
 		return -1;
 	}
