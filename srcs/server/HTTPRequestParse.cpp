@@ -186,6 +186,8 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 			std::vector<std::string> host = split(header[1], ':');
 			if (host.size() == 2) {
 				this->_request.setHost(host[0]);
+				if (ft_stoi(host[1]) < 0 || ft_stoi(host[1]) > 65535)
+					throw ServerException(STATUS_400, "Bad Request");
 				this->_request.setPort(host[1]);
 			} else if (host.size() == 1) {
 				this->_request.setHost(host[0]);
@@ -193,7 +195,7 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 			} else {
 				throw ServerException(STATUS_400, "Bad Request");
 			}
-			if (host[1].compare("80") == 0)
+			if (host.size() == 1 || host[1].compare("80") == 0)
 				pair.second = host[0];
 			else
 				pair.second = header[1];
