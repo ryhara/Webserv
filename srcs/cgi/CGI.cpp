@@ -140,12 +140,16 @@ void	CGI::runCGI(HTTPRequest &request)
 		{
 			query = uri.substr(found + 1, uri.length());
 			pathinfo = uri.substr(0, found);
-			path = alias + pathinfo;
 		}
 		setEnv(pathinfo, query);
+		size_t found = new_uri.find("?");
+		if (found != std::string::npos) {
+			std::string exec_path = new_uri.substr(0, found);
+			path = alias + exec_path;
+		}
 	}
 	else if (request.getMethod().compare("POST") == 0)
-		setEnv(new_uri, request.getBody());
+		setEnv(uri, request.getBody());
 	if (pipe(_pipeFd) < 0) {
 		deleteArgv(); deleteEnv();
 		log_exit("pipe", __LINE__, __FILE__, errno);
