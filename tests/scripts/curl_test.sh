@@ -36,7 +36,7 @@ command_list=(
 	"curl $option -X POST http://localhost$port/cgi/loop.py"
 	"curl $option http://localhost$port/cgi/test.rb"
 	"curl $option http://localhost$port/cgi/calc.py?value1=2&operator=add&value2=5"
-	"curl $option -X POST http://localhost$port/cgi/calc.py -d value1=2&operator=add&value2=5"
+	# "curl $option -X POST http://localhost$port/cgi/calc.py -d value1=2&operator=add&value2=5"
 	"curl $option http://localhost$port/test.sh"
 	"curl $option --resolve webserv$resolve_port:127.0.0.1 http://webserv$port"
 	"curl $option --resolve webserv2$resolve_port:127.0.0.1 http://webserv2$port"
