@@ -171,7 +171,7 @@ void	CGI::runCGI(HTTPRequest &request)
 		}
 		if (access(path.c_str(), X_OK) < 0) {
 			deleteArgv(); deleteEnv();
-			throw ServerException(STATUS_403, "Forbidden");
+			throw ServerException(STATUS_404, "Not Found");
 		}
 		if (execve(path.c_str(), _argv ,_env) < 0) {
 			deleteArgv(); deleteEnv();
