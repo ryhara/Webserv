@@ -134,12 +134,12 @@ void	CGI::runCGI(HTTPRequest &request)
 	setArgv(init_argv(path));
 
 	if (request.getMethod().compare("GET") == 0) {
-		pathinfo = new_uri;
-		size_t found = new_uri.find("?");
+		pathinfo = uri;
+		size_t found = uri.find("?");
 		if (found != std::string::npos)
 		{
-			query = new_uri.substr(found + 1, new_uri.length());
-			pathinfo = new_uri.substr(0, found);
+			query = uri.substr(found + 1, uri.length());
+			pathinfo = uri.substr(0, found);
 			path = alias + pathinfo;
 		}
 		setEnv(pathinfo, query);
