@@ -36,18 +36,23 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(OBJDIR)/%.o: $(CONFIGDIR)/%.cpp
+	@mkdir -p $(OBJDIR)
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(INC)
 
 $(OBJDIR)/%.o: $(SERVERDIR)/%.cpp
+	@mkdir -p $(OBJDIR)
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(INC)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	@mkdir -p $(OBJDIR)
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(INC)
 
 $(OBJDIR)/%.o: $(UTILSDIR)/%.cpp
+	@mkdir -p $(OBJDIR)
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(INC)
 
 $(OBJDIR)/%.o: $(CGIDIR)/%.cpp
+	@mkdir -p $(OBJDIR)
 	$(CXX) $(CXXFLAGS) -o $@ -c $< $(INC)
 
 clean :
