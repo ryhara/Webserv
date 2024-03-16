@@ -142,7 +142,7 @@ void	CGI::runCGI(HTTPRequest &request)
 			pathinfo = uri.substr(0, found);
 		}
 		setEnv(pathinfo, query);
-		size_t found = new_uri.find("?");
+		found = new_uri.find("?");
 		if (found != std::string::npos) {
 			std::string exec_path = new_uri.substr(0, found);
 			path = alias + exec_path;
