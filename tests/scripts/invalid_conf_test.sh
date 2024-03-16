@@ -17,7 +17,9 @@ do
 		exit 1
 	fi
 	if [[ -f "$file" ]]; then
+		echo ""
 		echo "Testing file: $file"
-		./webserv "$file" || echo -e "\033[31mError occurred with file: $file\033[0m\n"
+		./webserv "$file"
+		# || echo -e "\033[31mError occurred with file: $file\033[0m\n"
 	fi
 done
