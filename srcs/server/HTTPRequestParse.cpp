@@ -207,13 +207,14 @@ bool HTTPRequestParse::readHeaders(std::stringstream &ss)
 			throw ServerException(STATUS_400, "Bad Request");
 		return (true);
 	} else {
-		if (_contentLength > 0 || _isChunked) {
-			setHTTPRequestParseState(BODY_STATE);
-			return (false);
-		}
-		else {
-			return (false);
-		}
+		return (false);
+		// if (_contentLength > 0 || _isChunked) {
+		// 	setHTTPRequestParseState(BODY_STATE);
+		// 	return (false);
+		// }
+		// else {
+		// 	return (false);
+		// }
 	}
 }
 
